@@ -1,8 +1,8 @@
-
 <?php
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use App\Services\LotteryService;
 
 class LotteryController extends Controller
@@ -17,6 +17,6 @@ class LotteryController extends Controller
     public function index()
     {
         $results = $this->lotteryService->getResults();
-        return view('lottery.index', ['results' => $results]);
+        return view('lottery.index', compact('results'));
     }
 }
