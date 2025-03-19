@@ -26,20 +26,8 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npm run build"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "php artisan config:cache"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "php artisan route:cache"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "php artisan view:cache"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
 args = "php artisan serve --host=0.0.0.0 --port=80"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev -- --host 0.0.0.0"
