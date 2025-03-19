@@ -1,4 +1,4 @@
-modules = ["php-8.2", "nodejs-20"]
+modules = ["php-8.2", "nodejs-20", "postgresql-16"]
 run = "npm run dev"
 
 [nix]
@@ -6,7 +6,7 @@ channel = "stable-24_05"
 
 [deployment]
 run = ["sh", "-c", "php artisan serve --host=0.0.0.0 --port=80"]
-build = ["sh", "-c", "npm run build"]
+build = ["sh", "-c", "composer install"]
 
 [[ports]]
 localPort = 5173
@@ -17,6 +17,7 @@ localPort = 5174
 externalPort = 80
 
 [workflows]
+runButton = "Run"
 
 [[workflows.workflow]]
 name = "Run"
@@ -29,8 +30,16 @@ args = "composer install"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "php artisan optimize:clear"
+args = "php artisan config:clear"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "php artisan serve --host=0.0.0.0 --port=8000"
+args = "php artisan route:clear"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "php artisan view:clear"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "php artisan serve --host=0.0.0.0 --port=80"
