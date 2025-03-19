@@ -2,30 +2,45 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="card">
-    <div class="card-header">
-        <h2>Kết quả xổ số</h2>
-    </div>
-    <div class="card-body">
-        <div class="row mb-3">
-            <div class="col">
-                <input type="date" class="form-control" id="date-picker">
+<div class="container mx-auto px-4">
+    <div class="bg-white rounded-lg shadow-lg p-6">
+        <h1 class="text-3xl font-bold mb-6">Hệ thống chọn cầu lô tối ưu</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Kết quả xổ số mới nhất -->
+            <div class="border rounded-lg p-4">
+                <h2 class="text-xl font-semibold mb-4">Kết quả mới nhất</h2>
+                <div id="latest-results">
+                    <!-- Results will be loaded here -->
+                </div>
             </div>
-            <div class="col">
-                <button class="btn btn-primary" id="load-results">Xem kết quả</button>
+
+            <!-- Cầu lô đề xuất -->
+            <div class="border rounded-lg p-4">
+                <h2 class="text-xl font-semibold mb-4">Cầu lô đề xuất</h2>
+                <div id="suggested-numbers">
+                    <!-- Suggestions will be loaded here -->
+                </div>
             </div>
         </div>
-        <div class="table-responsive">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Giải</th>
-                        <th>Số trúng</th>
-                    </tr>
-                </thead>
-                <tbody id="results-body">
-                </tbody>
-            </table>
+
+        <!-- Thống kê và phân tích -->
+        <div class="mt-8">
+            <h2 class="text-xl font-semibold mb-4">Thống kê và phân tích</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="stats-card">
+                    <h3>Tổng số cầu</h3>
+                    <p id="total-cau">0</p>
+                </div>
+                <div class="stats-card">
+                    <h3>Tỷ lệ trúng</h3>
+                    <p id="win-rate">0%</p>
+                </div>
+                <div class="stats-card">
+                    <h3>Số người đang theo dõi</h3>
+                    <p id="followers">0</p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -33,23 +48,20 @@
 
 @push('scripts')
 <script>
-document.getElementById('load-results').addEventListener('click', async () => {
-    const date = document.getElementById('date-picker').value;
-    try {
-        const response = await fetch(`/api/lottery-results/${date}`);
-        const data = await response.json();
-        // Render results
-        const tbody = document.getElementById('results-body');
-        tbody.innerHTML = Object.entries(data.prizes)
-            .map(([prize, number]) => `
-                <tr>
-                    <td>${prize}</td>
-                    <td>${number}</td>
-                </tr>
-            `).join('');
-    } catch (error) {
-        console.error('Error loading results:', error);
-    }
+document.addEventListener('DOMContentLoaded', function() {
+    // Load latest results
+    fetch('/api/lottery-results')
+        .then(response => response.json())
+        .then(data => {
+            // Update UI with results
+        });
+
+    // Load suggestions
+    fetch('/api/lottery-cau-lo')
+        .then(response => response.json())
+        .then(data => {
+            // Update UI with suggestions
+        });
 });
 </script>
 @endpush
