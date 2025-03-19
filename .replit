@@ -22,27 +22,7 @@ runButton = "Run"
 [[workflows.workflow]]
 name = "Run"
 author = 8252304
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "composer install"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "php artisan config:clear"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "php artisan route:clear"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "php artisan view:clear"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "php artisan cache:clear"
+mode = "parallel"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
