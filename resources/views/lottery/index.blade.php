@@ -77,6 +77,29 @@
             <tr>
                 <td class="prize-header">Giải năm</td>
                 <td class="prize-number">
+                    @foreach($results->fifth_prize ?? ['4578', '6325', '8741', '9632', '1478', '9874'] as $prize)
+                        <span>{{ $prize }}</span>
+                    @endforeach
+                </td>
+            </tr>
+            <tr>
+                <td class="prize-header">Giải sáu</td>
+                <td class="prize-number">
+                    @foreach($results->sixth_prize ?? ['147', '258', '369'] as $prize)
+                        <span>{{ $prize }}</span>
+                    @endforeach
+                </td>
+            </tr>
+            <tr>
+                <td class="prize-header">Giải bảy</td>
+                <td class="prize-number">
+                    @foreach($results->seventh_prize ?? ['25', '47', '89', '63'] as $prize)
+                        <span>{{ $prize }}</span>
+                    @endforeach
+                </td>
+            </tr>
+                <td class="prize-header">Giải năm</td>
+                <td class="prize-number">
                     @foreach($results->fifth_prize ?? ['9130', '1718', '4336'] as $prize)
                         <span>{{ $prize }}</span>
                     @endforeach
@@ -159,20 +182,38 @@
 .result-table table {
     width: 100%;
     border-collapse: collapse;
+    margin-top: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.result-table td {
+    border: 1px solid #dee2e6;
 }
 
 .prize-header {
     width: 120px;
-    background: #f5f5f5;
+    background: #f8f9fa;
     text-align: center;
     font-weight: bold;
-    padding: 10px;
+    padding: 15px;
+    color: #495057;
+    border-right: 2px solid #dee2e6;
 }
 
 .prize-number {
     font-size: 24px;
     text-align: center;
-    padding: 10px;
+    padding: 15px;
+    background: #fff;
+}
+
+.prize-number span {
+    display: inline-block;
+    margin: 5px 10px;
+    padding: 5px 10px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    color: #d10000;
 }
 
 .prize-number span {
