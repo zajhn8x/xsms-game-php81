@@ -4,9 +4,10 @@
 namespace App\Services;
 
 use App\Models\LotteryResult;
+use App\Contracts\LotteryResultServiceInterface;
 use Carbon\Carbon;
 
-class LotteryResultService
+class LotteryResultService implements LotteryResultServiceInterface
 {
     public function getLatestResults($limit = 10)
     {

@@ -3,9 +3,10 @@
 namespace App\Services;
 
 use App\Models\LotteryLog;
+use App\Contracts\LotteryLogServiceInterface;
 use Carbon\Carbon;
 
-class LotteryLogService
+class LotteryLogService implements LotteryLogServiceInterface
 {
     public function logAction($userId, $action, $data)
     {

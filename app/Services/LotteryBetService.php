@@ -4,9 +4,10 @@ namespace App\Services;
 
 use App\Models\LotteryBet;
 use App\Models\LotteryResult;
+use App\Contracts\LotteryBetServiceInterface;
 use Carbon\Carbon;
 
-class LotteryBetService
+class LotteryBetService implements LotteryBetServiceInterface
 {
     public function placeBet($userId, $betData)
     {
