@@ -25,7 +25,7 @@ Route::get('/bet', function () {
     return view('bet.form');
 });
 
-Route::post('/bet', [App\Http\Controllers\BetController::class, 'store']);
+Route::post('/bet', [App\Http\Controllers\BetController::class, 'store'])->name('bet.store');
 Route::get('/statistics', function () {
     return view('statistics.index');
 });
