@@ -1,5 +1,7 @@
 
 <?php
+declare(strict_types=1);
+
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
@@ -10,9 +12,7 @@ class LotteryServiceProvider extends ServiceProvider
 {
     public function register()
     {
-        $this->app->bind(LotteryResultServiceInterface::class, function($app) {
-            return new LotteryService();
-        });
+        $this->app->bind(LotteryResultServiceInterface::class, LotteryService::class);
     }
 
     public function boot()
