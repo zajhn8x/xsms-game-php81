@@ -1,14 +1,12 @@
 
 <?php
+
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class LotteryResult extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'draw_date',
         'prizes',
@@ -16,7 +14,7 @@ class LotteryResult extends Model
     ];
 
     protected $casts = [
-        'draw_date' => 'date',
+        'draw_date' => 'datetime',
         'prizes' => 'array',
         'lo_array' => 'array'
     ];
