@@ -26,19 +26,7 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "php artisan config:clear"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "php artisan route:clear "
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "php artisan view:clear"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "php artisan cache:clear"
+args = "php artisan optimize:clear"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
