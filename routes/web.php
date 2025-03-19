@@ -13,13 +13,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return redirect('/lottery');
-});
-
-Route::get('/lottery', function () {
-    return view('lottery.index');
-});
+Route::get('/', [App\Http\Controllers\LotteryController::class, 'index'])->name('home');
+Route::get('/lottery', [App\Http\Controllers\LotteryController::class, 'index'])->name('lottery.index');
 
 Route::get('/bet', function () {
     return view('bet.form');

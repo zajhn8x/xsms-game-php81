@@ -2,66 +2,81 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto px-4">
-    <div class="bg-white rounded-lg shadow-lg p-6">
-        <h1 class="text-3xl font-bold mb-6">Hệ thống chọn cầu lô tối ưu</h1>
+<div class="container mx-auto px-4 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold mb-4">Kết Quả Xổ Số Miền Bắc</h1>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Kết quả xổ số mới nhất -->
-            <div class="border rounded-lg p-4">
-                <h2 class="text-xl font-semibold mb-4">Kết quả mới nhất</h2>
-                <div id="latest-results">
-                    <!-- Results will be loaded here -->
+        <!-- Filter Controls -->
+        <div class="bg-white p-4 rounded-lg shadow mb-6">
+            <form method="GET" class="flex flex-wrap gap-4 items-end">
+                <div class="flex-1">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Chọn khoảng thời gian</label>
+                    <div class="flex gap-4">
+                        <a href="?days=10" class="px-4 py-2 rounded-md {{ request('days') == 10 ? 'bg-blue-500 text-white' : 'bg-gray-100' }}">10 ngày</a>
+                        <a href="?days=30" class="px-4 py-2 rounded-md {{ request('days') == 30 ? 'bg-blue-500 text-white' : 'bg-gray-100' }}">30 ngày</a>
+                        <a href="?days=90" class="px-4 py-2 rounded-md {{ request('days') == 90 ? 'bg-blue-500 text-white' : 'bg-gray-100' }}">90 ngày</a>
+                    </div>
                 </div>
-            </div>
-
-            <!-- Cầu lô đề xuất -->
-            <div class="border rounded-lg p-4">
-                <h2 class="text-xl font-semibold mb-4">Cầu lô đề xuất</h2>
-                <div id="suggested-numbers">
-                    <!-- Suggestions will be loaded here -->
+                
+                <div class="flex gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Từ ngày</label>
+                        <input type="date" name="start_date" value="{{ request('start_date') }}" 
+                               class="border rounded-md px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Đến ngày</label>
+                        <input type="date" name="end_date" value="{{ request('end_date') }}"
+                               class="border rounded-md px-3 py-2">
+                    </div>
+                    <div>
+                        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md">
+                            Tìm kiếm
+                        </button>
+                    </div>
                 </div>
-            </div>
+            </form>
         </div>
 
-        <!-- Thống kê và phân tích -->
-        <div class="mt-8">
-            <h2 class="text-xl font-semibold mb-4">Thống kê và phân tích</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="stats-card">
-                    <h3>Tổng số cầu</h3>
-                    <p id="total-cau">0</p>
-                </div>
-                <div class="stats-card">
-                    <h3>Tỷ lệ trúng</h3>
-                    <p id="win-rate">0%</p>
-                </div>
-                <div class="stats-card">
-                    <h3>Số người đang theo dõi</h3>
-                    <p id="followers">0</p>
-                </div>
-            </div>
+        <!-- Results Table -->
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Ngày
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Giải ĐB
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Giải Nhất
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Giải Nhì
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @foreach($results as $result)
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {{ $result->draw_date->format('d/m/Y') }}
+                        </td>
+                        <td class="px-6 py-4">
+                            {{ $result->prizes['DB'] ?? '' }}
+                        </td>
+                        <td class="px-6 py-4">
+                            {{ $result->prizes['1'] ?? '' }}
+                        </td>
+                        <td class="px-6 py-4">
+                            {{ implode(', ', $result->prizes['2'] ?? []) }}
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
 @endsection
-
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Load latest results
-    fetch('/api/lottery-results')
-        .then(response => response.json())
-        .then(data => {
-            // Update UI with results
-        });
-
-    // Load suggestions
-    fetch('/api/lottery-cau-lo')
-        .then(response => response.json())
-        .then(data => {
-            // Update UI with suggestions
-        });
-});
-</script>
-@endpush
