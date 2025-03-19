@@ -2,33 +2,56 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="row">
-    <div class="col-md-6">
-        <div class="card mb-4">
-            <div class="card-header">
-                <h3>Thống Kê Cá Nhân</h3>
+<div class="card">
+    <div class="card-header">
+        <h2>Thống kê</h2>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-header">Số xuất hiện nhiều nhất</div>
+                    <div class="card-body">
+                        <canvas id="frequentNumbers"></canvas>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                <ul class="list-group">
-                    <li class="list-group-item d-flex justify-content-between">
-                        <span>Tổng số lần cược:</span>
-                        <strong>{{ $stats['total_bets'] }}</strong>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between">
-                        <span>Tổng tiền đã cược:</span>
-                        <strong>{{ number_format($stats['total_amount_bet']) }}đ</strong>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between">
-                        <span>Số lần trúng:</span>
-                        <strong>{{ $stats['total_wins'] }}</strong>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between">
-                        <span>Tổng tiền thắng:</span>
-                        <strong>{{ number_format($stats['total_winnings']) }}đ</strong>
-                    </li>
-                </ul>
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-header">Thống kê lợi nhuận</div>
+                    <div class="card-body">
+                        <canvas id="profitChart"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+async function loadStatistics() {
+    try {
+        const response = await fetch('/api/statistics');
+        const data = await response.json();
+        
+        // Render charts using Chart.js
+        new Chart(document.getElementById('frequentNumbers'), {
+            type: 'bar',
+            data: data.frequentNumbers
+        });
+        
+        new Chart(document.getElementById('profitChart'), {
+            type: 'line',
+            data: data.profitData
+        });
+    } catch (error) {
+        console.error('Error loading statistics:', error);
+    }
+}
+
+loadStatistics();
+</script>
+@endpush
