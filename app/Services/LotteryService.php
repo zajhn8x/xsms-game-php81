@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Services;
@@ -15,7 +14,7 @@ class LotteryService
                 'second_prize' => '11111'
             ],
             (object)[
-                'date' => '2024-01-19', 
+                'date' => '2024-01-19',
                 'special_prize' => '54321',
                 'first_prize' => '09876',
                 'second_prize' => '22222'
