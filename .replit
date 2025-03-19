@@ -5,4 +5,9 @@ run = "npm run dev"
 channel = "stable-24_05"
 
 [deployment]
-run = ["sh", "-c", "npm run dev"]
+run = ["sh", "-c", "php artisan serve --host=0.0.0.0 --port=80"]
+build = ["sh", "-c", "npm install && npm run build"]
+
+[[ports]]
+localPort = 5174
+externalPort = 80
