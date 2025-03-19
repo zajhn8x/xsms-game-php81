@@ -14,9 +14,4 @@ class LotteryServiceProvider extends ServiceProvider
             return new LotteryService();
         });
     }
-
-    public function boot()
-    {
-        //
-    }
 }
