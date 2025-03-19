@@ -2,23 +2,41 @@
 
 namespace App\Services;
 
-class LotteryService
+use App\Contracts\LotteryResultServiceInterface;
+use App\Models\LotteryResult;
+use Carbon\Carbon;
+
+class LotteryService implements LotteryResultServiceInterface
 {
+    public function getLatestResults($limit)
+    {
+        return LotteryResult::orderBy('draw_date', 'desc')
+            ->take($limit)
+            ->get();
+    }
+
+    public function getResultsByDateRange($startDate, $endDate)
+    {
+        return LotteryResult::whereBetween('draw_date', [$startDate, $endDate])
+            ->orderBy('draw_date', 'desc')
+            ->get();
+    }
+
+    public function createResult(array $data)
+    {
+        return LotteryResult::create($data);
+    }
+
+    public function analyzeFrequency($days)
+    {
+        $results = LotteryResult::where('draw_date', '>=', Carbon::now()->subDays($days))
+            ->get();
+
+        return [];
+    }
+
     public function getResults()
     {
-        return [
-            (object)[
-                'date' => '2024-01-20',
-                'special_prize' => '12345',
-                'first_prize' => '67890',
-                'second_prize' => '11111'
-            ],
-            (object)[
-                'date' => '2024-01-19',
-                'special_prize' => '54321',
-                'first_prize' => '09876',
-                'second_prize' => '22222'
-            ]
-        ];
+        return LotteryResult::orderBy('draw_date', 'desc')->get();
     }
 }

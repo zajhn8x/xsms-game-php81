@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Services\LotteryResultService;
 use Illuminate\Support\ServiceProvider;
+use App\Contracts\LotteryResultServiceInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -11,7 +13,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        //$this->app->singleton(LotteryResultServiceInterface::class, LotteryResultService::class);
     }
 
     /**

@@ -58,45 +58,55 @@ class ImportLotteryData extends Command
 
     private function parseCsv($file)
     {
+        $handle = fopen($file, "r");
         $data = [];
         $handle = fopen($file, 'r');
 
         // Skip header row
-        $headers = fgetcsv($handle);
+        fgetcsv($handle);
 
         while (($row = fgetcsv($handle)) !== false) {
-            $prizes = [
-                'special' => $row[1],
-                'prize1' => $row[2],
-                'prize2' => [$row[3], $row[4]],
-                'prize3' => [$row[5], $row[6], $row[7], $row[8], $row[9], $row[10]],
-                'prize4' => [$row[11], $row[12], $row[13], $row[14]],
-                'prize5' => [$row[15], $row[16], $row[17], $row[18], $row[19], $row[20]],
-                'prize6' => [$row[21], $row[22], $row[23]],
-                'prize7' => [$row[24], $row[25], $row[26], $row[27]]
-            ];
+            if (empty($row[0])) continue;
 
-            // Generate lo_array from all prize numbers
-            $lo_array = [];
-            foreach ($prizes as $prize_numbers) {
-                if (is_array($prize_numbers)) {
-                    foreach ($prize_numbers as $number) {
-                        if (strlen($number) >= 2) {
-                            $lo_array[] = substr($number, -2);
+            try {
+                $prizes = [
+                    'special' => trim($row[1]),    // Giải đặc biệt (1 số)
+                    'prize1'  => trim($row[2]),    // Giải nhất (1 số)
+                    'prize2'  => array_map('trim', array_slice($row, 3, 2)),  // Giải nhì (2 số)
+                    'prize3'  => array_map('trim', array_slice($row, 5, 6)),  // Giải ba (6 số)
+                    'prize4'  => array_map('trim', array_slice($row, 11, 4)), // Giải tư (4 số)
+                    'prize5'  => array_map('trim', array_slice($row, 15, 6)), // Giải năm (6 số)
+                    'prize6'  => array_map('trim', array_slice($row, 21, 3)), // Giải sáu (3 số)
+                    'prize7'  => array_map('trim', array_slice($row, 24, 4))  // Giải bảy (4 số)
+                ];
+
+
+                $lo_array = [];
+                foreach ($prizes as $prize) {
+                    $numbers = is_array($prize) ? $prize : [$prize];
+
+                    foreach ($numbers as $number) {
+                        if (!empty($number) && is_numeric($number)) {
+                            $lo_array[] = sprintf('%02d', substr($number, -2));
                         }
                     }
-                } else {
-                    if (strlen($prize_numbers) >= 2) {
-                        $lo_array[] = substr($prize_numbers, -2);
-                    }
                 }
-            }
 
-            $data[] = [
-                'draw_date' => $row[0],
-                'prizes' => $prizes,
-                'lo_array' => array_unique($lo_array)
-            ];
+                // Đảm bảo mỗi ngày có đủ 27 giải (nếu thiếu thì log lỗi hoặc xử lý)
+                if (count($lo_array) !== 27) {
+                    error_log("Cảnh báo: Số lượng số lô không đúng 27! Hiện tại: " . count($lo_array));
+                }
+
+                $data[] = [
+                    'draw_date' => $row[0],
+                    'prizes' => $prizes,
+                    'lo_array' => array_unique($lo_array)
+                ];
+            } catch (\Exception $e) {
+                //Handle exceptions during row processing.  Log the error for debugging.
+                $this->error("Error processing row: " . $e->getMessage());
+                continue; //Skip this row and move on to the next.
+            }
         }
 
         fclose($handle);
