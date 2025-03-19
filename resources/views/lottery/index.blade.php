@@ -2,137 +2,138 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <div class="card">
-        <div class="card-header text-center bg-dark text-white py-3">
-            <h2>Kết quả Xổ số Miền Bắc {{ $date ?? 'Hôm nay' }}</h2>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered">
-                    <tbody>
-                        <tr>
-                            <td class="col-3 text-end fw-bold">Đặc biệt</td>
-                            <td class="text-center fw-bold text-danger" style="font-size: 1.5em;">48130</td>
-                        </tr>
-                        <tr>
-                            <td class="text-end fw-bold">Giải nhất</td>
-                            <td class="text-center">66421</td>
-                        </tr>
-                        <tr>
-                            <td class="text-end fw-bold">Giải nhì</td>
-                            <td>
-                                <div class="row text-center">
-                                    <div class="col">73844</div>
-                                    <div class="col">41421</div>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="text-end fw-bold">Giải ba</td>
-                            <td>
-                                <div class="row text-center">
-                                    <div class="col">62423</div>
-                                    <div class="col">46621</div>
-                                    <div class="col">17961</div>
-                                    <div class="col">19630</div>
-                                    <div class="col">55272</div>
-                                    <div class="col">97320</div>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="text-end fw-bold">Giải tư</td>
-                            <td>
-                                <div class="row text-center">
-                                    <div class="col">9526</div>
-                                    <div class="col">7565</div>
-                                    <div class="col">2651</div>
-                                    <div class="col">1660</div>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="text-end fw-bold">Giải năm</td>
-                            <td>
-                                <div class="row text-center">
-                                    <div class="col">9130</div>
-                                    <div class="col">1718</div>
-                                    <div class="col">4336</div>
-                                    <div class="col">9548</div>
-                                    <div class="col">9052</div>
-                                    <div class="col">7386</div>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="text-end fw-bold">Giải sáu</td>
-                            <td>
-                                <div class="row text-center">
-                                    <div class="col">119</div>
-                                    <div class="col">731</div>
-                                    <div class="col">059</div>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="text-end fw-bold">Giải bảy</td>
-                            <td>
-                                <div class="row text-center">
-                                    <div class="col">63</div>
-                                    <div class="col">26</div>
-                                    <div class="col">78</div>
-                                    <div class="col">06</div>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+<div class="lottery-container">
+    <h1 class="lottery-title">Kết quả Xổ số Miền Bắc {{ $date ?? 'Hôm nay' }}</h1>
 
-            <div class="mt-4">
-                <h4 class="text-center bg-secondary text-white py-2">Lô tô Miền Bắc {{ $date ?? 'Hôm nay' }}</h4>
-                <div class="table-responsive">
-                    <table class="table table-bordered text-center">
-                        <tbody>
-                            <tr>
-                                <td>06</td>
-                                <td>18</td>
-                                <td>19</td>
-                                <td>20</td>
-                                <td>21</td>
-                                <td>21</td>
-                                <td>21</td>
-                                <td>23</td>
-                                <td>26</td>
-                            </tr>
-                            <tr>
-                                <td>26</td>
-                                <td>30</td>
-                                <td>30</td>
-                                <td class="text-danger">30</td>
-                                <td>31</td>
-                                <td>36</td>
-                                <td>44</td>
-                                <td>48</td>
-                                <td>51</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+    <div class="filters">
+        <select id="dayFilter" class="form-select">
+            <option value="10" {{ $days == 10 ? 'selected' : '' }}>10 ngày gần nhất</option>
+            <option value="30" {{ $days == 30 ? 'selected' : '' }}>30 ngày gần nhất</option>
+            <option value="90" {{ $days == 90 ? 'selected' : '' }}>90 ngày gần nhất</option>
+        </select>
 
-            <div class="d-flex justify-content-center mt-4">
-                <div class="btn-group">
-                    <button class="btn btn-outline-primary active">Đầy đủ</button>
-                    <button class="btn btn-outline-primary">2 số</button>
-                    <button class="btn btn-outline-primary">3 số</button>
-                </div>
-                <button class="btn btn-outline-secondary ms-2">
-                    <i class="fas fa-expand-arrows-alt"></i> Phóng to
-                </button>
-            </div>
+        <div class="date-range">
+            <input type="date" id="startDate" class="form-control">
+            <input type="date" id="endDate" class="form-control">
+            <button id="filterBtn" class="btn btn-primary">Lọc</button>
         </div>
     </div>
+
+    <div class="result-table">
+        <table class="table table-bordered">
+            <tr><th class="prize-header">Đặc biệt</th><td class="prize-number special">{{ $result->special_prize ?? '' }}</td></tr>
+            <tr><th class="prize-header">Giải nhất</th><td class="prize-number">{{ $result->first_prize ?? '' }}</td></tr>
+            <tr><th class="prize-header">Giải nhì</th><td class="prize-number">{{ $result->second_prize ?? '' }}</td></tr>
+            <tr>
+                <th class="prize-header">Giải ba</th>
+                <td class="prize-number">
+                    @foreach(explode(',', $result->third_prize ?? '') as $num)
+                        <span>{{ $num }}</span>
+                    @endforeach
+                </td>
+            </tr>
+            <tr>
+                <th class="prize-header">Giải tư</th>
+                <td class="prize-number">
+                    @foreach(explode(',', $result->fourth_prize ?? '') as $num)
+                        <span>{{ $num }}</span>
+                    @endforeach
+                </td>
+            </tr>
+            <tr>
+                <th class="prize-header">Giải năm</th>
+                <td class="prize-number">
+                    @foreach(explode(',', $result->fifth_prize ?? '') as $num)
+                        <span>{{ $num }}</span>
+                    @endforeach
+                </td>
+            </tr>
+            <tr>
+                <th class="prize-header">Giải sáu</th>
+                <td class="prize-number">
+                    @foreach(explode(',', $result->sixth_prize ?? '') as $num)
+                        <span>{{ $num }}</span>
+                    @endforeach
+                </td>
+            </tr>
+            <tr>
+                <th class="prize-header">Giải bảy</th>
+                <td class="prize-number">
+                    @foreach(explode(',', $result->seventh_prize ?? '') as $num)
+                        <span>{{ $num }}</span>
+                    @endforeach
+                </td>
+            </tr>
+        </table>
+    </div>
 </div>
+
+@push('styles')
+<style>
+.lottery-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.lottery-title {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.filters {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.date-range {
+    display: flex;
+    gap: 10px;
+}
+
+.result-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.prize-header {
+    width: 120px;
+    background: #f5f5f5;
+    text-align: center;
+}
+
+.prize-number {
+    font-size: 24px;
+    text-align: center;
+}
+
+.prize-number span {
+    display: inline-block;
+    margin: 0 10px;
+}
+
+.special {
+    color: red;
+    font-weight: bold;
+    font-size: 32px;
+}
+</style>
+@endpush
+
+@push('scripts')
+<script>
+document.getElementById('dayFilter').addEventListener('change', function() {
+    window.location.href = `/lottery?days=${this.value}`;
+});
+
+document.getElementById('filterBtn').addEventListener('click', function() {
+    const start = document.getElementById('startDate').value;
+    const end = document.getElementById('endDate').value;
+    if(start && end) {
+        window.location.href = `/lottery?start_date=${start}&end_date=${end}`;
+    }
+});
+</script>
+@endpush
 @endsection
