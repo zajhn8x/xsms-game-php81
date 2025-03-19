@@ -2,137 +2,246 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <div class="card">
-        <div class="card-header text-center bg-dark text-white py-3">
-            <h2>Kết quả Xổ số Miền Bắc {{ $date ?? 'Hôm nay' }}</h2>
+<div class="lottery-container">
+    <div class="lottery-header">
+        <img src="https://www.kqxs.vn/logo.png" alt="KQXS Logo" class="lottery-logo">
+        <h1 class="lottery-title">Kết quả Xổ số Miền Bắc {{ now()->format('d-m-Y') }}</h1>
+    </div>
+
+    <div class="time-regions">
+        <div class="region-box">
+            <div class="time">XSMN 16h15'</div>
+            <div class="provinces">
+                <a href="#">Đồng Nai</a>
+                <a href="#">Cần Thơ</a>
+                <a href="#">Sóc Trăng</a>
+            </div>
         </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered">
-                    <tbody>
-                        <tr>
-                            <td class="col-3 text-end fw-bold">Đặc biệt</td>
-                            <td class="text-center fw-bold text-danger" style="font-size: 1.5em;">48130</td>
-                        </tr>
-                        <tr>
-                            <td class="text-end fw-bold">Giải nhất</td>
-                            <td class="text-center">66421</td>
-                        </tr>
-                        <tr>
-                            <td class="text-end fw-bold">Giải nhì</td>
-                            <td>
-                                <div class="row text-center">
-                                    <div class="col">73844</div>
-                                    <div class="col">41421</div>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="text-end fw-bold">Giải ba</td>
-                            <td>
-                                <div class="row text-center">
-                                    <div class="col">62423</div>
-                                    <div class="col">46621</div>
-                                    <div class="col">17961</div>
-                                    <div class="col">19630</div>
-                                    <div class="col">55272</div>
-                                    <div class="col">97320</div>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="text-end fw-bold">Giải tư</td>
-                            <td>
-                                <div class="row text-center">
-                                    <div class="col">9526</div>
-                                    <div class="col">7565</div>
-                                    <div class="col">2651</div>
-                                    <div class="col">1660</div>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="text-end fw-bold">Giải năm</td>
-                            <td>
-                                <div class="row text-center">
-                                    <div class="col">9130</div>
-                                    <div class="col">1718</div>
-                                    <div class="col">4336</div>
-                                    <div class="col">9548</div>
-                                    <div class="col">9052</div>
-                                    <div class="col">7386</div>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="text-end fw-bold">Giải sáu</td>
-                            <td>
-                                <div class="row text-center">
-                                    <div class="col">119</div>
-                                    <div class="col">731</div>
-                                    <div class="col">059</div>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="text-end fw-bold">Giải bảy</td>
-                            <td>
-                                <div class="row text-center">
-                                    <div class="col">63</div>
-                                    <div class="col">26</div>
-                                    <div class="col">78</div>
-                                    <div class="col">06</div>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+        <div class="region-box">
+            <div class="time">XSMT 17h15'</div>
+            <div class="provinces">
+                <a href="#">Đà Nẵng</a>
+                <a href="#">Khánh Hòa</a>
             </div>
-
-            <div class="mt-4">
-                <h4 class="text-center bg-secondary text-white py-2">Lô tô Miền Bắc {{ $date ?? 'Hôm nay' }}</h4>
-                <div class="table-responsive">
-                    <table class="table table-bordered text-center">
-                        <tbody>
-                            <tr>
-                                <td>06</td>
-                                <td>18</td>
-                                <td>19</td>
-                                <td>20</td>
-                                <td>21</td>
-                                <td>21</td>
-                                <td>21</td>
-                                <td>23</td>
-                                <td>26</td>
-                            </tr>
-                            <tr>
-                                <td>26</td>
-                                <td>30</td>
-                                <td>30</td>
-                                <td class="text-danger">30</td>
-                                <td>31</td>
-                                <td>36</td>
-                                <td>44</td>
-                                <td>48</td>
-                                <td>51</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="d-flex justify-content-center mt-4">
-                <div class="btn-group">
-                    <button class="btn btn-outline-primary active">Đầy đủ</button>
-                    <button class="btn btn-outline-primary">2 số</button>
-                    <button class="btn btn-outline-primary">3 số</button>
-                </div>
-                <button class="btn btn-outline-secondary ms-2">
-                    <i class="fas fa-expand-arrows-alt"></i> Phóng to
-                </button>
+        </div>
+        <div class="region-box">
+            <div class="time">XSMB 18h15'</div>
+            <div class="provinces">
+                <a href="#">Miền Bắc</a>
             </div>
         </div>
     </div>
+
+    <div class="result-filters">
+        <select id="dayFilter" class="form-select">
+            <option value="today">Hôm nay</option>
+            <option value="yesterday">Hôm qua</option>
+            <option value="7days">7 ngày qua</option>
+            <option value="custom">Chọn ngày</option>
+        </select>ect>
+    </div>
+
+    <div class="result-table">
+        <table class="table table-bordered">
+            <tr>
+                <td class="prize-header">Đặc biệt</td>
+                <td class="prize-number special">{{ $results->special_prize ?? '48130' }}</td>
+            </tr>
+            <tr>
+                <td class="prize-header">Giải nhất</td>
+                <td class="prize-number">{{ $results->first_prize ?? '66421' }}</td>
+            </tr>
+            <tr>
+                <td class="prize-header">Giải nhì</td>
+                <td class="prize-number">
+                    <span>{{ $results->second_prize[0] ?? '73844' }}</span>
+                    <span>{{ $results->second_prize[1] ?? '41421' }}</span>
+                </td>
+            </tr>
+            <tr>
+                <td class="prize-header">Giải ba</td>
+                <td class="prize-number">
+                    @foreach($results->third_prize ?? ['62423', '46621', '17961', '19630', '55272', '97320'] as $prize)
+                        <span>{{ $prize }}</span>
+                    @endforeach
+                </td>
+            </tr>
+            <tr>
+                <td class="prize-header">Giải tư</td>
+                <td class="prize-number">
+                    @foreach($results->fourth_prize ?? ['9526', '7565', '2651', '1660'] as $prize)
+                        <span>{{ $prize }}</span>
+                    @endforeach
+                </td>
+            </tr>
+            <tr>
+                <td class="prize-header">Giải năm</td>
+                <td class="prize-number">
+                    @foreach($results->fifth_prize ?? ['4578', '6325', '8741', '9632', '1478', '9874'] as $prize)
+                        <span>{{ $prize }}</span>
+                    @endforeach
+                </td>
+            </tr>
+            <tr>
+                <td class="prize-header">Giải sáu</td>
+                <td class="prize-number">
+                    @foreach($results->sixth_prize ?? ['147', '258', '369'] as $prize)
+                        <span>{{ $prize }}</span>
+                    @endforeach
+                </td>
+            </tr>
+            <tr>
+                <td class="prize-header">Giải bảy</td>
+                <td class="prize-number">
+                    @foreach($results->seventh_prize ?? ['25', '47', '89', '63'] as $prize)
+                        <span>{{ $prize }}</span>
+                    @endforeach
+                </td>
+            </tr>
+                <td class="prize-header">Giải năm</td>
+                <td class="prize-number">
+                    @foreach($results->fifth_prize ?? ['9130', '1718', '4336'] as $prize)
+                        <span>{{ $prize }}</span>
+                    @endforeach
+                </td>
+            </tr>
+        </table>
+    </div>
 </div>
+
+@push('styles')
+<style>
+.lottery-container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #fff;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.lottery-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.lottery-logo {
+    height: 50px;
+    margin-right: 15px;
+}
+
+.time-regions {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.region-box {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+}
+
+.time {
+    font-weight: bold;
+    color: #d10000;
+    margin-bottom: 10px;
+}
+
+.provinces {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.provinces a {
+    color: #0056b3;
+    text-decoration: none;
+}
+
+.provinces a:hover {
+    text-decoration: underline;
+}
+
+.lottery-title {
+    text-align: center;
+    color: #d10000;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.result-filters {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.result-table table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.result-table td {
+    border: 1px solid #dee2e6;
+}
+
+.prize-header {
+    width: 120px;
+    background: #f8f9fa;
+    text-align: center;
+    font-weight: bold;
+    padding: 15px;
+    color: #495057;
+    border-right: 2px solid #dee2e6;
+}
+
+.prize-number {
+    font-size: 24px;
+    text-align: center;
+    padding: 15px;
+    background: #fff;
+}
+
+.prize-number span {
+    display: inline-block;
+    margin: 5px 10px;
+    padding: 5px 10px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    color: #d10000;
+}
+
+.prize-number span {
+    display: inline-block;
+    margin: 0 10px;
+}
+
+.special {
+    color: #d10000;
+    font-weight: bold;
+    font-size: 32px;
+}
+
+#dayFilter {
+    padding: 8px 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+</style>
+@endpush
+
+@push('scripts')
+<script>
+document.getElementById('dayFilter').addEventListener('change', function() {
+    // Handle date filter change
+    let date = this.value;
+    window.location.href = `/lottery?date=${date}`;
+});
+</script>
+@endpush
 @endsection
