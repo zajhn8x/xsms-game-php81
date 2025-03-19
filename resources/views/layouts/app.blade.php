@@ -1,27 +1,40 @@
 
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
-    <title>Xổ Số Miền Bắc</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống chọn cầu lô tối ưu</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand" href="/">XSMB</a>
-            <div class="navbar-nav">
-                <a class="nav-link" href="/lottery">Kết Quả</a>
-                <a class="nav-link" href="/bet">Đặt Cược</a>
-                <a class="nav-link" href="/statistics">Thống Kê</a>
+            <a class="navbar-brand" href="/">Hệ thống Xổ số</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/lottery">Kết quả xổ số</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/bet">Đặt cược</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/statistics">Thống kê</a>
+                    </li>
+                </ul>
             </div>
         </div>
     </nav>
 
-    <div class="container">
+    <main class="container my-4">
         @yield('content')
-    </div>
+    </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    @stack('scripts')
 </body>
 </html>

@@ -17,7 +17,15 @@ Route::get('/', function () {
     return redirect('/lottery');
 });
 
-Route::get('/lottery', [App\Http\Controllers\LotteryController::class, 'index']);
-Route::get('/bet', [App\Http\Controllers\BetController::class, 'form']);
-Route::post('/bet', [App\Http\Controllers\BetController::class, 'store']);
-Route::get('/statistics', [App\Http\Controllers\StatisticsController::class, 'index']);
+Route::get('/lottery', function () {
+    return view('lottery.index');
+});
+
+Route::get('/bet', function () {
+    return view('bet.form');
+});
+
+Route::post('/bet', [App\Http\Controllers\BetController::class, 'store'])->name('bet.store');
+Route::get('/statistics', function () {
+    return view('statistics.index');
+});
