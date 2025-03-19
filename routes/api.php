@@ -22,6 +22,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/statistics', [App\Http\Controllers\Api\StatisticsController::class, 'index']);
+    Route::get('/bet-history', [App\Http\Controllers\Api\StatisticsController::class, 'betHistory']);
+    Route::get('/bet-trends', [App\Http\Controllers\Api\StatisticsController::class, 'trends']);
+});
+
 Route::prefix('v1')->group(function () {
     Route::apiResource('lottery-results', App\Http\Controllers\Api\LotteryResultController::class);
     Route::apiResource('lottery-cau-meta', App\Http\Controllers\Api\LotteryCauMetaController::class);
