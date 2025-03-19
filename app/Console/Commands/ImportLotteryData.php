@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Console\Commands;
@@ -23,14 +22,14 @@ class ImportLotteryData extends Command
     public function handle()
     {
         $file = $this->argument('file');
-        
+
         if (!file_exists($file)) {
             $this->error("File not found: {$file}");
             return 1;
         }
 
         $extension = pathinfo($file, PATHINFO_EXTENSION);
-        
+
         try {
             $data = match($extension) {
                 'json' => $this->parseJson($file),
@@ -61,10 +60,10 @@ class ImportLotteryData extends Command
     {
         $data = [];
         $handle = fopen($file, 'r');
-        
+
         // Skip header row
         $headers = fgetcsv($handle);
-        
+
         while (($row = fgetcsv($handle)) !== false) {
             $prizes = [
                 'special' => $row[1],
@@ -99,7 +98,7 @@ class ImportLotteryData extends Command
                 'lo_array' => array_unique($lo_array)
             ];
         }
-        
+
         fclose($handle);
         return $data;
     }
