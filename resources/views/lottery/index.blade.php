@@ -1,65 +1,31 @@
+@extends('layouts.app')
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Kết Quả Xổ Số</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        h1 {
-            color: #333;
-            text-align: center;
-        }
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 12px 8px;
-            text-align: center;
-        }
-        th {
-            background-color: #4CAF50;
-            color: white;
-        }
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-        tr:hover {
-            background-color: #ddd;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 15px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Kết Quả Xổ Số Miền Bắc</h1>
-        <table>
-            <thead>
-                <tr>
-                    @foreach($headers as $header)
-                        <th>{{ $header }}</th>
-                    @endforeach
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($data as $row)
+@section('content')
+<div class="card">
+    <div class="card-header">
+        <h2>Kết Quả Xổ Số Miền Bắc</h2>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead class="table-primary">
                     <tr>
-                        @foreach($row as $cell)
-                            <td>{{ $cell }}</td>
+                        @foreach($headers as $header)
+                            <th>{{ $header }}</th>
                         @endforeach
                     </tr>
-                @endforeach
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach($data as $row)
+                        <tr>
+                            @foreach($row as $cell)
+                                <td>{{ $cell }}</td>
+                            @endforeach
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
     </div>
-</body>
-</html>
+</div>
+@endsection
