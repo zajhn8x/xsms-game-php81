@@ -7,43 +7,48 @@ use Illuminate\Http\Request;
 
 class LotteryResultController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $results = LotteryResult::orderBy('draw_date', 'desc')->paginate(10);
+        return response()->json($results);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'draw_date' => 'required|date',
+            'prizes' => 'required|array',
+            'lo_array' => 'required|array'
+        ]);
+
+        $result = LotteryResult::create($validated);
+        return response()->json($result, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
-        //
+        $result = LotteryResult::findOrFail($id);
+        return response()->json($result);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
-        //
+        $result = LotteryResult::findOrFail($id);
+        
+        $validated = $request->validate([
+            'draw_date' => 'date',
+            'prizes' => 'array',
+            'lo_array' => 'array'
+        ]);
+
+        $result->update($validated);
+        return response()->json($result);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
-        //
+        $result = LotteryResult::findOrFail($id);
+        $result->delete();
+        return response()->json(null, 204);
     }
 }
