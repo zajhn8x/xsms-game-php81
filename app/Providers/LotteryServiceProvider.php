@@ -5,12 +5,13 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use App\Services\LotteryService;
+use App\Contracts\LotteryResultServiceInterface;
 
 class LotteryServiceProvider extends ServiceProvider
 {
     public function register()
     {
-        $this->app->singleton(LotteryService::class, function ($app) {
+        $this->app->bind(LotteryResultServiceInterface::class, function($app) {
             return new LotteryService();
         });
     }

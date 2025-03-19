@@ -1,3 +1,4 @@
+
 <?php
 
 namespace App\Http\Controllers;
@@ -16,6 +17,6 @@ class LotteryController extends Controller
     public function index()
     {
         $results = $this->lotteryService->getResults();
-        return view('lottery.index', compact('results'));
+        return view('lottery.index', ['results' => $results]);
     }
 }
