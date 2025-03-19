@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('lottery_logs', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('action');
+            $table->json('data');
             $table->timestamps();
         });
     }
