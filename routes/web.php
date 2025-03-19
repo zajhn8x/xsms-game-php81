@@ -14,5 +14,10 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect('/lottery');
 });
+
+Route::get('/lottery', [App\Http\Controllers\LotteryController::class, 'index']);
+Route::get('/bet', [App\Http\Controllers\BetController::class, 'form']);
+Route::post('/bet', [App\Http\Controllers\BetController::class, 'store']);
+Route::get('/statistics', [App\Http\Controllers\StatisticsController::class, 'index']);

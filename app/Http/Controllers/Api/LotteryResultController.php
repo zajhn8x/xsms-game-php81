@@ -52,3 +52,42 @@ class LotteryResultController extends Controller
         return response()->json(null, 204);
     }
 }
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Contracts\LotteryResultServiceInterface;
+use Illuminate\Http\Request;
+
+class LotteryResultController extends Controller
+{
+    private $lotteryResultService;
+
+    public function __construct(LotteryResultServiceInterface $lotteryResultService)
+    {
+        $this->lotteryResultService = $lotteryResultService;
+    }
+
+    public function index(Request $request)
+    {
+        $limit = $request->get('limit', 10);
+        $results = $this->lotteryResultService->getLatestResults($limit);
+        return response()->json($results);
+    }
+
+    public function getByDateRange(Request $request)
+    {
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date'
+        ]);
+
+        $results = $this->lotteryResultService->getResultsByDateRange(
+            $request->start_date,
+            $request->end_date
+        );
+        
+        return response()->json($results);
+    }
+}

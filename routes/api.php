@@ -2,6 +2,10 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\LotteryResultController;
+
+Route::get('/lottery-results', [LotteryResultController::class, 'index']);
+Route::get('/lottery-results/date-range', [LotteryResultController::class, 'getByDateRange']);
 
 /*
 |--------------------------------------------------------------------------
