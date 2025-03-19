@@ -17,6 +17,7 @@ localPort = 5174
 externalPort = 80
 
 [workflows]
+runButton = "Run"
 
 [[workflows.workflow]]
 name = "Run"
@@ -25,15 +26,7 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "php artisan config:cache"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "php artisan route:cache"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "php artisan view:cache"
+args = "php artisan view:clear"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
