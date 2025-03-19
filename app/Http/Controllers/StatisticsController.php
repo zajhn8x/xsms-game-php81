@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Http\Controllers;
@@ -21,7 +20,7 @@ class StatisticsController extends Controller
     {
         $statistics = $this->betService->getBetStatistics(Auth::id());
         $history = $this->betService->getUserBetHistory(Auth::id(), 30);
-        
+
         return view('statistics.index', [
             'statistics' => $statistics,
             'history' => $history

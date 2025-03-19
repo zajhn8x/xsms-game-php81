@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Http\Controllers;
@@ -27,7 +26,7 @@ class BetController extends Controller
 
         try {
             $bet = $this->betService->placeBet(Auth::id(), $validated);
-            
+
             return redirect()->back()
                 ->with('success', 'Đặt cược thành công cho số ' . $bet->lo_number);
         } catch (\Exception $e) {

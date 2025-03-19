@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Http\Controllers\Api;
@@ -31,7 +30,7 @@ class StatisticsController extends Controller
     {
         $days = request('days', 7);
         $history = $this->betService->getUserBetHistory(Auth::id(), $days);
-        
+
         $trends = $history->groupBy(function($bet) {
             return $bet->bet_date->format('Y-m-d');
         })->map(function($dayBets) {
