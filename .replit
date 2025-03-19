@@ -17,6 +17,7 @@ localPort = 5174
 externalPort = 80
 
 [workflows]
+runButton = "Run"
 
 [[workflows.workflow]]
 name = "Run"
@@ -25,19 +26,7 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "composer install"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "php artisan config:clear"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "php artisan route:clear"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "php artisan view:clear"
+args = "php artisan optimize:clear"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
