@@ -133,6 +133,16 @@ class CheckLotteryFormulas extends Command
             if (!empty($matchedNumbers)) {
                 $hit = true;
                 $formula->hit_count++;
+                
+                // Save hit to database
+                foreach ($matchedNumbers as $hitNumber) {
+                    LotteryCauLoHit::create([
+                        'cau_lo_id' => $formula->id,
+                        'ngay' => $drawDate,
+                        'so_trung' => $hitNumber
+                    ]);
+                }
+                
                 $this->line("<fg=green>✓ {$drawDate}: Numbers [{$hitNumbersStr}] - Hit on [" . implode(', ', $matchedNumbers) . "]</>");
                 $this->line("  Lô array: [{$loArrayStr}]");
             } else {
