@@ -1,0 +1,99 @@
+<LotteryGame>
+  <Info>
+    <Name>Hệ thống chọn cầu lô tối ưu</Name>
+    <description>Hệ thống tự động chọn cầu lô tối ưu theo thống kê và mô phỏng chiến lược chơi.</description>
+    <Version>1.0</Version>
+    <Framework>Laravel 10</Framework>
+    <Database>MySQL</Database>
+    <Repository>https://github.com/zajhn8x/xsms-game-php81/tree/main</Repository>
+  </Info>
+  <Database>
+    <Table name="users">
+      <Column name="id" type="INT" primaryKey="true"></Column>
+      <Column name="username" type="VARCHAR(255)" unique="true"></Column>
+      <Column name="email" type="VARCHAR(255)" unique="true"></Column>
+      <Column name="total_cost" type="DECIMAL(10,2)"></Column>
+      <Column name="created_at" type="TIMESTAMP" default="CURRENT_TIMESTAMP"></Column>
+    </Table>
+    <Table name="lottery_results">
+      <Column name="id" type="INT" primaryKey="true"></Column>
+      <Column name="draw_date" type="DATE"></Column>
+      <Column name="prizes" type="JSON"></Column>
+      <Column name="lo_array" type="JSON"></Column>
+      <Column name="created_at" type="TIMESTAMP" default="CURRENT_TIMESTAMP"></Column>
+    </Table>
+    <Table name="lottery_cau_lo">
+      <Column name="id" type="INT" primaryKey="true"></Column>
+      <Column name="parent_id" type="INT" foreignKey="lottery_cau_lo(id)" onDelete="CASCADE"></Column>
+      <Column name="draw_date" type="DATE"></Column>
+      <Column name="lo_number" type="VARCHAR(2)"></Column>
+      <Column name="formula_id" type="INT" foreignKey="lottery_cau_meta(id)" onDelete="CASCADE"></Column>
+      <Column name="occurrence" type="INT"></Column>
+      <Column name="status" type="ENUM('strong', 'medium', 'weak')"></Column>
+      <Column name="created_at" type="TIMESTAMP" default="CURRENT_TIMESTAMP"></Column>
+    </Table>
+    <Table name="lottery_cau_meta">
+      <Column name="id" type="INT" primaryKey="true"></Column>
+      <Column name="formula_note" type="TEXT"></Column>
+      <Column name="formula_structure" type="JSON"></Column>
+      <Column name="created_at" type="TIMESTAMP" default="CURRENT_TIMESTAMP"></Column>
+    </Table>
+    <Table name="lottery_bets">
+      <Column name="id" type="INT" primaryKey="true"></Column>
+      <Column name="user_id" type="INT" foreignKey="users(id)" onDelete="CASCADE"></Column>
+      <Column name="cau_lo_id" type="INT" foreignKey="lottery_cau_lo(id)" onDelete="CASCADE"></Column>
+      <Column name="bet_amount" type="DECIMAL(10,2)"></Column>
+      <Column name="bet_status" type="ENUM('won', 'lost', 'pending')"></Column>
+      <Column name="created_at" type="TIMESTAMP" default="CURRENT_TIMESTAMP"></Column>
+    </Table>
+    <Table name="lottery_logs">
+      <Column name="id" type="INT" primaryKey="true"></Column>
+      <Column name="cau_lo_id" type="INT" foreignKey="lottery_cau_lo(id)" onDelete="CASCADE"></Column>
+      <Column name="log_details" type="TEXT"></Column>
+      <Column name="created_at" type="TIMESTAMP" default="CURRENT_TIMESTAMP"></Column>
+    </Table>
+  </Database>
+  <Features>
+    <Feature>
+      <Name>Chọn cầu lô tự động</Name>
+      <Description>Hệ thống tự động tìm kiếm cầu lô mạnh nhất.</Description>
+    </Feature>
+    <Feature>
+      <Name>Quản lý vốn</Name>
+      <Description>Theo dõi và phân tích lãi/lỗ dựa trên các cầu đã chọn.</Description>
+    </Feature>
+    <Feature>
+      <Name>Thống kê và đánh giá cầu</Name>
+      <Description>Phân tích tần suất trúng, chu kỳ trúng, và xác suất của từng cầu lô.</Description>
+    </Feature>
+    <Feature>
+      <Name>Chạy mô phỏng và đánh giá</Name>
+      <Description>Thử nghiệm chiến lược trên dữ liệu lịch sử và điều chỉnh phương pháp.</Description>
+    </Feature>
+  </Features>
+  <Optimization>
+    <Strategy name="Partition Table">
+      <Description>Chia bảng theo năm để tăng tốc truy vấn dữ liệu.</Description>
+    </Strategy>
+    <Strategy name="Indexed View">
+      <Description>Tạo view index giúp tăng tốc thống kê tần suất trúng.</Description>
+    </Strategy>
+    <Strategy name="Batch Query">
+      <Description>Xử lý dữ liệu theo batch để giảm tải truy vấn.</Description>
+    </Strategy>
+  </Optimization>
+  <GameRules>
+    <Rule>Người chơi có thể chọn 1-3 cầu mỗi ngày.</Rule>
+    <Rule>Cầu lô phải đang trúng hôm nay.</Rule>
+    <Rule>Chuỗi trúng liên tiếp gần nhất phải >= 2 ngày.</Rule>
+    <Rule>Hệ thống chỉ chọn Top 10 cầu mạnh nhất.</Rule>
+  </GameRules>
+  <Charts>
+    <Chart name="Cầu lô theo thời gian">
+      <Strategy>Biểu đồ line chart thể hiện chu kỳ trúng của từng cầu lô.</Strategy>
+    </Chart>
+    <Chart name="Hiệu suất chiến lược">
+      <Strategy>Biểu đồ cột thể hiện lợi nhuận/lỗ khi đánh cầu lô theo chiến lược.</Strategy>
+    </Chart>
+  </Charts>
+</LotteryGame>

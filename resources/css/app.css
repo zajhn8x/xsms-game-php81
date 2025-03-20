@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.stats-card {
+    @apply bg-gray-50 rounded-lg p-4 text-center;
+}
+
+.stats-card h3 {
+    @apply text-gray-600 text-sm mb-2;
+}
+
+.stats-card p {
+    @apply text-2xl font-bold text-blue-600;
+}
+
+.table td {
+    padding: 0.5rem;
+}
+.table .row {
+    margin: 0;
+}
+.table .col {
+    padding: 0.25rem;
+}
