@@ -10,8 +10,16 @@
                     $prizes = $result->prizes;
                     $lo_array = $result->lo_array;
 
-                    // Hàm chuẩn hóa số
                     $formatPrize = fn($prize) => is_array($prize) ? implode(', ', $prize) : $prize;
+
+                    $lo_head = [];
+                    $lo_tail = [];
+                    foreach ($lo_array as $lo) {
+                        $head = substr($lo, 0, 1);
+                        $tail = substr($lo, -1);
+                        $lo_head[$head][] = $lo;
+                        $lo_tail[$tail][] = $lo;
+                    }
                 @endphp
 
                 <div class="card mb-4 shadow-sm">
@@ -29,9 +37,43 @@
                             <tr><td>🏆 Giải năm</td> <td>{{ $formatPrize($prizes['prize5'] ?? []) }}</td></tr>
                             <tr><td>🎟️ Giải sáu</td> <td>{{ $formatPrize($prizes['prize6'] ?? []) }}</td></tr>
                             <tr><td>🎫 Giải bảy</td> <td>{{ $formatPrize($prizes['prize7'] ?? []) }}</td></tr>
-                            <tr><td class="fw-bold">🔢 Lô tô</td> <td class="fw-bold text-primary">{{ implode(', ', $lo_array) }}</td></tr>
                             </tbody>
                         </table>
+
+                        <h5 class="text-center mt-4 fw-bold text-primary">🔢 LÔ TÔ</h5>
+                        <table class="table table-bordered text-center">
+                            <tr>
+                                @foreach($lo_array as $lo)
+                                    <td>{{ $lo }}</td>
+                                @endforeach
+                            </tr>
+                        </table>
+
+                        <h5 class="text-center mt-4 fw-bold text-primary">📊 THỐNG KÊ LÔ TÔ</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="fw-bold">Đầu số</h6>
+                                <table class="table table-bordered text-center">
+                                    @foreach(range(0, 9) as $num)
+                                        <tr>
+                                            <td class="fw-bold">{{ $num }}</td>
+                                            <td>{{ isset($lo_head[$num]) ? implode('; ', $lo_head[$num]) : '-' }}</td>
+                                        </tr>
+                                    @endforeach
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="fw-bold">Đuôi số</h6>
+                                <table class="table table-bordered text-center">
+                                    @foreach(range(0, 9) as $num)
+                                        <tr>
+                                            <td class="fw-bold">{{ $num }}</td>
+                                            <td>{{ isset($lo_tail[$num]) ? implode('; ', $lo_tail[$num]) : '-' }}</td>
+                                        </tr>
+                                    @endforeach
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             @endforeach
