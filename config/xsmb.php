@@ -28,6 +28,47 @@ return [
             'G7-2-1', 'G7-2-2',
             'G7-3-1', 'G7-3-2',
             'G7-4-1', 'G7-4-2'] // Chia từng chữ số cho prize7
+    ],
+      // Cấu hình các dạng ghép cầu
+    'combination_types' => [
+    'single' => [
+        'description' => 'Cầu lô từ một vị trí duy nhất',
+        'example' => 'Lấy số tại vị trí G7-3-2'
+    ],
+    'pair' => [
+        'description' => 'Ghép từ hai vị trí',
+        'example' => 'G7-3-2 & G7-4-2 = XY [0-99]'
+    ],
+    'multi' => [
+        'description' => 'Ghép từ nhiều vị trí',
+        'example' => 'G7-3-2 & G7-4-2 & G6-1-3 = XYZ'
+    ],
+    'dynamic' => [
+        'description' => 'Máy học tự động xác định vị trí tối ưu',
+        'example' => 'Tự động xác định vị trí dựa trên phân tích thống kê'
     ]
+],
+
+    // Các công thức ghép cầu mẫu
+    'predefined_formulas' => [
+    [
+        'name' => 'Cầu Lô Song Thủ G7',
+        'type' => 'pair',
+        'positions' => ['G7-3-2', 'G7-4-2'],
+        'description' => 'Ghép song thủ từ Giải 7'
+    ],
+    [
+        'name' => 'Cầu Lô Tam Thủ G6-G7',
+        'type' => 'multi',
+        'positions' => ['G6-3-3', 'G7-3-2', 'G7-4-2'],
+        'description' => 'Ghép tam thủ từ Giải 6 và Giải 7'
+    ],
+    [
+        'name' => 'Cầu Lô Đầu DB',
+        'type' => 'single',
+        'positions' => ['GDB-1-1'],
+        'description' => 'Lấy số đầu của giải đặc biệt'
+    ]
+]
 ];
 
