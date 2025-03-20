@@ -37,6 +37,6 @@ class LotteryService implements LotteryResultServiceInterface
 
     public function getResults()
     {
-        return LotteryResult::orderBy('draw_date', 'desc')->get();
+        return LotteryResult::orderBy('draw_date', 'desc')->limit(3)->get();
     }
 }

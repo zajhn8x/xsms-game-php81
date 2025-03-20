@@ -3,13 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\LotteryResult;
 use Illuminate\Http\Request;
 
 class LotteryResultController extends Controller
 {
     public function index()
     {
-        $results = LotteryResult::orderBy('draw_date', 'desc')->paginate(10);
+        $results = LotteryResult::orderBy('draw_date', 'desc')->paginate(3);
         return response()->json($results);
     }
 
@@ -34,7 +35,7 @@ class LotteryResultController extends Controller
     public function update(Request $request, string $id)
     {
         $result = LotteryResult::findOrFail($id);
-        
+
         $validated = $request->validate([
             'draw_date' => 'date',
             'prizes' => 'array',
@@ -87,7 +88,7 @@ class LotteryResultController extends Controller
             $request->start_date,
             $request->end_date
         );
-        
+
         return response()->json($results);
     }
 }
