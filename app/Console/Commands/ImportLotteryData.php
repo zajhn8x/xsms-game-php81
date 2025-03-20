@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Contracts\LotteryResultServiceInterface;
+use App\Models\LotteryResultIndex;
 use Carbon\Carbon;
 
 class ImportLotteryData extends Command
@@ -17,6 +18,7 @@ class ImportLotteryData extends Command
     {
         parent::__construct();
         $this->lotteryResultService = $lotteryResultService;
+        $this->positions = config('xsmb.positions',[]);
     }
 
     public function handle()
@@ -36,9 +38,55 @@ class ImportLotteryData extends Command
                 'csv' => $this->parseCsv($file),
                 default => throw new \Exception("Unsupported file type: {$extension}")
             };
-
+//            dd($this->positions);
             foreach ($data as $row) {
                 $this->lotteryResultService->createResult($row);
+                $positions = [];
+
+                foreach ($this->positions as $prizeKey => $posList) {
+                    if (!isset($row['prizes'][$prizeKey])) {
+                        error_log("⚠️ Thiếu dữ liệu giải $prizeKey cho ngày {$row['draw_date']}");
+                        continue;
+                    }
+
+                    $prizeNumbers = $row['prizes'][$prizeKey];
+
+                    // Chuyển về mảng nếu chỉ có một giải
+                    if (!is_array($prizeNumbers)) {
+                        $prizeNumbers = [$prizeNumbers];
+                    }
+
+                    foreach ($posList as $posName) {
+                        $parts = explode('-', $posName);
+                        if (count($parts) < 3) continue;
+
+                        $groupIndex = (int) $parts[1] - 1; // Chỉ mục nhóm giải (0-based)
+                        $digitIndex = (int) $parts[2] - 1; // Chỉ mục chữ số (0-based)
+
+                        if (!isset($prizeNumbers[$groupIndex])) {
+                            error_log("⚠️ Không tìm thấy nhóm giải $prizeKey ($posName) cho ngày {$row['draw_date']}");
+                            continue;
+                        }
+
+                        $prizeValue = (string) $prizeNumbers[$groupIndex];
+
+                        if (!isset($prizeValue[$digitIndex])) continue;
+
+                        $positions[] = [
+                            'draw_date'  => $row['draw_date'],
+                            'position'   => $posName,
+                            'value'      => (int) $prizeValue[$digitIndex],
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ];
+                    }
+                }
+
+                // Lưu dữ liệu vào bảng lottery_results_index
+                if (!empty($positions)) {
+                    LotteryResultIndex::upsert($positions, ['draw_date', 'position'], ['value', 'updated_at']);
+                }
+
                 $this->info("Imported result for date: {$row['draw_date']}");
             }
 
