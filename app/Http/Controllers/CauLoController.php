@@ -1,8 +1,8 @@
-
 <?php
 
 namespace App\Http\Controllers;
 
+use App\Models\LotteryCauLoHit;
 use App\Services\LotteryCauLoHitService;
 use App\Models\LotteryCauLo;
 use Carbon\Carbon;
@@ -33,12 +33,12 @@ class CauLoController extends Controller
         $cauLo = LotteryCauLo::findOrFail($id);
         $startDate = request('date', Carbon::today()->format('Y-m-d'));
         $endDate = Carbon::parse($startDate)->subDays(30)->format('Y-m-d');
-        
+
         $hits = LotteryCauLoHit::where('cau_lo_id', $id)
             ->whereBetween('ngay', [$endDate, $startDate])
             ->orderBy('ngay')
             ->get();
-            
+
         return view('caulo.timeline', compact('cauLo', 'hits'));
     }
 }

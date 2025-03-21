@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LotteryController;
 use App\Http\Controllers\BetController;
 use App\Http\Controllers\StatisticsController;
+use App\Http\Controllers\CauLoController;
 
 Route::get('/', [LotteryController::class, 'index'])->name('home');
 Route::get('/lottery', [LotteryController::class, 'index'])->name('lottery.index');

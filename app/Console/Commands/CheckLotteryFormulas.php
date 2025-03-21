@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\LotteryCauLo;
 use App\Models\LotteryCauLoMeta;
 use App\Models\LotteryResult;
+use App\Models\LotteryCauLoHit;
 use App\Services\LotteryIndexResultsService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
@@ -133,7 +134,7 @@ class CheckLotteryFormulas extends Command
             if (!empty($matchedNumbers)) {
                 $hit = true;
                 $formula->hit_count++;
-                
+
                 // Save hit to database
                 foreach ($matchedNumbers as $hitNumber) {
                     LotteryCauLoHit::create([
@@ -142,7 +143,7 @@ class CheckLotteryFormulas extends Command
                         'so_trung' => $hitNumber
                     ]);
                 }
-                
+
                 $this->line("<fg=green>✓ {$drawDate}: Numbers [{$hitNumbersStr}] - Hit on [" . implode(', ', $matchedNumbers) . "]</>");
                 $this->line("  Lô array: [{$loArrayStr}]");
             } else {

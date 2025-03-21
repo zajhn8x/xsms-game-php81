@@ -19,11 +19,12 @@ return new class extends Migration
             $table->index('ngay');
             $table->index('cau_lo_id');
         });
-
+        /**
         DB::statement("ALTER TABLE lottery_cau_lo_hit PARTITION BY RANGE (YEAR(ngay)) (
             PARTITION p2023 VALUES LESS THAN (2024),
             PARTITION p2024 VALUES LESS THAN (2025)
         )");
+         * */
     }
 
     public function down()

@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Services;
@@ -29,10 +28,9 @@ class LotteryCauLoHitService
             SELECT h1.cau_lo_id, GROUP_CONCAT(h1.ngay ORDER BY h1.ngay ASC) as ngay_trung
             FROM " . $subqueries[0] . "
             " . implode(" ", $joins) . "
-            WHERE " . implode(" AND ", $conditions) . "
+            WHERE  1 " . implode(" AND ", $conditions) . "
             GROUP BY h1.cau_lo_id
         ";
-
         return DB::select($query);
     }
 }
