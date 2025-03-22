@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Services;
@@ -17,7 +16,7 @@ class LotteryCauLoHitService
         $endDate = $startDate->copy()->subDays($daysBack);
         $dateRange = [];
         $currentDate = $startDate->copy();
-        
+
         while ($currentDate >= $endDate) {
             $dateRange[] = $currentDate->format('Y-m-d');
             $currentDate->subDay();
@@ -39,8 +38,8 @@ class LotteryCauLoHitService
             'formula_name' => $cauLo->formula->name ?? '',
             'formula_structure' => $cauLo->formula->structure ?? '',
             'total_hits' => $hits->count(),
-            'hit_rate' => count($dateRange) > 0 
-                ? ($hits->count() / count($dateRange)) * 100 
+            'hit_rate' => count($dateRange) > 0
+                ? ($hits->count() / count($dateRange)) * 100
                 : 0
         ];
 

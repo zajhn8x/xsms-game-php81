@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Services;
@@ -25,8 +24,8 @@ class LotteryCauService
         return [
             'total_predictions' => $cauLos->count(),
             'successful_predictions' => $cauLos->where('occurrence', '>', 0)->count(),
-            'success_rate' => $cauLos->count() > 0 
-                ? ($cauLos->where('occurrence', '>', 0)->count() / $cauLos->count()) * 100 
+            'success_rate' => $cauLos->count() > 0
+                ? ($cauLos->where('occurrence', '>', 0)->count() / $cauLos->count()) * 100
                 : 0
         ];
     }

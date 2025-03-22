@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Jobs;
@@ -36,12 +35,12 @@ class ProcessLotteryFormula implements ShouldQueue
                                ->get();
 
         $cauLos = LotteryCauLo::where('is_processed', false)->get();
-        
+
         foreach ($cauLos as $cauLo) {
             foreach ($results as $result) {
                 $formulaService->calculateResults($cauLo->id, $result->draw_date);
             }
-            
+
             $cauLo->is_processed = true;
             $cauLo->last_processed_date = Carbon::now();
             $cauLo->save();
