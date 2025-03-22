@@ -2,166 +2,73 @@
 
 namespace App\Console\Commands;
 
-use App\Models\LotteryCauLo;
-use App\Models\LotteryCauLoMeta;
-use App\Models\LotteryResult;
-use App\Models\LotteryCauLoHit;
-use App\Services\LotteryIndexResultsService;
 use Illuminate\Console\Command;
-use Illuminate\Support\Carbon;
+use App\Models\LotteryResult;
+use App\Models\LotteryCauLo;
+use App\Models\LotteryCauLoHit;
+use App\Services\LotteryService;
+use Carbon\Carbon;
+use App\Models\LotteryCauLoMeta;
+
 
 class CheckLotteryFormulas extends Command
 {
-    protected $signature = 'lottery:check-formulas 
-                            {--date= : Date to check formulas against (YYYY-MM-DD)}
-                            {--days=1 : Number of days to check backwards from the date}
-                            {--formula-id= : Specific formula ID to check}';
-
+    protected $signature = 'lottery:check-formulas';
     protected $description = 'Check lottery formulas against results';
 
-    /**
-     * @var LotteryIndexResultsService
-     */
-    protected $lotteryIndexService;
+    protected $lotteryService;
 
-    /**
-     * Create a new command instance.
-     *
-     * @param LotteryIndexResultsService $lotteryIndexService
-     * @return void
-     */
-    public function __construct(LotteryIndexResultsService $lotteryIndexService)
+    public function __construct(LotteryService $lotteryService)
     {
         parent::__construct();
-        $this->lotteryIndexService = $lotteryIndexService;
+        $this->lotteryService = $lotteryService;
     }
 
     public function handle()
     {
-        $date = $this->option('date') ? Carbon::parse($this->option('date')) : Carbon::today();
-        $days = max(1, (int)$this->option('days'));
-        $formulaId = $this->option('formula-id');
+        $this->info('Checking lottery formulas...');
 
-        $this->info("Checking formulas for {$days} days starting from {$date->format('Y-m-d')}");
+        $today = Carbon::now()->format('Y-m-d');
+        $results = $this->lotteryService->getResultsByDateRange(
+            Carbon::now()->subDays(30),
+            $today
+        );
 
-        // Get formulas to check
-        $query = LotteryCauLoMeta::query();
-        if ($formulaId) {
-            $query->where('id', $formulaId);
-        }
-        $formulas = $query->get();
+        foreach ($results as $result) {
+            $formulas = LotteryCauLo::where('is_active', true)->get();
 
-        if ($formulas->isEmpty()) {
-            $this->error('No formulas found to check.');
-            return 1;
-        }
+            foreach ($formulas as $formula) {
+                $formulaMeta = LotteryCauLoMeta::find($formula->formula_meta_id);
+                if(!$formulaMeta){
+                    continue;
+                }
+                $hit = $this->checkFormulaHit($formulaMeta, $result);
 
-        $this->info("Found {$formulas->count()} formulas to check.");
-
-        // Get results for the specified date range
-        $startDate = $date->copy()->subDays($days - 1);
-        $endDate = $date;
-
-        $results = LotteryResult::whereBetween('draw_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
-            ->orderBy('draw_date')
-            ->get();
-
-        if ($results->isEmpty()) {
-            $this->error('No lottery results found for the specified date range.');
-            return 1;
+                if ($hit) {
+                    LotteryCauLoHit::create([
+                        'cau_lo_id' => $formula->id,
+                        'ngay' => $result->draw_date,
+                        'so_trung' => $hit,
+                        
+                    ]);
+                }
+            }
         }
 
-        $this->info("Found {$results->count()} days of results to check against.");
-
-        // Process each formula
-        $this->info(""); // Add empty line for better readability
-        $this->info("--- Detailed Formula Results ---");
-
-        foreach ($formulas as $formulaMeta) {
-            $this->checkFormula($formulaMeta, $results);
-        }
-
-        $this->info("");
-        $this->info('Formula checking completed.');
-
-        return 0;
+        $this->info('Formula check completed');
     }
 
-    private function checkFormula($formulaMeta, $results)
+    protected function checkFormulaHit($formulaMeta, $result)
     {
         $formulaStructure = json_decode($formulaMeta->formula_structure, true);
         $combinationType = $formulaMeta->combination_type;
-
-        // Find or create the formula record
-        $formula = LotteryCauLo::firstOrCreate(
-            ['formula_meta_id' => $formulaMeta->id],
-            [
-                'combination_type' => $combinationType,
-                'is_verified' => false,
-                'hit_count' => 0,
-                'miss_count' => 0,
-                'is_active' => true
-            ]
-        );
-
-        // Print formula details
-        $this->info("");
-        $this->info("Formula ID: {$formulaMeta->id} - Type: {$combinationType}");
-        $this->line("Formula structure: " . json_encode($formulaStructure['positions'] ?? []));
-
-        // Reset counters before checking
-        $formula->hit_count = 0;
-        $formula->miss_count = 0;
-
-        $results->slice(0, $results->count() - 1)->each(function ($resultToday, $index) use ($results, $formulaStructure, $combinationType, &$formula) {
-            $resultNextDay = $results->get($index + 1); // Lấy kết quả ngày kế tiếp
-
-            if (!$resultNextDay) {
-                return;
-            }
-
-            $hitNumbers = $this->extractNumbers($resultToday->draw_date, $formulaStructure, $combinationType);
-            $drawDate = $resultToday->draw_date;
-            $loArray = $resultNextDay->lo_array ?? [];
-            $loToDayArray = $resultToday->lo_array ?? [];
-
-            $hitNumbersStr = implode(', ', $hitNumbers);
-            $loArrayStr = implode(', ', $loToDayArray);
-
-            $hit = false;
-            $matchedNumbers = collect($hitNumbers)->intersect($loArray)->all();
-
-            if (!empty($matchedNumbers)) {
-                $hit = true;
-                $formula->hit_count++;
-
-                // Save hit to database
-                foreach ($matchedNumbers as $hitNumber) {
-                    LotteryCauLoHit::create([
-                        'cau_lo_id' => $formula->id,
-                        'ngay' => $drawDate,
-                        'so_trung' => $hitNumber
-                    ]);
-                }
-
-                $this->line("<fg=green>✓ {$drawDate}: Numbers [{$hitNumbersStr}] - Hit on [" . implode(', ', $matchedNumbers) . "]</>");
-                $this->line("  Lô array: [{$loArrayStr}]");
-            } else {
-                $formula->miss_count++;
-                $this->line("<fg=red>✗ {$drawDate}: Numbers [{$hitNumbersStr}] - Miss</>");
-                $this->line("  Lô array: [{$loArrayStr}]");
-            }
-        });
-
-        // Print summary for this formula
-        $totalDays = $formula->hit_count + $formula->miss_count;
-        $hitRate = $totalDays > 0 ? round(($formula->hit_count / $totalDays) * 100, 2) : 0;
-        $this->info("Hit rate: {$formula->hit_count}/{$totalDays} ({$hitRate}%)");
-
-        // Update the formula verification status
-        $formula->is_verified = true;
-        $formula->last_date_verified = now();
-        $formula->save();
+        $hitNumbers = $this->extractNumbers($result->draw_date, $formulaStructure, $combinationType);
+        $loArray = $result->lo_array ?? [];
+        $matchedNumbers = collect($hitNumbers)->intersect($loArray)->all();
+        if (!empty($matchedNumbers)) {
+            return $matchedNumbers[0]; // Return the first matched number
+        }
+        return null;
     }
 
     private function extractNumbers($drawDate, $formulaStructure, $combinationType)
@@ -193,7 +100,7 @@ class CheckLotteryFormulas extends Command
         $digits = [];
 
         foreach ($positions as $position) {
-            $digit = $this->lotteryIndexService->getPositionValue($drawDate, $position);
+            $digit = $this->lotteryService->getPositionValue($drawDate, $position);
             if ($digit !== null) {
                 $digits[] = $digit;
             }
@@ -212,7 +119,7 @@ class CheckLotteryFormulas extends Command
             return;
         }
 
-        $digit = $this->lotteryIndexService->getPositionValue($drawDate, $positions[0]);
+        $digit = $this->lotteryService->getPositionValue($drawDate, $positions[0]);
         if ($digit !== null) {
             $numbers[] = $digit;
         }
@@ -227,7 +134,7 @@ class CheckLotteryFormulas extends Command
         $digits = [];
 
         foreach ($positions as $position) {
-            $digit = $this->lotteryIndexService->getPositionValue($drawDate, $position);
+            $digit = $this->lotteryService->getPositionValue($drawDate, $position);
             if ($digit !== null) {
                 $digits[] = $digit;
             }
