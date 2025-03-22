@@ -1,3 +1,0 @@
-[19-Mar-2025 07:16:39 UTC] PHP Warning:  Missing arginfo for uploadprogress_get_info() in Unknown on line 0
-[19-Mar-2025 07:16:39 UTC] PHP Warning:  Missing arginfo for uploadprogress_get_contents() in Unknown on line 0
-[19-Mar-2025 07:16:39 UTC] PHP Warning:  Cannot load module "memcached" because required module "igbinary" is not loaded in Unknown on line 0
