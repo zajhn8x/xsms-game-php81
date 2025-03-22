@@ -1,4 +1,3 @@
-
 <?php
 
 namespace Tests\Unit\Services;
@@ -7,6 +6,7 @@ use Tests\TestCase;
 use App\Services\LotteryFormulaService;
 use App\Models\LotteryResult;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\LotteryCauLo; // Assuming this model exists
 
 class LotteryFormulaServiceTest extends TestCase
 {
@@ -33,9 +33,32 @@ class LotteryFormulaServiceTest extends TestCase
         ]);
 
         $result = $this->service->calculateFormulaResults('2024-03-20');
-        
+
         $this->assertIsArray($result);
         $this->assertArrayHasKey('special', $result);
         $this->assertArrayHasKey('prize1', $result);
+    }
+
+    /**
+     * Test xử lý khi không có kết quả xổ số
+     */
+    public function test_handle_no_lottery_result()
+    {
+        $cauLo = LotteryCauLo::factory()->create();
+        $result = $this->service->calculateResults($cauLo->id, '2024-03-21');
+        $this->assertNull($result);
+    }
+
+    /**
+     * Test xử lý khi cầu lô không tồn tại
+     */
+    public function test_handle_invalid_cau_lo()
+    {
+        $this->expectException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+        $this->service->calculateResults(999, '2024-03-21');
+    }
+
+    public function test_can_save_processed_results()
+    {
     }
 }
