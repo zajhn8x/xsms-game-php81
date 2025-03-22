@@ -9,17 +9,18 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('lottery_cau_lo_hit', function (Blueprint $table) {
+        Schema::create('formula_hit', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('cau_lo_id');
             $table->date('ngay');
             $table->string('so_trung', 10);
-            $table->foreign('cau_lo_id')->references('id')->on('lottery_cau_lo');
+            $table->foreign('cau_lo_id')->references('id')->on('lottery_formula');
             $table->index('ngay');
             $table->index('cau_lo_id');
+
         });
         /**
-        DB::statement("ALTER TABLE lottery_cau_lo_hit PARTITION BY RANGE (YEAR(ngay)) (
+        DB::statement("ALTER TABLE lottery_formula_hit PARTITION BY RANGE (YEAR(ngay)) (
             PARTITION p2023 VALUES LESS THAN (2024),
             PARTITION p2024 VALUES LESS THAN (2025)
         )");
@@ -28,6 +29,6 @@ return new class extends Migration
 
     public function down()
     {
-        Schema::dropIfExists('lottery_cau_lo_hit');
+        Schema::dropIfExists('lottery_formula_hit');
     }
 };

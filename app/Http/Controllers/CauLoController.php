@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\LotteryCauLo;
-use App\Services\LotteryCauLoHitService;
+use App\Models\LotteryFormula;
+use App\Services\LotteryFormulaHitService;
 use Carbon\Carbon;
 use App\Models\LotteryResult;
 use App\Models\LotteryResultIndex;
@@ -13,7 +13,7 @@ class CauLoController extends Controller
 {
     protected $cauLoHitService;
 
-    public function __construct(LotteryCauLoHitService $cauLoHitService)
+    public function __construct(LotteryFormulaHitService $cauLoHitService)
     {
         $this->cauLoHitService = $cauLoHitService;
     }
@@ -32,7 +32,7 @@ class CauLoController extends Controller
 
     public function timeline($id)
     {
-        $cauLo = LotteryCauLo::with('formula')->findOrFail($id);
+        $cauLo = LotteryFormula::with('formula')->findOrFail($id);
         $startDate = Carbon::parse(request('date', Carbon::today()->format('Y-m-d')));
 
         $timelineData = $this->cauLoHitService->getTimelineData(

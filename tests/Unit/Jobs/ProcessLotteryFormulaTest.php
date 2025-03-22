@@ -6,7 +6,7 @@ namespace Tests\Unit\Jobs;
 use Tests\TestCase;
 use App\Jobs\ProcessLotteryFormula;
 use App\Models\LotteryResult;
-use App\Models\LotteryCauLo;
+use App\Models\LotteryFormula;
 use App\Services\LotteryFormulaService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Carbon\Carbon;
@@ -18,7 +18,7 @@ class ProcessLotteryFormulaTest extends TestCase
     public function test_process_lottery_formula()
     {
         // Create test data
-        $cauLo = LotteryCauLo::factory()->create([
+        $cauLo = LotteryFormula::factory()->create([
             'is_processed' => false
         ]);
 

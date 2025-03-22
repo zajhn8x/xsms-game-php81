@@ -31,8 +31,8 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::prefix('v1')->group(function () {
     Route::apiResource('lottery-results', App\Http\Controllers\Api\LotteryResultController::class);
     Route::apiResource('lottery-cau-meta', App\Http\Controllers\Api\LotteryCauMetaController::class);
-    Route::apiResource('lottery-cau-lo', App\Http\Controllers\Api\LotteryCauLoController::class);
-    
+    Route::apiResource('lottery-cau-lo', App\Http\Controllers\Api\LotteryFormulaController::class);
+
     Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('lottery-bets', App\Http\Controllers\Api\LotteryBetController::class);
         Route::apiResource('lottery-logs', App\Http\Controllers\Api\LotteryLogController::class);

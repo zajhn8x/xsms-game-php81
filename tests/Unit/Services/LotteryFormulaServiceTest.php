@@ -6,7 +6,7 @@ use Tests\TestCase;
 use App\Services\LotteryFormulaService;
 use App\Models\LotteryResult;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Models\LotteryCauLo; // Assuming this model exists
+use App\Models\LotteryFormula; // Assuming this model exists
 
 class LotteryFormulaServiceTest extends TestCase
 {
@@ -44,7 +44,7 @@ class LotteryFormulaServiceTest extends TestCase
      */
     public function test_handle_no_lottery_result()
     {
-        $cauLo = LotteryCauLo::factory()->create();
+        $cauLo = LotteryFormula::factory()->create();
         $result = $this->service->calculateResults($cauLo->id, '2024-03-21');
         $this->assertNull($result);
     }

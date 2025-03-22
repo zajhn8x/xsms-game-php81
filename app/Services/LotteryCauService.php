@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\LotteryCauMeta;
-use App\Models\LotteryCauLo;
+use App\Models\LotteryFormula;
 use Carbon\Carbon;
 
 class LotteryCauService
@@ -17,7 +17,7 @@ class LotteryCauService
 
     public function analyzeCauPerformance($formulaId, $days = 30)
     {
-        $cauLos = LotteryCauLo::where('formula_id', $formulaId)
+        $cauLos = LotteryFormula::where('formula_id', $formulaId)
             ->where('draw_date', '>=', Carbon::now()->subDays($days))
             ->get();
 
@@ -33,7 +33,7 @@ class LotteryCauService
     public function predictForTomorrow($formulaId)
     {
         $formula = LotteryCauMeta::findOrFail($formulaId);
-        $latestPredictions = LotteryCauLo::where('formula_id', $formulaId)
+        $latestPredictions = LotteryFormula::where('formula_id', $formulaId)
             ->orderBy('draw_date', 'desc')
             ->take(7)
             ->get();

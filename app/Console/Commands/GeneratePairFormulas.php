@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Models\LotteryCauLoMeta;
+use App\Models\LotteryFormulaMeta;
 use Illuminate\Console\Command;
 
 class GeneratePairFormulas extends Command
@@ -29,7 +29,7 @@ class GeneratePairFormulas extends Command
         $bar->start();
 
         $formulasGenerated = 0;
-        $existingFormulas = LotteryCauLoMeta::where('combination_type', 'pair')
+        $existingFormulas = LotteryFormulaMeta::where('combination_type', 'pair')
             ->pluck('formula_structure')
             ->toArray();
 
@@ -82,7 +82,7 @@ class GeneratePairFormulas extends Command
             ];
 
             // Save to database
-            LotteryCauLoMeta::create([
+            LotteryFormulaMeta::create([
                 'formula_name' => $formulaName,
                 'formula_note' => "Công thức ghép cầu lô tự động từ vị trí {$selectedPositions[0]} và {$selectedPositions[1]}",
                 'formula_structure' => json_encode($formulaStructure),

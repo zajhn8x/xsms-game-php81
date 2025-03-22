@@ -4,11 +4,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class LotteryCauLoMeta extends Model
+class LotteryFormulaMeta extends Model
 {
     use HasFactory;
 
-    protected $table = 'lottery_cau_lo_meta';
+    protected $table = 'lottery_formula_meta';
 
     protected $fillable = [
         'formula_name',
@@ -26,7 +26,7 @@ class LotteryCauLoMeta extends Model
      */
     public function caus()
     {
-        return $this->hasMany(LotteryCauLo::class, 'formula_meta_id');
+        return $this->hasMany(LotteryFormula::class, 'formula_meta_id');
     }
 
     /**

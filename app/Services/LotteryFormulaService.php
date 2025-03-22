@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\LotteryCauLo;
-use App\Models\LotteryCauLoHit;
+use App\Models\LotteryFormula;
+use App\Models\LotteryFormulaHit;
 use App\Models\LotteryResult;
 use Carbon\Carbon;
 
@@ -14,7 +14,7 @@ class LotteryFormulaService
      */
     public function calculateResults($cauLoId, $date)
     {
-        $cauLo = LotteryCauLo::with('formula')->findOrFail($cauLoId);
+        $cauLo = LotteryFormula::with('formula')->findOrFail($cauLoId);
         $result = LotteryResult::where('draw_date', $date)->first();
 
         if (!$result || !$cauLo) {
@@ -26,8 +26,8 @@ class LotteryFormulaService
         $soTrung = $this->checkHit($cauLo, $loArray);
 
         if ($soTrung) {
-            // Lưu kết quả trúng vào LotteryCauLoHit
-            LotteryCauLoHit::create([
+            // Lưu kết quả trúng vào LotteryFormulaHit
+            LotteryFormulaHit::create([
                 'cau_lo_id' => $cauLo->id,
                 'ngay' => $date,
                 'so_trung' => $soTrung
@@ -83,7 +83,7 @@ class LotteryFormulaService
      */
     public function saveProcessedResults($cauLoId, $processedData)
     {
-        $cauLo = LotteryCauLo::findOrFail($cauLoId);
+        $cauLo = LotteryFormula::findOrFail($cauLoId);
         $cauLo->is_processed = true;
         $cauLo->last_processed_date = Carbon::now();
         $cauLo->result_data = array_merge(

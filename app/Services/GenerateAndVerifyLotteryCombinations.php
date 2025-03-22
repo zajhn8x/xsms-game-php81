@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\DB;
-use App\Models\LotteryCauLo;
-use App\Models\LotteryCauLoMetaMeta;
+use App\Models\LotteryFormula;
+use App\Models\LotteryFormulaMetaMeta;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -26,11 +26,11 @@ class GenerateAndVerifyLotteryCombinations
     public function generateCombinations($count = 100)
     {
         $generated = 0;
-        $formulas = LotteryCauLoMeta::inRandomOrder()->limit($count)->get();
+        $formulas = LotteryFormulaMeta::inRandomOrder()->limit($count)->get();
 
         $caus = [];
         foreach ($formulas as $formula) {
-            $cau = new LotteryCauLo();
+            $cau = new LotteryFormula();
             $cau->combination_type = $formula->combination_type;
             $cau->formula_meta_id = $formula->id;
             $cau->is_processed = false;
@@ -80,7 +80,7 @@ class GenerateAndVerifyLotteryCombinations
 
         foreach ($caus as $cau) {
             try {
-                $meta = LotteryCauLoMeta::find($cau->formula_meta_id);
+                $meta = LotteryFormulaMeta::find($cau->formula_meta_id);
                 if (!$meta) {
                     Log::error("Formula meta không tồn tại cho cầu ID: " . $cau->id);
                     $errors++;

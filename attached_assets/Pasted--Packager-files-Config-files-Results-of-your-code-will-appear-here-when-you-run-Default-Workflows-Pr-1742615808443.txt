@@ -22,14 +22,14 @@ Split
             'amount' => 'required|numeric|min:1',
             'campaign_id' => 'required|exists:campaigns,id'
         ]);
-        
+
         $bet = Bet::create([
             'user_id' => auth()->id(),
             'campaign_id' => $validated['campaign_id'],
             'number' => $validated['number'],
             'amount' => $validated['amount']
         ]);
-        
+
         return redirect()->back()->with('success', 'Đặt cược thành công');
     }
 }
@@ -42,13 +42,13 @@ Split
             'amount' => 'required|numeric|min:1',
             'campaign_id' => 'required|exists:campaigns,id'
         ]);
-        
+
         $campaign = Campaign::findOrFail($validated['campaign_id']);
-        
+
         if($campaign->user_id !== auth()->id()) {
             return redirect()->back()->with('error', 'Không có quyền truy cập chiến dịch này');
         }
-        
+
         $bet = Bet::create([
             'user_id' => auth()->id(),
             'campaign_id' => $validated['campaign_id'],
@@ -56,7 +56,7 @@ Split
             'amount' => $validated['amount'],
             'result' => null
         ]);
-        
+
         return redirect()->back()->with('success', 'Đặt cược thành công');
     }
 }
@@ -169,12 +169,12 @@ Updated database connection settings
 Database đã được tạo import dữ liệu
 
 Sửa file app/Console/Commands/CheckLotteryFormulas.php lưu hit dữ liệu vào bảng với cấu trúc
-CREATE TABLE lottery_cau_lo_hit (
+CREATE TABLE lottery_formula_hit (
 id BIGINT PRIMARY KEY AUTO_INCREMENT,
 cau_lo_id BIGINT NOT NULL,
 ngay DATE NOT NULL,
 so_trung VARCHAR(10),
-FOREIGN KEY (cau_lo_id) REFERENCES lottery_cau_lo(id),
+FOREIGN KEY (cau_lo_id) REFERENCES lottery_formula(id),
 INDEX (ngay),
 INDEX (cau_lo_id)
 ) PARTITION BY RANGE (YEAR(ngay)) (
@@ -186,9 +186,9 @@ Tạo migrate
 Tạo sevice phục mục địch Truy vấn lấy ra cầu lô có 3 ngày trúng liên tiếp theo ngày nhập vào
 ex: Giả sử ngày nhập vào là '2024-03-20', ta cần tìm những cầu lô trúng liên tiếp 3 ngày trở lại.
 SELECT h1.cau_lo_id, GROUP_CONCAT(h1.ngay ORDER BY h1.ngay ASC) AS ngay_trung
-FROM lottery_cau_lo_hit h1
-JOIN lottery_cau_lo_hit h2 ON h1.cau_lo_id = h2.cau_lo_id AND h1.ngay = DATE_ADD(h2.ngay, INTERVAL 1 DAY)
-JOIN lottery_cau_lo_hit h3 ON h1.cau_lo_id = h3.cau_lo_id AND h1.ngay = DATE_ADD(h3.ngay, INTERVAL 2 DAY)
+FROM lottery_formula_hit h1
+JOIN lottery_formula_hit h2 ON h1.cau_lo_id = h2.cau_lo_id AND h1.ngay = DATE_ADD(h2.ngay, INTERVAL 1 DAY)
+JOIN lottery_formula_hit h3 ON h1.cau_lo_id = h3.cau_lo_id AND h1.ngay = DATE_ADD(h3.ngay, INTERVAL 2 DAY)
 WHERE h1.ngay <= '2024-03-20'
 GROUP BY h1.cau_lo_id;
 
@@ -201,13 +201,13 @@ I'll help you create the necessary files and update the CheckLotteryFormulas com
 
 First, let's create the migration:
 
-database/migrations/2024_03_20_000001_create_lottery_cau_lo_hit_table.php
+database/migrations/2024_03_20_000001_create_lottery_formula_hit_table.php
 Now let's create the model:
 
-app/Models/LotteryCauLoHit.php
+app/Models/LotteryFormulaHit.php
 Let's create the service for querying consecutive hits:
 
-app/Services/LotteryCauLoHitService.php
+app/Services/LotteryFormulaHitService.php
 Now let's update the CheckLotteryFormulas command to save hits:
 
 app/Console/Commands/CheckLotteryFormulas.php
@@ -357,11 +357,11 @@ Enable "Accessible Terminal" in Workspace Settings to use a screen reader with t
 Unsupported image
 
 Unsupported image
- 
+
 Unsupported image
- 
+
 Unsupported image
- 
+
 Unsupported image
 
 About Laravel
@@ -451,11 +451,11 @@ Database connected
 12 tables
 30.95MB/10GB
 Schema	Name	Type	Owner	Size	Description
-public	failed_jobs	table	neondb_owner	24 kB	
-public	failed_jobs_id_seq	sequence	neondb_owner	8192 bytes	
-public	lottery_bets	table	neondb_owner	8192 bytes	
-public	lottery_bets_id_seq	sequence	neondb_owner	8192 bytes	
-public	lottery_cau_lo	table	neondb_owner	24 kB	
+public	failed_jobs	table	neondb_owner	24 kB
+public	failed_jobs_id_seq	sequence	neondb_owner	8192 bytes
+public	lottery_bets	table	neondb_owner	8192 bytes
+public	lottery_bets_id_seq	sequence	neondb_owner	8192 bytes
+public	lottery_formula	table	neondb_owner	24 kB
 Docs
 Powered by
 Unsupported state: you are in the middle of a rebase.

@@ -22,9 +22,9 @@
       <Column name="lo_array" type="JSON"></Column>
       <Column name="created_at" type="TIMESTAMP" default="CURRENT_TIMESTAMP"></Column>
     </Table>
-    <Table name="lottery_cau_lo">
+    <Table name="lottery_formula">
       <Column name="id" type="INT" primaryKey="true"></Column>
-      <Column name="parent_id" type="INT" foreignKey="lottery_cau_lo(id)" onDelete="CASCADE"></Column>
+      <Column name="parent_id" type="INT" foreignKey="lottery_formula(id)" onDelete="CASCADE"></Column>
       <Column name="draw_date" type="DATE"></Column>
       <Column name="lo_number" type="VARCHAR(2)"></Column>
       <Column name="formula_id" type="INT" foreignKey="lottery_cau_meta(id)" onDelete="CASCADE"></Column>
@@ -41,14 +41,14 @@
     <Table name="lottery_bets">
       <Column name="id" type="INT" primaryKey="true"></Column>
       <Column name="user_id" type="INT" foreignKey="users(id)" onDelete="CASCADE"></Column>
-      <Column name="cau_lo_id" type="INT" foreignKey="lottery_cau_lo(id)" onDelete="CASCADE"></Column>
+      <Column name="cau_lo_id" type="INT" foreignKey="lottery_formula(id)" onDelete="CASCADE"></Column>
       <Column name="bet_amount" type="DECIMAL(10,2)"></Column>
       <Column name="bet_status" type="ENUM('won', 'lost', 'pending')"></Column>
       <Column name="created_at" type="TIMESTAMP" default="CURRENT_TIMESTAMP"></Column>
     </Table>
     <Table name="lottery_logs">
       <Column name="id" type="INT" primaryKey="true"></Column>
-      <Column name="cau_lo_id" type="INT" foreignKey="lottery_cau_lo(id)" onDelete="CASCADE"></Column>
+      <Column name="cau_lo_id" type="INT" foreignKey="lottery_formula(id)" onDelete="CASCADE"></Column>
       <Column name="log_details" type="TEXT"></Column>
       <Column name="created_at" type="TIMESTAMP" default="CURRENT_TIMESTAMP"></Column>
     </Table>

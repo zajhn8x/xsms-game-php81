@@ -8,7 +8,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use App\Models\LotteryResult;
-use App\Models\LotteryCauLo;
+use App\Models\LotteryFormula;
 use App\Services\LotteryFormulaService;
 use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
@@ -34,7 +34,7 @@ class ProcessLotteryFormula implements ShouldQueue
                                ->orderBy('draw_date')
                                ->get();
 
-        $cauLos = LotteryCauLo::where('is_processed', false)->get();
+        $cauLos = LotteryFormula::where('is_processed', false)->get();
 
         foreach ($cauLos as $cauLo) {
             foreach ($results as $result) {

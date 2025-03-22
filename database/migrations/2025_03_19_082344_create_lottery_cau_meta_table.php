@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     public function up(): void {
-        Schema::create('lottery_cau_lo_meta', function (Blueprint $table) {
+        Schema::create('lottery_formula_meta', function (Blueprint $table) {
             $table->id();
             $table->string('formula_name', 255);
             $table->text('formula_note')->nullable();
@@ -16,6 +16,6 @@ return new class extends Migration {
     }
 
     public function down(): void {
-        Schema::dropIfExists('lottery_cau_lo_meta');
+        Schema::dropIfExists('lottery_formula_meta');
     }
 };

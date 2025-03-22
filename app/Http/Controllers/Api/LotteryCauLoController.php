@@ -5,11 +5,11 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-class LotteryCauLoController extends Controller
+class LotteryFormulaController extends Controller
 {
     public function index()
     {
-        $cauLos = LotteryCauLo::with('cauMeta')->paginate(10);
+        $cauLos = LotteryFormula::with('cauMeta')->paginate(10);
         return response()->json($cauLos);
     }
 
@@ -22,20 +22,20 @@ class LotteryCauLoController extends Controller
             'day_missed' => 'required|integer'
         ]);
 
-        $cauLo = LotteryCauLo::create($validated);
+        $cauLo = LotteryFormula::create($validated);
         return response()->json($cauLo, 201);
     }
 
     public function show(string $id)
     {
-        $cauLo = LotteryCauLo::with('cauMeta')->findOrFail($id);
+        $cauLo = LotteryFormula::with('cauMeta')->findOrFail($id);
         return response()->json($cauLo);
     }
 
     public function update(Request $request, string $id)
     {
-        $cauLo = LotteryCauLo::findOrFail($id);
-        
+        $cauLo = LotteryFormula::findOrFail($id);
+
         $validated = $request->validate([
             'lottery_cau_meta_id' => 'exists:lottery_cau_meta,id',
             'number' => 'string|max:2',
@@ -49,7 +49,7 @@ class LotteryCauLoController extends Controller
 
     public function destroy(string $id)
     {
-        $cauLo = LotteryCauLo::findOrFail($id);
+        $cauLo = LotteryFormula::findOrFail($id);
         $cauLo->delete();
         return response()->json(null, 204);
     }

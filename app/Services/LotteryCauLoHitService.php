@@ -2,15 +2,15 @@
 
 namespace App\Services;
 
-use App\Models\LotteryCauLo;
-use App\Models\LotteryCauLoHit;
+use App\Models\LotteryFormula;
+use App\Models\LotteryFormulaHit;
 use App\Models\LotteryResult;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
-class LotteryCauLoHitService
+class LotteryFormulaHitService
 {
-    public function getTimelineData(LotteryCauLo $cauLo, Carbon $startDate, int $daysBack = 30): array
+    public function getTimelineData(LotteryFormula $cauLo, Carbon $startDate, int $daysBack = 30): array
     {
         // Get date range
         $endDate = $startDate->copy()->subDays($daysBack);
@@ -23,7 +23,7 @@ class LotteryCauLoHitService
         }
 
         // Get hits for this cau lo in date range
-        $hits = LotteryCauLoHit::where('cau_lo_id', $cauLo->id)
+        $hits = LotteryFormulaHit::where('cau_lo_id', $cauLo->id)
             ->whereBetween('ngay', [$endDate, $startDate])
             ->get()
             ->keyBy('ngay');
