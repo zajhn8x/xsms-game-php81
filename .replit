@@ -26,6 +26,23 @@ args = "php artisan optimize:clear"
 task = "shell.exec"
 args = "php artisan serve --host=0.0.0.0 --port=80"
 
+[[workflows.workflow]]
+name = "Queue Workers"
+author = 8252304
+mode = "parallel"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "php artisan queue:work --queue=default --tries=3 --max-jobs=1000"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "php artisan queue:work --queue=default --tries=3 --max-jobs=1000"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "php artisan queue:work --queue=default --tries=3 --max-jobs=1000"
+
 [[ports]]
 localPort = 80
 externalPort = 80
