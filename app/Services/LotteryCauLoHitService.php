@@ -1,43 +1,54 @@
+
 <?php
 
 namespace App\Services;
 
+use App\Models\LotteryCauLo;
 use App\Models\LotteryCauLoHit;
-use Illuminate\Support\Facades\DB;
+use App\Models\LotteryResult;
+use Carbon\Carbon;
+use Illuminate\Support\Collection;
 
 class LotteryCauLoHitService
 {
-    public function findConsecutiveHits($date, $days = 3)
+    public function getTimelineData(LotteryCauLo $cauLo, Carbon $startDate, int $daysBack = 30): array
     {
-        $subqueries = [];
-        for ($i = 0; $i < $days; $i++) {
-            $alias = "h" . ($i + 1);
-            $subqueries[] = "(SELECT cau_lo_id, ngay FROM lottery_cau_lo_hit WHERE ngay <= '$date') as $alias";
+        // Get date range
+        $endDate = $startDate->copy()->subDays($daysBack);
+        $dateRange = [];
+        $currentDate = $startDate->copy();
+        
+        while ($currentDate >= $endDate) {
+            $dateRange[] = $currentDate->format('Y-m-d');
+            $currentDate->subDay();
         }
 
-        $joins = [];
-        $conditions = [];
-        for ($i = 1; $i < $days; $i++) {
-            $current = "h" . ($i + 1);
-            $prev = "h$i";
-            $joins[] = "JOIN " . $subqueries[$i] . " ON $current.cau_lo_id = $prev.cau_lo_id";
-            $conditions[] = "$current.ngay = DATE_SUB($prev.ngay, INTERVAL 1 DAY)";
-        }
+        // Get hits for this cau lo in date range
+        $hits = LotteryCauLoHit::where('cau_lo_id', $cauLo->id)
+            ->whereBetween('ngay', [$endDate, $startDate])
+            ->get()
+            ->keyBy('ngay');
 
-        $query = "
-        SELECT 
-            h1.cau_lo_id, 
-            meta.formula_name, 
-            meta.formula_structure, 
-            meta.combination_type,
-            GROUP_CONCAT(h1.ngay ORDER BY h1.ngay ASC) as ngay_trung
-        FROM " . $subqueries[0] . "
-        " . implode(" ", $joins) . "
-        LEFT JOIN lottery_cau_lo_meta AS meta ON h1.cau_lo_id = meta.id
-        WHERE 1 " . implode(" AND ", $conditions) . "
-        GROUP BY h1.cau_lo_id, meta.formula_name, meta.formula_structure, meta.combination_type
-    ";
+        // Get lottery results for the date range
+        $results = LotteryResult::whereBetween('draw_date', [$endDate, $startDate])
+            ->get()
+            ->keyBy('draw_date');
 
-        return DB::select($query);
+        // Get meta information
+        $meta = [
+            'formula_name' => $cauLo->formula->name ?? '',
+            'formula_structure' => $cauLo->formula->structure ?? '',
+            'total_hits' => $hits->count(),
+            'hit_rate' => count($dateRange) > 0 
+                ? ($hits->count() / count($dateRange)) * 100 
+                : 0
+        ];
+
+        return [
+            'meta' => $meta,
+            'dateRange' => $dateRange,
+            'hits' => $hits,
+            'results' => $results
+        ];
     }
 }
