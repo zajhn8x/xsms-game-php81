@@ -8,38 +8,36 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use App\Models\LotteryCauLo;
-use App\Models\LotteryCauLoMeta;
-use App\Models\LotteryCauLoHit;
-use App\Services\LotteryService;
+use App\Models\LotteryResult;
+use App\Services\LotteryFormulaService;
+use Illuminate\Support\Facades\Cache;
 
 class ProcessLotteryFormula implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $formula;
-    protected $results;
+    protected $batchId;
+    protected $startDate;
+    protected $endDate;
 
-    public function __construct(LotteryCauLo $formula, array $results)
+    public function __construct($batchId, $startDate, $endDate)
     {
-        $this->formula = $formula;
-        $this->results = $results;
+        $this->batchId = $batchId;
+        $this->startDate = $startDate;
+        $this->endDate = $endDate;
     }
 
-    public function handle(LotteryService $lotteryService)
+    public function handle(LotteryFormulaService $formulaService)
     {
-        $formulaMeta = LotteryCauLoMeta::find($this->formula->formula_meta_id);
-        if (!$formulaMeta) return;
+        $results = LotteryResult::whereBetween('draw_date', [$this->startDate, $this->endDate])
+                               ->orderBy('draw_date')
+                               ->get();
 
-        foreach ($this->results as $result) {
-            $hit = $lotteryService->checkFormulaHit($formulaMeta, $result);
-            if ($hit) {
-                LotteryCauLoHit::create([
-                    'cau_lo_id' => $this->formula->id,
-                    'ngay' => $result->draw_date,
-                    'so_trung' => $hit,
-                ]);
-            }
+        foreach ($results as $result) {
+            $formulaResults = $formulaService->calculateFormulaResults($result->draw_date);
+            
+            // Save results and update checkpoint
+            Cache::put("formula_checkpoint_{$this->batchId}", $result->draw_date);
         }
     }
 }

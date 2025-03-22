@@ -1,54 +1,57 @@
+
 <?php
 
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Services\LotteryService;
-use App\Models\LotteryCauLo;
 use App\Jobs\ProcessLotteryFormula;
+use App\Models\LotteryResult;
+use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Bus;
 
 class CheckLotteryFormulas extends Command
 {
-    protected $signature = 'lottery:check-formulas {--chunk=100} {--queue=default}';
-    protected $description = 'Check lottery formulas against results using parallel processing';
-
-    protected $lotteryService;
-
-    public function __construct(LotteryService $lotteryService)
-    {
-        parent::__construct();
-        $this->lotteryService = $lotteryService;
-    }
+    protected $signature = 'lottery:check-formulas {--batch-size=100} {--resume}';
+    protected $description = 'Check lottery formulas with support for resuming';
 
     public function handle()
     {
-        $this->info('Starting parallel formula checks...');
+        $batchSize = $this->option('batch-size');
+        $shouldResume = $this->option('resume');
+        $batchId = uniqid('formula_batch_');
 
-        $chunk = $this->option('chunk');
-        $queue = $this->option('queue');
+        // Get date range
+        $startDate = LotteryResult::min('draw_date');
+        $endDate = LotteryResult::max('draw_date');
 
-        $today = Carbon::now()->format('Y-m-d');
-        $results = $this->lotteryService->getResultsByDateRange(
-            Carbon::now()->subDays(30),
-            $today
-        );
+        if ($shouldResume) {
+            $lastCheckpoint = Cache::get('formula_last_checkpoint');
+            if ($lastCheckpoint) {
+                $startDate = Carbon::parse($lastCheckpoint)->addDay();
+                $this->info("Resuming from: " . $startDate);
+            }
+        }
 
-        LotteryCauLo::where('is_active', true)
-            ->chunk($chunk, function($formulas) use ($results, $queue) {
-                $jobs = $formulas->map(function($formula) use ($results) {
-                    return new ProcessLotteryFormula($formula, $results);
-                });
+        // Split date range into batches
+        $currentDate = Carbon::parse($startDate);
+        $endDateTime = Carbon::parse($endDate);
 
-                Bus::batch($jobs)
-                    ->onQueue($queue)
-                    ->allowFailures()
-                    ->dispatch();
+        while ($currentDate <= $endDateTime) {
+            $batchEndDate = (clone $currentDate)->addDays($batchSize);
+            if ($batchEndDate > $endDateTime) {
+                $batchEndDate = $endDateTime;
+            }
 
-                $this->info("Dispatched batch of {$formulas->count()} formulas");
-            });
+            ProcessLotteryFormula::dispatch(
+                $batchId,
+                $currentDate->format('Y-m-d'),
+                $batchEndDate->format('Y-m-d')
+            );
 
-        $this->info('All formula check jobs have been queued');
+            $this->info("Queued batch: {$currentDate->format('Y-m-d')} to {$batchEndDate->format('Y-m-d')}");
+            $currentDate = $batchEndDate->addDay();
+        }
+
+        $this->info('All batches have been queued.');
     }
 }
