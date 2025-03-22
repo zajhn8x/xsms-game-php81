@@ -37,7 +37,6 @@ class LotteryCauLoMeta extends Model
         if (!$this->formula_structure || !isset($this->formula_structure['positions'])) {
             return [];
         }
-
         return $this->formula_structure['positions'];
     }
 

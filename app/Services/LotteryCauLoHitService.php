@@ -25,12 +25,19 @@ class LotteryCauLoHitService
         }
 
         $query = "
-            SELECT h1.cau_lo_id, GROUP_CONCAT(h1.ngay ORDER BY h1.ngay ASC) as ngay_trung
-            FROM " . $subqueries[0] . "
-            " . implode(" ", $joins) . "
-            WHERE  1 " . implode(" AND ", $conditions) . "
-            GROUP BY h1.cau_lo_id
-        ";
+        SELECT 
+            h1.cau_lo_id, 
+            meta.formula_name, 
+            meta.formula_structure, 
+            meta.combination_type,
+            GROUP_CONCAT(h1.ngay ORDER BY h1.ngay ASC) as ngay_trung
+        FROM " . $subqueries[0] . "
+        " . implode(" ", $joins) . "
+        LEFT JOIN lottery_cau_lo_meta AS meta ON h1.cau_lo_id = meta.id
+        WHERE 1 " . implode(" AND ", $conditions) . "
+        GROUP BY h1.cau_lo_id, meta.formula_name, meta.formula_structure, meta.combination_type
+    ";
+
         return DB::select($query);
     }
 }
