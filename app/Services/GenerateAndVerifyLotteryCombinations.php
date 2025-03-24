@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use Illuminate\Support\Facades\DB;
 use App\Models\LotteryFormula;
 use App\Models\LotteryFormulaMetaMeta;
@@ -157,7 +158,7 @@ class GenerateAndVerifyLotteryCombinations
                 $cau->save();
 
                 $updated++;
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 Log::error("Lỗi xử lý cầu ID: " . $cau->id . " - " . $e->getMessage());
                 $errors++;
             }

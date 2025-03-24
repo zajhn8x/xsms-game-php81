@@ -20,15 +20,15 @@
 
         <form action="{{ route('bet.store') }}" method="POST" class="space-y-6">
             @csrf
-            
+
             <div>
                 <label for="lo_number" class="block text-sm font-medium text-gray-700">Số lô</label>
-                <input type="number" 
-                       name="lo_number" 
-                       id="lo_number" 
-                       min="00" 
-                       max="99" 
-                       required 
+                <input type="number"
+                       name="lo_number"
+                       id="lo_number"
+                       min="00"
+                       max="99"
+                       required
                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                 @error('lo_number')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -38,12 +38,12 @@
             <div>
                 <label for="amount" class="block text-sm font-medium text-gray-700">Số tiền đặt (VNĐ)</label>
                 <div class="mt-1 relative rounded-md shadow-sm">
-                    <input type="number" 
-                           name="amount" 
-                           id="amount" 
-                           min="1000" 
-                           step="1000" 
-                           required 
+                    <input type="number"
+                           name="amount"
+                           id="amount"
+                           min="1000"
+                           step="1000"
+                           required
                            class="block w-full rounded-md border-gray-300 pl-7 focus:border-blue-500 focus:ring-blue-500">
                     <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                         <span class="text-gray-500 sm:text-sm">VNĐ</span>
@@ -64,7 +64,7 @@
             </div>
 
             <div class="flex items-center">
-                <button type="submit" 
+                <button type="submit"
                         class="w-full bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                     Xác nhận đặt cược
                 </button>
@@ -81,17 +81,17 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('submit', function(e) {
         const amount = document.getElementById('amount').value;
         const loNumber = document.getElementById('lo_number').value;
-        
+
         if (amount < 1000) {
             e.preventDefault();
             alert('Số tiền cược tối thiểu là 1,000 VNĐ');
             return;
         }
-        
+
         if (loNumber < 0 || loNumber > 99) {
             e.preventDefault();
             alert('Số lô phải từ 00-99');
-            return;
+
         }
     });
 });

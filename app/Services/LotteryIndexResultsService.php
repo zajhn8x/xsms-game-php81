@@ -11,17 +11,17 @@ class LotteryIndexResultsService
      * Lấy giá trị tại vị trí cụ thể cho một ngày xổ số
      *
      * @param string $date Ngày xổ số (Y-m-d)
-     * @param string $position Vị trí (ví dụ: GDB-1-1, G7-4-2)
+     * @param string|array $position Vị trí (ví dụ: GDB-1-1, G7-4-2)
      * @return int|null Giá trị tại vị trí (0-9) hoặc null nếu không tìm thấy
      */
     public function getPositionValue($date, $position)
     {
         $result = DB::table('lottery_results_index')
             ->where('draw_date', $date)
-            ->where('position', $position)
-            ->first();
+            ->whereIn('position', $position)
+            ->get();
 
-        return $result ? $result->value : null;
+        return $result ? $result->pluck('value')->toArray() : null;
     }
     /**
      * Lấy tất cả giá trị vị trí cho một ngày cụ thể

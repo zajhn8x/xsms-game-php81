@@ -19,6 +19,13 @@ class FormulaHit extends Model
         'ngay' => 'date'
     ];
 
+    protected $ngay = ['draw_date'];
+
+    public function getNgayAttribute($value)
+    {
+        return \Carbon\Carbon::parse($value)->format('Y-m-d');
+    }
+
     public function cauLo()
     {
         return $this->belongsTo(LotteryFormula::class, 'cau_lo_id');

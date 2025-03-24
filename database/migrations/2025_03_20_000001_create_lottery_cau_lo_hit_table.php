@@ -29,6 +29,6 @@ return new class extends Migration
 
     public function down()
     {
-        Schema::dropIfExists('lottery_formula_hit');
+        Schema::dropIfExists('formula_hit');
     }
 };

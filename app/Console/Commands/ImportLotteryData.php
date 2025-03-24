@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Exception;
 use Illuminate\Console\Command;
 use App\Contracts\LotteryResultServiceInterface;
 use App\Models\LotteryResultIndex;
@@ -36,7 +37,7 @@ class ImportLotteryData extends Command
             $data = match($extension) {
                 'json' => $this->parseJson($file),
                 'csv' => $this->parseCsv($file),
-                default => throw new \Exception("Unsupported file type: {$extension}")
+                default => throw new Exception("Unsupported file type: {$extension}")
             };
 //            dd($this->positions);
             foreach ($data as $row) {
@@ -92,7 +93,7 @@ class ImportLotteryData extends Command
 
             $this->info('Import completed successfully!');
             return 0;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->error("Import failed: " . $e->getMessage());
             return 1;
         }
@@ -103,6 +104,16 @@ class ImportLotteryData extends Command
         $content = file_get_contents($file);
         return json_decode($content, true);
     }
+    // Hàm định dạng số theo đúng độ dài yêu cầu
+    private function formatNumber($num, $length) {
+        $num = trim($num);
+        if (!is_numeric($num) || empty($num)) {
+            return str_pad("", $length, "0", STR_PAD_LEFT); // Nếu lỗi trả về chuỗi 0 phù hợp
+        }
+        return str_pad($num, $length, '0', STR_PAD_LEFT);
+    }
+
+
 
     private function parseCsv($file)
     {
@@ -118,14 +129,14 @@ class ImportLotteryData extends Command
 
             try {
                 $prizes = [
-                    'special' => trim($row[1]),    // Giải đặc biệt (1 số)
-                    'prize1'  => trim($row[2]),    // Giải nhất (1 số)
-                    'prize2'  => array_map('trim', array_slice($row, 3, 2)),  // Giải nhì (2 số)
-                    'prize3'  => array_map('trim', array_slice($row, 5, 6)),  // Giải ba (6 số)
-                    'prize4'  => array_map('trim', array_slice($row, 11, 4)), // Giải tư (4 số)
-                    'prize5'  => array_map('trim', array_slice($row, 15, 6)), // Giải năm (6 số)
-                    'prize6'  => array_map('trim', array_slice($row, 21, 3)), // Giải sáu (3 số)
-                    'prize7'  => array_map('trim', array_slice($row, 24, 4))  // Giải bảy (4 số)
+                    'special' => $this->formatNumber($row[1], 5),    // Giải đặc biệt (5 số)
+                    'prize1'  => $this->formatNumber($row[2], 5),    // Giải nhất (5 số)
+                    'prize2'  => array_map(fn($num) => $this->formatNumber($num, 5), array_slice($row, 3, 2)),  // Giải nhì (2 số, mỗi số 5 chữ số)
+                    'prize3'  => array_map(fn($num) => $this->formatNumber($num, 5), array_slice($row, 5, 6)),  // Giải ba (6 số, mỗi số 5 chữ số)
+                    'prize4'  => array_map(fn($num) => $this->formatNumber($num, 4), array_slice($row, 11, 4)), // Giải tư (4 số, mỗi số 4 chữ số)
+                    'prize5'  => array_map(fn($num) => $this->formatNumber($num, 4), array_slice($row, 15, 6)), // Giải năm (6 số, mỗi số 4 chữ số)
+                    'prize6'  => array_map(fn($num) => $this->formatNumber($num, 3), array_slice($row, 21, 3)), // Giải sáu (3 số, mỗi số 3 chữ số)
+                    'prize7'  => array_map(fn($num) => $this->formatNumber($num, 2), array_slice($row, 24, 4))  // Giải bảy (4 số, mỗi số 2 chữ số)
                 ];
 
 
@@ -150,7 +161,7 @@ class ImportLotteryData extends Command
                     'prizes' => $prizes,
                     'lo_array' => array_unique($lo_array)
                 ];
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 //Handle exceptions during row processing.  Log the error for debugging.
                 $this->error("Error processing row: " . $e->getMessage());
                 continue; //Skip this row and move on to the next.

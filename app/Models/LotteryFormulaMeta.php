@@ -3,6 +3,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
+use function GuzzleHttp\json_decode;
+use function PHPUnit\Framework\isJson;
 
 class LotteryFormulaMeta extends Model
 {
@@ -34,10 +37,18 @@ class LotteryFormulaMeta extends Model
      */
     public function getPositionsAttribute()
     {
-        if (!$this->formula_structure || !isset($this->formula_structure['positions'])) {
-            return [];
+
+        if(!empty($this->formula_structure) && isJson($this->formula_structure)){
+            // Đảm bảo giá trị trả về là một mảng chuỗi công thức
+            return array_map('strval', Arr::get(json_decode($this->formula_structure,true),'positions',[]) );
         }
-        return $this->formula_structure['positions'];
+        // Kiểm tra nếu formula_structure không tồn tại hoặc không chứa 'positions'
+        else if (empty($this->formula_structure) || !isset($this->formula_structure['positions'])) {
+            return ['a'];
+        }
+
+        // Đảm bảo giá trị trả về là một mảng chuỗi công thức
+        return array_map('strval', (array) $this->formula_structure['positions']);
     }
 
     /**

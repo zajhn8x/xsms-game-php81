@@ -5,6 +5,8 @@ namespace App\Repositories;
 use App\Models\LotteryResult;
 use App\Contracts\Repositories\LotteryResultRepositoryInterface;
 use Carbon\Carbon;
+use Exception;
+use Log;
 
 class LotteryResultRepository implements LotteryResultRepositoryInterface
 {
@@ -74,9 +76,9 @@ class LotteryResultRepository implements LotteryResultRepositoryInterface
 
             DB::commit();
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
-            \Log::error('Lỗi khi thêm kết quả xổ số: ' . $e->getMessage());
+            Log::error('Lỗi khi thêm kết quả xổ số: ' . $e->getMessage());
             return false;
         }
     }

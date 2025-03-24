@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Services;
 
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Tests\TestCase;
 use App\Services\LotteryFormulaService;
 use App\Models\LotteryResult;
@@ -54,7 +55,7 @@ class LotteryFormulaServiceTest extends TestCase
      */
     public function test_handle_invalid_cau_lo()
     {
-        $this->expectException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+        $this->expectException(ModelNotFoundException::class);
         $this->service->calculateResults(999, '2024-03-21');
     }
 

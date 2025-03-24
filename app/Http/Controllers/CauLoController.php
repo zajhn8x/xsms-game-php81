@@ -3,17 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\LotteryFormula;
-use App\Services\LotteryFormulaHitService;
+use App\Services\FormulaHitService;
 use Carbon\Carbon;
-use App\Models\LotteryResult;
-use App\Models\LotteryResultIndex;
 use Illuminate\Support\Arr;
+use function GuzzleHttp\json_encode;
 
 class CauLoController extends Controller
 {
     protected $cauLoHitService;
 
-    public function __construct(LotteryFormulaHitService $cauLoHitService)
+    public function __construct(FormulaHitService $cauLoHitService)
     {
         $this->cauLoHitService = $cauLoHitService;
     }
@@ -40,10 +39,12 @@ class CauLoController extends Controller
             $startDate,
             30 // days before
         );
+        dump($timelineData['results']);
 
         return view('caulo.timeline', [
             'cauLo' => $cauLo,
-            'meta' => $timelineData['meta'],
+            'meta' => $cauLo->formula,
+            'metaPosition' => json_encode($cauLo->formula->positions),
             'dateRange' => $timelineData['dateRange'],
             'hits' => $timelineData['hits'],
             'results' => $timelineData['results']

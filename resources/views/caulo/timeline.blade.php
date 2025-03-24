@@ -12,7 +12,7 @@
         </div>
         <div class="card-body">
             <p><strong>Tên công thức:</strong> {{ $meta['formula_name'] }}</p>
-            <p><strong>Cấu trúc:</strong> <pre class="bg-light p-2">{{ json_encode($meta['formula_structure'] ?? [], JSON_PRETTY_PRINT) }}</pre></p>
+            <p><strong>Cấu trúc:</strong> <pre class="bg-light p-2">{{ $metaPosition }}</pre></p>
             <p><strong>Tỷ lệ trúng:</strong> {{ number_format($meta['hit_rate'], 2) }}%</p>
             <p><strong>Tổng số lần trúng:</strong> {{ $meta['total_hits'] }}</p>
         </div>
@@ -28,7 +28,7 @@
                 @foreach($dateRange as $date)
                     @php
                         $hit = $hits[$date] ?? null;
-                        $result = $results[$date] ?? null;
+                        $result = $results[$date] ?? null
                     @endphp
                     <div class="list-group-item {{ $hit ? 'list-group-item-success' : '' }}">
                         <div class="d-flex justify-content-between align-items-center">
@@ -74,7 +74,7 @@
                                     </div>
                                     <div class="modal-body">
                                         @if($result->prizes)
-                                            <x-lottery-results :prizes="$result->prizes" />
+                                            <x-lottery-results :prizes="$result->prizes" :hits="[86,68]" :positions="['G6-2-1', 'G7-4-2']" />
                                         @else
                                             <p class="text-center">Không có dữ liệu chi tiết</p>
                                         @endif

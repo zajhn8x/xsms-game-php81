@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Log;
 
 class LotteryResultVerifier
 {
@@ -56,10 +58,10 @@ class LotteryResultVerifier
                 } else {
                     $stats['misses']++;
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $stats['errors']++;
                 // Log lỗi
-                \Log::error("Error verifying combination ID {$cau->id}: " . $e->getMessage());
+                Log::error("Error verifying combination ID {$cau->id}: " . $e->getMessage());
             }
         }
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Exception;
 use Illuminate\Http\Request;
 use App\Services\LotteryBetService;
 use Illuminate\Support\Facades\Auth;
@@ -29,7 +30,7 @@ class BetController extends Controller
 
             return redirect()->back()
                 ->with('success', 'Đặt cược thành công cho số ' . $bet->lo_number);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return redirect()->back()
                 ->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
         }

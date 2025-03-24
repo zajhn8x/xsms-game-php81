@@ -17,4 +17,11 @@ class LotteryResult extends Model
         'prizes' => 'array',
         'lo_array' => 'array'
     ];
+
+    protected $dates = ['draw_date'];
+
+    public function getDrawDateAttribute($value)
+    {
+        return \Carbon\Carbon::parse($value)->format('Y-m-d');
+    }
 }

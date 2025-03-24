@@ -1,14 +1,13 @@
 <?php
-
 namespace App\Services;
 
 use App\Models\LotteryFormula;
-use App\Models\LotteryFormulaHit;
+use App\Models\FormulaHit;
 use App\Models\LotteryResult;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
-class LotteryFormulaHitService
+class FormulaHitService
 {
     public function getTimelineData(LotteryFormula $cauLo, Carbon $startDate, int $daysBack = 30): array
     {
@@ -23,7 +22,7 @@ class LotteryFormulaHitService
         }
 
         // Get hits for this cau lo in date range
-        $hits = LotteryFormulaHit::where('cau_lo_id', $cauLo->id)
+        $hits = FormulaHit::where('cau_lo_id', $cauLo->id)
             ->whereBetween('ngay', [$endDate, $startDate])
             ->get()
             ->keyBy('ngay');
@@ -32,6 +31,7 @@ class LotteryFormulaHitService
         $results = LotteryResult::whereBetween('draw_date', [$endDate, $startDate])
             ->get()
             ->keyBy('draw_date');
+
 
         // Get meta information
         $meta = [

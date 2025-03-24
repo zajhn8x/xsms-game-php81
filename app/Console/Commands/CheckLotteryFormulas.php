@@ -1,6 +1,7 @@
 <?php
 namespace App\Console\Commands;
 
+use Exception;
 use Illuminate\Console\Command;
 use App\Jobs\ProcessLotteryFormula;
 use App\Models\LotteryResult;
@@ -26,7 +27,7 @@ class CheckLotteryFormulas extends Command
         try {
             $startDate = Carbon::parse($userStartDate)->format('Y-m-d');
             $endDate = Carbon::parse($userStartDate)->addDays($days - 1)->format('Y-m-d');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->error('Invalid date format. Please use Y-m-d format (e.g., 2025-03-22)');
             return 1;
         }

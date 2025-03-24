@@ -3,6 +3,7 @@
 
 namespace Tests\Unit;
 
+use Illuminate\Database\QueryException;
 use Tests\TestCase;
 use App\Models\LotteryResultIndex;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -10,12 +11,12 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 class LotteryResultIndexTest extends TestCase
 {
     use RefreshDatabase;
-    
+
     public function test_can_create_lottery_result_index()
     {
         $positions = config('xsmb.positions');
         $testPosition = $positions['special'][0]; // Using first special position
-        
+
         $data = [
             'draw_date' => '2005-10-01',
             'position' => $testPosition,
@@ -33,14 +34,14 @@ class LotteryResultIndexTest extends TestCase
     public function test_validates_position_from_config()
     {
         $positions = collect(config('xsmb.positions'))->flatten()->toArray();
-        
+
         $data = [
             'draw_date' => '2005-10-01',
             'position' => 'invalid_position',
             'value' => '12345'
         ];
 
-        $this->expectException(\Illuminate\Database\QueryException::class);
+        $this->expectException(QueryException::class);
         LotteryResultIndex::create($data);
     }
 }

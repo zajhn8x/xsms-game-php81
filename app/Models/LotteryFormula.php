@@ -31,7 +31,7 @@ class LotteryFormula extends Model
      */
     public function formula()
     {
-        return $this->belongsTo(LotteryFormula::class, 'formula_meta_id');
+        return $this->belongsTo(LotteryFormulaMeta::class, 'formula_meta_id');
     }
 
     /**
