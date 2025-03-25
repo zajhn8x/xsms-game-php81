@@ -139,15 +139,10 @@ class ImportLotteryData extends Command
                     'prize7'  => array_map(fn($num) => $this->formatNumber($num, 2), array_slice($row, 24, 4))  // Giải bảy (4 số, mỗi số 2 chữ số)
                 ];
 
-
                 $lo_array = [];
-                foreach ($prizes as $prize) {
-                    $numbers = is_array($prize) ? $prize : [$prize];
-
-                    foreach ($numbers as $number) {
-                        if (!empty($number) && is_numeric($number)) {
-                            $lo_array[] = sprintf('%02d', substr($number, -2));
-                        }
+                foreach ($row as $key => $number) {
+                    if($key != 0){
+                        $lo_array[] = $this->formatNumber( substr($number, -2),2);
                     }
                 }
 
