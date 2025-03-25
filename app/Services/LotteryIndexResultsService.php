@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\LotteryResultIndex;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class LotteryIndexResultsService
 {
@@ -16,13 +16,14 @@ class LotteryIndexResultsService
      */
     public function getPositionValue($date, $position)
     {
-        $result = DB::table('lottery_results_index')
-            ->where('draw_date', $date)
-            ->whereIn('position', $position)
-            ->get();
+        $result = LotteryResultIndex::where('draw_date', $date)
+            ->whereIn('position', (array) $position)
+            ->pluck('value')
+            ->toArray();
 
-        return $result ? $result->pluck('value')->toArray() : null;
+        return $result ?: null;
     }
+
     /**
      * Lấy tất cả giá trị vị trí cho một ngày cụ thể
      *
@@ -31,30 +32,34 @@ class LotteryIndexResultsService
      */
     public function getPositionsForDate($date)
     {
-        $results = DB::table('lottery_results_index')
-            ->where('draw_date', $date)
-            ->get();
-
-        $positionMap = [];
-        foreach ($results as $result) {
-            $positionMap[$result->position] = $result->value;
-        }
-
-        return $positionMap;
+        return LotteryResultIndex::where('draw_date', $date)
+            ->pluck('value', 'position')
+            ->toArray();
     }
 
     /**
-     * Lấy danh sách các ngày có dữ liệu xổ số
+     * Lấy danh sách các ngày có dữ liệu xổ số, có lọc theo vị trí cụ thể.
      *
+     * @param array $positions Danh sách vị trí cần lọc (ví dụ: ['G2-2-1', 'G5-3-2'])
      * @param string|null $startDate Ngày bắt đầu (Y-m-d)
      * @param string|null $endDate Ngày kết thúc (Y-m-d)
-     * @return array Danh sách các ngày xổ số
+     * @return array Danh sách các ngày xổ số, group theo ngày.
      */
-    public function getDrawDates($startDate = null, $endDate = null)
+    public function getDrawDates(array $positions, $startDate = null, $endDate = null)
     {
-        $query = DB::table('lottery_results_index')
-            ->select('draw_date')
-            ->distinct();
+        // Lấy danh sách vị trí hợp lệ từ config
+        $validPositions = collect(config('xsmb.positions'))->flatten()->toArray();
+
+        // Lọc bỏ những position không hợp lệ
+        $positions = array_intersect($positions, $validPositions);
+
+        if (empty($positions)) {
+            return []; // Nếu không có position hợp lệ, trả về mảng rỗng
+        }
+
+        // Truy vấn dữ liệu
+        $query = LotteryResultIndex::select('draw_date','value' ,'position')
+            ->whereIn('position', $positions);
 
         if ($startDate) {
             $query->where('draw_date', '>=', $startDate);
@@ -64,10 +69,14 @@ class LotteryIndexResultsService
             $query->where('draw_date', '<=', $endDate);
         }
 
+        // Lấy kết quả và nhóm theo ngày
         return $query->orderBy('draw_date', 'desc')
-            ->pluck('draw_date')
+            ->get()
+            ->groupBy('draw_date')
+            ->map(fn ($items) => $items->pluck('value')->toArray())
             ->toArray();
     }
+
 
     /**
      * Kiểm tra xem ngày xổ số có dữ liệu đầy đủ không
@@ -78,14 +87,11 @@ class LotteryIndexResultsService
     public function isDateComplete($date)
     {
         $allPositions = $this->getAllConfigPositions();
-        $datePositions = DB::table('lottery_results_index')
-            ->where('draw_date', $date)
+        $datePositions = LotteryResultIndex::where('draw_date', $date)
             ->pluck('position')
             ->toArray();
 
-        $missingPositions = array_diff($allPositions, $datePositions);
-
-        return count($missingPositions) === 0;
+        return empty(array_diff($allPositions, $datePositions));
     }
 
     /**
@@ -96,13 +102,7 @@ class LotteryIndexResultsService
     public function getAllConfigPositions()
     {
         $positions = config('xsmb.positions');
-        $allPositions = [];
-
-        foreach ($positions as $groupPositions) {
-            $allPositions = array_merge($allPositions, $groupPositions);
-        }
-
-        return $allPositions;
+        return array_merge(...array_values($positions));
     }
 
     /**
@@ -115,8 +115,7 @@ class LotteryIndexResultsService
      */
     public function getPositionHistory($position, $limit = 30, $endDate = null)
     {
-        $query = DB::table('lottery_results_index')
-            ->where('position', $position)
+        $query = LotteryResultIndex::where('position', $position)
             ->select('draw_date', 'value');
 
         if ($endDate) {

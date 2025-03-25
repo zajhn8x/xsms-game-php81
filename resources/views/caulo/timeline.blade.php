@@ -12,7 +12,7 @@
         </div>
         <div class="card-body">
             <p><strong>Tên công thức:</strong> {{ $meta['formula_name'] }}</p>
-            <p><strong>Cấu trúc:</strong> <pre class="bg-light p-2">{{ $metaPosition }}</pre></p>
+            <p><strong>Cấu trúc:</strong> <pre class="bg-light p-2">{{ \GuzzleHttp\json_encode($metaPosition) }}</pre></p>
             <p><strong>Tỷ lệ trúng:</strong> {{ number_format($meta['hit_rate'], 2) }}%</p>
             <p><strong>Tổng số lần trúng:</strong> {{ $meta['total_hits'] }}</p>
         </div>
@@ -28,7 +28,9 @@
                 @foreach($dateRange as $date)
                     @php
                         $hit = $hits[$date] ?? null;
-                        $result = $results[$date] ?? null
+                        $result = $results[$date] ?? null;
+                        $formulaValues = isset($resultsIndexs[$date]) ? $resultsIndexs[$date]['values'] : [];
+                        $formulaPairs  =  isset($resultsIndexs[$date]) ? $resultsIndexs[$date]['pairs'] : [];
                     @endphp
                     <div class="list-group-item {{ $hit ? 'list-group-item-success' : '' }}">
                         <div class="d-flex justify-content-between align-items-center">
@@ -40,15 +42,18 @@
                             </div>
                             <div class="d-flex align-items-center gap-2">
                                 <!-- Cặp cầu lô hôm sau -->
-                                @if(isset($cauLoIndex[$date]))
+                                @if(isset($resultsIndexs[$date]))
                                     <span class="badge bg-info">
-                                        Cặp cầu lô hôm sau: {{ $cauLoIndex[$date]->pluck('value')->implode(', ') }}
+                                        Giá trị cầu lô: {{ GuzzleHttp\json_encode($formulaValues) }}
+                                    </span>
+                                    <span class="badge bg-info">
+                                        Cặp số cầu lô: {{ GuzzleHttp\json_encode($formulaPairs) }}
                                     </span>
                                 @endif
 
                                 <!-- Trạng thái trúng -->
                                 <span class="badge {{ $hit ? 'bg-success' : 'bg-secondary' }}">
-                                    {{ $hit ? '🎯 Số trúng: ' . $hit->so_trung : '❌ Không trúng' }}
+                                    {{ $hit ? '🎯 Số trúng: ' . $hit->so_trung . ' - ' . \GuzzleHttp\json_encode($metaPosition) : '❌ Không trúng' }}
                                 </span>
 
                                 <!-- Modal Button -->
@@ -62,7 +67,7 @@
                     </div>
 
                     <!-- Modal -->
-                    @if($result)
+                    @if($result && isset($resultsIndexs[$date]))
                         <div class="modal fade" id="modal-{{ $date }}" tabindex="-1" aria-labelledby="modalLabel-{{ $date }}" aria-hidden="true">
                             <div class="modal-dialog modal-lg">
                                 <div class="modal-content">
@@ -74,7 +79,7 @@
                                     </div>
                                     <div class="modal-body">
                                         @if($result->prizes)
-                                            <x-lottery-results :prizes="$result->prizes" :hits="[86,68]" :positions="['G6-2-1', 'G7-4-2']" />
+                                            <x-lottery-results :prizes="$result->prizes" :hits="$formulaValues" :positions="$metaPosition" />
                                         @else
                                             <p class="text-center">Không có dữ liệu chi tiết</p>
                                         @endif

@@ -6,9 +6,17 @@ use App\Models\FormulaHit;
 use App\Models\LotteryResult;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use function Symfony\Component\Routing\Loader\forDirectory;
 
 class FormulaHitService
 {
+    protected $resultIndexService;
+
+    public function __construct(LotteryResultService $resultService, LotteryIndexResultsService $resultIndexService)
+    {
+        $this->resultService = $resultService;
+        $this->resultIndexService = $resultIndexService;
+    }
     public function getTimelineData(LotteryFormula $cauLo, Carbon $startDate, int $daysBack = 30): array
     {
         // Get date range
@@ -31,7 +39,27 @@ class FormulaHitService
         $results = LotteryResult::whereBetween('draw_date', [$endDate, $startDate])
             ->get()
             ->keyBy('draw_date');
+        // Get lottery results index for data range
+        $resultIndexs = $this->resultIndexService->getDrawDates($cauLo->formula->positions,$endDate, $startDate);
+        //Xử lý Pair $resultIndexs Tạo các cặp số ghép
 
+        foreach ($resultIndexs as $date => &$values) {
+            $pairs = [];
+
+            if (count($values) > 1) {
+                for ($i = 0; $i < count($values); $i++) {
+                    for ($j = $i + 1; $j < count($values); $j++) {
+                        $pairs[] = "{$values[$i]}{$values[$j]}";
+                        $pairs[] = "{$values[$j]}{$values[$i]}";
+                    }
+                }
+            }
+
+            $resultIndexs[$date] = [
+                'values' => $values,
+                'pairs'  => array_values(array_unique($pairs)) // Loại bỏ trùng lặp
+            ];
+        }
 
         // Get meta information
         $meta = [
@@ -47,7 +75,8 @@ class FormulaHitService
             'meta' => $meta,
             'dateRange' => $dateRange,
             'hits' => $hits,
-            'results' => $results
+            'results' => $results,
+            'resultIndexs' => $resultIndexs
         ];
     }
 }

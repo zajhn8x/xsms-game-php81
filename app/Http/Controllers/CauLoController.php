@@ -39,15 +39,16 @@ class CauLoController extends Controller
             $startDate,
             30 // days before
         );
-        dump($timelineData['results']);
+        dump($timelineData);
 
         return view('caulo.timeline', [
             'cauLo' => $cauLo,
             'meta' => $cauLo->formula,
-            'metaPosition' => json_encode($cauLo->formula->positions),
+            'metaPosition' => $cauLo->formula->positions,
             'dateRange' => $timelineData['dateRange'],
             'hits' => $timelineData['hits'],
-            'results' => $timelineData['results']
+            'results' => $timelineData['results'],
+            'resultsIndexs' => $timelineData['resultIndexs']
         ]);
     }
 }
