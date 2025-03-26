@@ -13,7 +13,7 @@ class GenerateFormulaStatisticsCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'formula:generate-statistics {formulaId} {startDate} {endDate}';
+    protected $signature = 'formula:generate-statistics {formulaId} {startDate} {days}';
 
     /**
      * The console command description.
@@ -31,26 +31,32 @@ class GenerateFormulaStatisticsCommand extends Command
     {
         $formulaId = (int) $this->argument('formulaId');
         $startDate = Carbon::parse($this->argument('startDate'));
-        $endDate = Carbon::parse($this->argument('endDate'));
+        $days = (int) $this->argument('days');
+        $endDate = $startDate->copy()->addDays($days - 1);
 
         while ($startDate <= $endDate) {
-            // Xác định quý hiện tại của startDate
+            // Xác định năm và quý của startDate
             $year = $startDate->year;
             $quarter = ceil($startDate->month / 3);
 
-            // Xác định ngày kết thúc của quý này
+            // Xác định ngày bắt đầu và ngày kết thúc của quý hiện tại
+            $quarterStart = Carbon::create($year, ($quarter - 1) * 3 + 1, 1)->startOfMonth();
             $quarterEnd = Carbon::create($year, $quarter * 3, 1)->endOfMonth();
 
+            // Giới hạn phạm vi nếu vượt quá endDate
+            if ($quarterStart < $startDate) {
+                $quarterStart = $startDate->copy();
+            }
             if ($quarterEnd > $endDate) {
-                $quarterEnd = $endDate;
+                $quarterEnd = $endDate->copy();
             }
 
             // Dispatch job xử lý batch theo quý
-            CreateFormulaStatisticsJob::dispatch($formulaId, $startDate->toDateString(), $quarterEnd->toDateString());
-            $this->info("Dispatched job for Formula ID: $formulaId, from {$startDate->toDateString()} to {$quarterEnd->toDateString()}");
+            CreateFormulaStatisticsJob::dispatch($formulaId, $quarterStart->toDateString(), $quarterEnd->toDateString());
+            $this->info("Dispatched job for Formula ID: $formulaId, from {$quarterStart->toDateString()} to {$quarterEnd->toDateString()}");
 
-            // Chuyển sang batch tiếp theo
-            $startDate = $quarterEnd->addDay();
+            // Chuyển startDate sang ngày đầu tiên của quý tiếp theo
+            $startDate = $quarterEnd->copy()->addDay();
         }
 
         return 0;

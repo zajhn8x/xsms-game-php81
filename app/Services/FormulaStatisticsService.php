@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use App\Models\FormulaHit;
 use App\Models\FormulaStatistic;
 use App\Models\LotteryFormula;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class FormulaStatisticsService
 {
@@ -117,59 +119,91 @@ class FormulaStatisticsService
     }
 
     /**
-     * Tạo thống kê cầu từ FormulaHit trong khoảng ngày cụ thể
-     *
-     * @param int $formulaId
-     * @param string $startDate
-     * @param string $endDate
-     * @return void
+     * Generate statistics from FormulaHit
      */
-    public function generateStatisticsFromHits(int $formulaId, string $startDate, string $endDate)
+    public function generateStatisticsFromHits($formulaId, $startDate, $endDate)
     {
-        $hits = FormulaHit::where('cau_lo_id', $formulaId)
-            ->whereBetween('ngay', [$startDate, $endDate])
-            ->orderBy('ngay')
+        $hits = FormulaHit::where('formula_id', $formulaId)
+            ->whereBetween('date', [$startDate, $endDate])
+            ->orderBy('date', 'asc')
             ->get();
 
-        $streaks = [];
-        $prevDate = null;
-        $currentStreak = 0;
-
-        foreach ($hits as $hit) {
-            $date = Carbon::parse($hit->ngay);
-            $year = $date->year;
-            $quarter = ceil($date->month / 3);
-
-            // Kiểm tra streaks
-            if ($prevDate && $date->diffInDays($prevDate) == 1) {
-                $currentStreak++;
-            } else {
-                $currentStreak = 1;
-            }
-
-            $streaks[] = $currentStreak;
-            $prevDate = $date;
-
-            // Cập nhật thống kê
-            $this->updateStatistics($formulaId, $year, $quarter, [
-                'frequency' => DB::raw('frequency + 1'),
-                'win_cycle' => DB::raw("IF(win_cycle = 0, DATEDIFF('$hit->ngay', (SELECT MAX(ngay) FROM formula_hit WHERE cau_lo_id = $formulaId AND ngay < '$hit->ngay')), win_cycle)")
-            ]);
+        if ($hits->isEmpty()) {
+            return;
         }
 
-        // Tính streaks tổng hợp
-        $streakCounts = array_count_values($streaks);
-        $lastStreak = end($streaks) ?: 0;
-        $prevStreak = $streaks[count($streaks) - 2] ?? 0;
+        // Nhóm dữ liệu theo quý và năm
+        $groupedHits = $hits->groupBy(function ($hit) {
+            $year = Carbon::parse($hit->date)->year;
+            $quarter = ceil(Carbon::parse($hit->date)->month / 3);
+            return "$year-Q$quarter";
+        });
 
-        $this->updateStatistics($formulaId, $year, $quarter, [
-            'streak_3' => $streakCounts[3] ?? 0,
-            'streak_4' => $streakCounts[4] ?? 0,
-            'streak_5' => $streakCounts[5] ?? 0,
-            'streak_6' => $streakCounts[6] ?? 0,
-            'streak_more_6' => array_sum(array_filter($streakCounts, fn($streak) => $streak > 6)),
-            'prev_streak' => $prevStreak,
-            'last_streak' => $lastStreak
-        ]);
+        foreach ($groupedHits as $quarterYear => $quarterHits) {
+            $dates = $quarterHits->pluck('date')->map(fn($d) => Carbon::parse($d))->sort();
+            $year = $dates->first()->year;
+            $quarter = ceil($dates->first()->month / 3);
+
+            $frequency = $dates->count();
+
+            // Tính chu kỳ trúng trung bình
+            $winCycle = 0;
+            if ($frequency > 1) {
+                $winCycle = $dates->zip($dates->skip(1))
+                    ->map(fn($pair) => $pair[1]->diffInDays($pair[0]))
+                    ->average();
+            }
+
+            // Xác suất trúng trong quý
+            $totalDays = $dates->last()->diffInDays($dates->first()) + 1;
+            $probability = $totalDays > 0 ? round(($frequency / $totalDays) * 100, 2) : 0.00;
+
+            // Tính các streak (liên tiếp trúng)
+            $streaks = [3 => 0, 4 => 0, 5 => 0, 6 => 0, 'more_6' => 0];
+            $currentStreak = 1;
+            $maxStreak = 1;
+
+            foreach ($dates->zip($dates->skip(1)) as $pair) {
+                if ($pair[1]->diffInDays($pair[0]) == 1) {
+                    $currentStreak++;
+                } else {
+                    if ($currentStreak >= 3) {
+                        $key = $currentStreak > 6 ? 'more_6' : $currentStreak;
+                        $streaks[$key]++;
+                    }
+                    $maxStreak = max($maxStreak, $currentStreak);
+                    $currentStreak = 1;
+                }
+            }
+            if ($currentStreak >= 3) {
+                $key = $currentStreak > 6 ? 'more_6' : $currentStreak;
+                $streaks[$key]++;
+            }
+            $maxStreak = max($maxStreak, $currentStreak);
+
+            // Tìm trạng thái streak của quý trước
+            $prevStatistic = FormulaStatistic::where('formula_id', $formulaId)
+                ->where('year', $year)
+                ->where('quarter', $quarter - 1)
+                ->first();
+            $prevStreak = $prevStatistic->last_streak ?? 0;
+
+            // Lưu thống kê vào database
+            FormulaStatistic::updateOrCreate(
+                ['formula_id' => $formulaId, 'year' => $year, 'quarter' => $quarter],
+                [
+                    'frequency' => $frequency,
+                    'win_cycle' => round($winCycle),
+                    'probability' => $probability,
+                    'streak_3' => $streaks[3],
+                    'streak_4' => $streaks[4],
+                    'streak_5' => $streaks[5],
+                    'streak_6' => $streaks[6],
+                    'streak_more_6' => $streaks['more_6'],
+                    'prev_streak' => $prevStreak,
+                    'last_streak' => $maxStreak,
+                ]
+            );
+        }
     }
 }
