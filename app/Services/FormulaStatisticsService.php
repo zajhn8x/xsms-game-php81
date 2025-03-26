@@ -115,4 +115,61 @@ class FormulaStatisticsService
             return $formula->statistics->max('streak_more_6') > 0;
         });
     }
+
+    /**
+     * Tạo thống kê cầu từ FormulaHit trong khoảng ngày cụ thể
+     *
+     * @param int $formulaId
+     * @param string $startDate
+     * @param string $endDate
+     * @return void
+     */
+    public function generateStatisticsFromHits(int $formulaId, string $startDate, string $endDate)
+    {
+        $hits = FormulaHit::where('cau_lo_id', $formulaId)
+            ->whereBetween('ngay', [$startDate, $endDate])
+            ->orderBy('ngay')
+            ->get();
+
+        $streaks = [];
+        $prevDate = null;
+        $currentStreak = 0;
+
+        foreach ($hits as $hit) {
+            $date = Carbon::parse($hit->ngay);
+            $year = $date->year;
+            $quarter = ceil($date->month / 3);
+
+            // Kiểm tra streaks
+            if ($prevDate && $date->diffInDays($prevDate) == 1) {
+                $currentStreak++;
+            } else {
+                $currentStreak = 1;
+            }
+
+            $streaks[] = $currentStreak;
+            $prevDate = $date;
+
+            // Cập nhật thống kê
+            $this->updateStatistics($formulaId, $year, $quarter, [
+                'frequency' => DB::raw('frequency + 1'),
+                'win_cycle' => DB::raw("IF(win_cycle = 0, DATEDIFF('$hit->ngay', (SELECT MAX(ngay) FROM formula_hit WHERE cau_lo_id = $formulaId AND ngay < '$hit->ngay')), win_cycle)")
+            ]);
+        }
+
+        // Tính streaks tổng hợp
+        $streakCounts = array_count_values($streaks);
+        $lastStreak = end($streaks) ?: 0;
+        $prevStreak = $streaks[count($streaks) - 2] ?? 0;
+
+        $this->updateStatistics($formulaId, $year, $quarter, [
+            'streak_3' => $streakCounts[3] ?? 0,
+            'streak_4' => $streakCounts[4] ?? 0,
+            'streak_5' => $streakCounts[5] ?? 0,
+            'streak_6' => $streakCounts[6] ?? 0,
+            'streak_more_6' => array_sum(array_filter($streakCounts, fn($streak) => $streak > 6)),
+            'prev_streak' => $prevStreak,
+            'last_streak' => $lastStreak
+        ]);
+    }
 }
