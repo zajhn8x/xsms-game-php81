@@ -18,6 +18,7 @@ class LotteryFormulaMeta extends Model
         'formula_note',
         'formula_structure',
         'combination_type'
+//        'formula_hash' // Thêm cột hash để kiểm tra trùng công thức
     ];
 
     protected $casts = [
@@ -49,6 +50,40 @@ class LotteryFormulaMeta extends Model
 
         // Đảm bảo giá trị trả về là một mảng chuỗi công thức
         return array_map('strval', (array) $this->formula_structure['positions']);
+    }
+
+    /**
+     * Lưu công thức **tránh trùng lặp**
+     */
+    public static function saveUniqueFormula($formulaData)
+    {
+        $positions = Arr::get($formulaData, 'formula_structure.positions', []);
+        $combinationType = Arr::get($formulaData, 'combination_type', 'pair');
+
+        if (empty($positions)) {
+            return false;
+        }
+
+        // **Sắp xếp vị trí để tránh trùng khi đảo vị trí**
+        sort($positions);
+        $positionsString = implode(',', $positions);
+
+        // **Tạo hash**
+        $formulaHash = hash('sha256', $combinationType . '_' . $positionsString);
+
+        // **Kiểm tra trùng**
+        if (self::where('formula_hash', $formulaHash)->exists()) {
+            return false;
+        }
+
+        // **Lưu vào DB**
+        return self::create([
+            'formula_name' => Arr::get($formulaData, 'formula_name'),
+            'formula_note' => Arr::get($formulaData, 'formula_note'),
+            'formula_structure' => ['positions' => $positions], // Lưu danh sách vị trí đã sắp xếp
+            'combination_type' => $combinationType,
+            'formula_hash' => $formulaHash
+        ]);
     }
 
     /**

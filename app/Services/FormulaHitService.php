@@ -6,6 +6,7 @@ use App\Models\FormulaHit;
 use App\Models\LotteryResult;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use function Symfony\Component\Routing\Loader\forDirectory;
 
 class FormulaHitService
@@ -78,5 +79,39 @@ class FormulaHitService
             'results' => $results,
             'resultIndexs' => $resultIndexs
         ];
+    }
+
+    public function findConsecutiveHits($date, $days = 3)
+    {
+        $subqueries = [];
+        for ($i = 0; $i < $days; $i++) {
+            $alias = "h" . ($i + 1);
+            $subqueries[] = "(SELECT cau_lo_id, ngay FROM formula_hit WHERE ngay <= '$date') as $alias";
+        }
+
+        $joins = [];
+        $conditions = [];
+        for ($i = 1; $i < $days; $i++) {
+            $current = "h" . ($i + 1);
+            $prev = "h$i";
+            $joins[] = "JOIN " . $subqueries[$i] . " ON $current.cau_lo_id = $prev.cau_lo_id";
+            $conditions[] = "$current.ngay = DATE_SUB($prev.ngay, INTERVAL 1 DAY)";
+        }
+
+        $query = "
+        SELECT 
+            h1.cau_lo_id, 
+            meta.formula_name, 
+            meta.formula_structure, 
+            meta.combination_type,
+            GROUP_CONCAT(h1.ngay ORDER BY h1.ngay ASC) as ngay_trung
+        FROM " . $subqueries[0] . "
+        " . implode(" ", $joins) . "
+        LEFT JOIN lottery_formula_meta AS meta ON h1.cau_lo_id = meta.id
+        WHERE 1 " . implode(" AND ", $conditions) . "
+        GROUP BY h1.cau_lo_id, meta.formula_name, meta.formula_structure, meta.combination_type
+    ";
+
+        return DB::select($query);
     }
 }

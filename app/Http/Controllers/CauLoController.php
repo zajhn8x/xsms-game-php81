@@ -39,7 +39,6 @@ class CauLoController extends Controller
             $startDate,
             30 // days before
         );
-        dump($timelineData);
 
         return view('caulo.timeline', [
             'cauLo' => $cauLo,
