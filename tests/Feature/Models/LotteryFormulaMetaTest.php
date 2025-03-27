@@ -6,10 +6,8 @@ use App\Models\LotteryFormulaMeta;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class LotteryFormulaMetaTest extends TestCase
+class LotteryFormulaMetaTest extends BaseModelTest
 {
-    use RefreshDatabase;
-
     /** @test */
     public function it_can_create_a_lottery_formula_meta()
     {

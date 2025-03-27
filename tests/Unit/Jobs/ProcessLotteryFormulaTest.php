@@ -3,7 +3,9 @@
 
 namespace Tests\Unit\Jobs;
 
-use Tests\TestCase;
+//use Tests\TestCase;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
+use PHPUnit\Framework\TestCase;
 use App\Jobs\ProcessLotteryFormula;
 use App\Models\LotteryResult;
 use App\Models\LotteryFormula;
@@ -14,6 +16,7 @@ use Carbon\Carbon;
 class ProcessLotteryFormulaTest extends TestCase
 {
     use RefreshDatabase;
+    use DatabaseMigrations;
 
     public function test_process_lottery_formula()
     {
