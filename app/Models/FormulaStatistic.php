@@ -18,13 +18,15 @@ class FormulaStatistic extends Model
         'frequency',
         'win_cycle',
         'probability',
+        'streak_2',
         'streak_3',
         'streak_4',
         'streak_5',
         'streak_6',
         'streak_more_6',
         'prev_streak',
-        'last_streak'
+        'last_streak',
+        'days_max_streak',
     ];
 
     public $timestamps = true;

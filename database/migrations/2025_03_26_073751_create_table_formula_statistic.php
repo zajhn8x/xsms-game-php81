@@ -23,11 +23,14 @@ return new class extends Migration
             $table->decimal('probability', 5, 2)->default(0.00); // Xác suất trúng (%) trong quý
 
             // Đếm số lần cầu chạy liên tiếp theo mức độ
+            $table->tinyInteger('streak_2')->unsigned()->default(0);
             $table->tinyInteger('streak_3')->unsigned()->default(0);
             $table->tinyInteger('streak_4')->unsigned()->default(0);
             $table->tinyInteger('streak_5')->unsigned()->default(0);
             $table->tinyInteger('streak_6')->unsigned()->default(0);
             $table->tinyInteger('streak_more_6')->unsigned()->default(0);
+            //Sô ngày streak dài nhất trong quý
+            $table->tinyInteger('days_max_streak')->unsigned()->default(0);
 
             // Trạng thái cầu chạy từ quý trước
             $table->tinyInteger('prev_streak')->unsigned()->default(0);

@@ -9,6 +9,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
+use Exception;
 
 class CreateFormulaStatisticsJob implements ShouldQueue
 {
@@ -39,6 +41,16 @@ class CreateFormulaStatisticsJob implements ShouldQueue
      */
     public function handle(FormulaStatisticsService $formulaStatisticsService)
     {
-        $formulaStatisticsService->generateStatisticsFromHits($this->formulaId, $this->startDate, $this->endDate);
+        try{
+            Log::info("Dispatched job for Formula ID: $this->formulaId, from {$this->startDate} to {$this->endDate}");
+            $formulaStatisticsService->generateStatisticsFromHits($this->formulaId, $this->startDate, $this->endDate);
+        } catch (Exception $e) {
+            Log::error("⛔ Lỗi trong job: " . $e->getMessage(), [
+                'exception' => $e,
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+        }
     }
 }

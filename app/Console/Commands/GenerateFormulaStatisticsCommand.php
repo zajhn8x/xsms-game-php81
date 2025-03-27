@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Jobs\CreateFormulaStatisticsJob;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class GenerateFormulaStatisticsCommand extends Command
 {
@@ -50,7 +51,7 @@ class GenerateFormulaStatisticsCommand extends Command
             if ($quarterEnd > $endDate) {
                 $quarterEnd = $endDate->copy();
             }
-
+            Log::info("CreateFormulaStatisticsJob start id " . $formulaId . " - command: GenerateFormulaStatisticsCommand");
             // Dispatch job xử lý batch theo quý
             CreateFormulaStatisticsJob::dispatch($formulaId, $quarterStart->toDateString(), $quarterEnd->toDateString());
             $this->info("Dispatched job for Formula ID: $formulaId, from {$quarterStart->toDateString()} to {$quarterEnd->toDateString()}");
