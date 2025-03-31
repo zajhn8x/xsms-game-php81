@@ -1,4 +1,3 @@
-
 <?php
 
 namespace Tests\Feature\Commands;
@@ -9,8 +8,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 class ImportLotteryDataTest extends TestCase
 {
     use RefreshDatabase;
+    public function example_test(): void{
+        $this->assertTrue(true);
+    }
 
-    public function test_can_import_csv_data()
+    public function test_can_import_csv_data(): void
     {
         $this->artisan('lottery:import', [
             'file' => base_path('xsmb_mau.csv')
@@ -26,4 +28,5 @@ class ImportLotteryDataTest extends TestCase
             'value' => '34584'
         ]);
     }
+
 }
