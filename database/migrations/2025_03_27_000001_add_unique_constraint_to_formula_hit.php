@@ -12,9 +12,9 @@ return new class extends Migration
         Schema::table('formula_hit', function (Blueprint $table) {
             // Xóa các bản ghi trùng lặp trước khi thêm unique constraint
             DB::statement('DELETE t1 FROM formula_hit t1 INNER JOIN formula_hit t2 WHERE t1.id > t2.id AND t1.cau_lo_id = t2.cau_lo_id AND t1.ngay = t2.ngay');
-            
+
             // Thêm unique constraint
-            $table->unique(['cau_lo_id', 'ngay'], 'formula_hit_unique');
+            $table->unique(['cau_lo_id', 'ngay','so_trung'], 'formula_hit_unique');
         });
     }
 

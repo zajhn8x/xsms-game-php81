@@ -17,7 +17,7 @@ class LotteryFormula extends Model
         'processed_days',
         'last_processed_date',
         'processing_status',
-        'result_data'
+        'result_data',
     ];
 
     protected $casts = [

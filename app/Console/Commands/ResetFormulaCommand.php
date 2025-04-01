@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Console\Commands;
@@ -26,7 +25,6 @@ class ResetFormulaCommand extends Command
                 'processed_days' => 0,
                 'last_processed_date' => null,
                 'processing_status' => 'pending',
-                'result_data' => null
             ]);
 
         $this->info("Đã reset formula ID: {$formulaId}");

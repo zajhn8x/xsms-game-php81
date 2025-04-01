@@ -61,17 +61,19 @@ class ProcessLotteryFormula implements ShouldQueue
                     Log::info("🔄 Bắt đầu xử lý cầu lô ID: {$cauLo->id}");
 
                     $processDays = 0;
+                    $lastDay = '';
                     foreach ($results as $result) {
-                        Log::info("📊 Tính toán kết quả cho cầu lô ID: {$cauLo->id} với ngày: {$result->draw_date}");
+//                        Log::info("📊 Tính toán kết quả cho cầu lô ID: {$cauLo->id} với ngày: {$result->draw_date}");
 
                         $formulaService->calculateResults($cauLo->id, $result->draw_date);
                         $processDays++;
+                        $lastDay = $result->draw_date;
                     }
 
                     // Cập nhật trạng thái đã xử lý
                     //$cauLo->is_processed = $processDays == $results->count();
                     $cauLo->processed_days += $processDays;
-                    $cauLo->last_processed_date = Carbon::now();
+                    $cauLo->last_processed_date = $lastDay;
                     $cauLo->processing_status = $cauLo->is_processed ? 'completed' : 'partial';
                     $cauLo->save();
 

@@ -34,8 +34,8 @@ class CheckLotteryFormulas extends Command
                 $startDate = Carbon::now()->subDays($days - 1)->format('Y-m-d');
             }
 
-            // Lấy và tạo các formula chưa được xử lý
-            $this->prepareFormulas($maxFormulaBatch);
+//            // Lấy và tạo các formula chưa được xử lý
+//            $this->prepareFormulas($maxFormulaBatch);
 
             // Tính toán batch xử lý
             $batchSize = 100;
