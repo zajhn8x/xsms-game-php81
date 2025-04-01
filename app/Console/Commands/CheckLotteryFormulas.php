@@ -115,7 +115,10 @@ class CheckLotteryFormulas extends Command
      */
     private function getUnprocessedFormulas($limit)
     {
-        return LotteryFormula::where('is_processed', false)
+        return LotteryFormula::where(function($query) {
+                $query->where('is_processed', false)
+                    ->orWhere('processing_status', 'partial');
+            })
             ->orderBy('processed_days')  // Ưu tiên các formula ít được xử lý
             ->orderBy('last_processed_date', 'asc')  // Ưu tiên các formula lâu không xử lý
             ->limit($limit)

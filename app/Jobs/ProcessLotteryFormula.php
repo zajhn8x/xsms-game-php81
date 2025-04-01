@@ -41,13 +41,22 @@ class ProcessLotteryFormula implements ShouldQueue
         Log::info("🔹 Số lượng formula IDs: " . count($this->formulaIds) . "=>" . json_encode($this->formulaIds));
 
         try {
-            // Gọi service để xử lý batch
-            $formulaService->processBatchFormulas(
-                $this->batchId,
-                $this->startDate,
-                $this->endDate,
-                $this->formulaIds
-            );
+            // Lấy formulas cần xử lý
+            $formulas = LotteryFormula::whereIn('id', $this->formulaIds)->get();
+            
+            foreach ($formulas as $formula) {
+                $startDate = $formula->processing_status === 'partial' 
+                    ? $formula->last_processed_date->addDay()->format('Y-m-d')
+                    : $this->startDate;
+                    
+                // Gọi service để xử lý batch cho từng formula
+                $formulaService->processBatchFormulas(
+                    $this->batchId,
+                    $startDate,
+                    $this->endDate,
+                    [$formula->id]
+                );
+            }
 
             // Lưu checkpoint vào cache
             Cache::put("formula_checkpoint_{$this->batchId}", [
