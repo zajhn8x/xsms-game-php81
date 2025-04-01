@@ -1,0 +1,11 @@
+apps:
+  - script    : 'artisan'
+    name  : xsmb-php81-queue-work
+    interpreter :  /Applications/MAMP/bin/php/php8.1.13/bin/php
+    watch : true
+    exec_mode : fork
+    args  : 'queue:listen --tries=1'
+    autorestart : true
+    restart_delay : 100000
+    cwd : '/Users/tunganh/Documents/code/hop_hang_tuan/xsmb-game-php82'
+

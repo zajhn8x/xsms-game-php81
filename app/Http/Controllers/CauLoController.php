@@ -37,7 +37,7 @@ class CauLoController extends Controller
         $timelineData = $this->cauLoHitService->getTimelineData(
             $cauLo,
             $startDate,
-            30 // days before
+            200 // days before
         );
 
         return view('caulo.timeline', [
