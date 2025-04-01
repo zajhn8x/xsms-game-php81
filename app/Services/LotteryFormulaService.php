@@ -4,14 +4,11 @@ namespace App\Services;
 
 use App\Models\FormulaHit;
 use App\Models\LotteryFormula;
-use App\Models\LotteryFormulaMeta;
 use App\Models\LotteryResult;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
-use PHPUnit\Event\InvalidArgumentException;
-use function GuzzleHttp\json_encode;
 use App\Exceptions\Lottery\NotPositionResult;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
+use Exception;
 
 class LotteryFormulaService
 {
@@ -53,7 +50,7 @@ class LotteryFormulaService
         if(empty($soTrungs)) return null; //không trúng thì thoát sớm.
         foreach ($soTrungs as $soTrung){
             // Lưu kết quả trúng vào bảng LotteryFormulaHit
-            FormulaHit::firstOrCreate([
+            FormulaHit::create([
                 'cau_lo_id' => $cauLo->id,
                 'ngay' => $nextDay,
                 'so_trung' => $soTrung
@@ -188,7 +185,7 @@ class LotteryFormulaService
 
                     // Cập nhật trạng thái đã xử lý
                     $cauLo->processed_days += $processDays;
-                    $cauLo->last_processed_date = $lastDay ?  $lastDay : $cauLo->last_processed_date;
+                    $cauLo->last_processed_date = $lastDay;
                     $cauLo->processing_status = $cauLo->is_processed ? 'completed' : 'partial';
                     $cauLo->save();
 
