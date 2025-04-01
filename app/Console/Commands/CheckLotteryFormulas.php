@@ -15,7 +15,8 @@ class CheckLotteryFormulas extends Command
     protected $signature = 'lottery:check-formulas 
                            {--days=3 : Number of days to check}
                            {--start-date= : Optional start date in Y-m-d format}
-                           {--max-formula-batch=2 : Max number of formulas per batch}';
+                           {--max-formula-batch=2 : Max number of formulas per batch}
+                           {--partial : Process only partial status formulas}';
 
     protected $description = 'Check lottery formulas against results';
 
@@ -115,11 +116,18 @@ class CheckLotteryFormulas extends Command
      */
     private function getUnprocessedFormulas($limit)
     {
-        return LotteryFormula::where(function($query) {
-                $query->where('is_processed', false)
-                    ->orWhere('processing_status', 'partial');
-            })
-            ->orderBy('processed_days')  // Ưu tiên các formula ít được xử lý
+        $query = LotteryFormula::query();
+
+        // Xử lý theo option partial
+        if ($this->option('partial')) {
+            // Chỉ lấy các formula có trạng thái partial
+            $query->where('processing_status', 'partial');
+        } else {
+            // Lấy các formula chưa được xử lý
+            $query->where('is_processed', false);
+        }
+
+        return $query->orderBy('processed_days')  // Ưu tiên các formula ít được xử lý
             ->orderBy('last_processed_date', 'asc')  // Ưu tiên các formula lâu không xử lý
             ->limit($limit)
             ->get();
