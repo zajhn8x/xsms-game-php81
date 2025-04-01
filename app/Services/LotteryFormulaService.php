@@ -144,6 +144,90 @@ class LotteryFormulaService
      * @param int $cauLoId ID công thức cầu lô
      * @param array $processedData Dữ liệu kết quả đã xử lý
      */
+    /**
+     * Xử lý một loạt công thức trong một khoảng thời gian
+     * 
+     * @param string $batchId ID của batch xử lý
+     * @param string $startDate Ngày bắt đầu
+     * @param string $endDate Ngày kết thúc  
+     * @param array $formulaIds Danh sách ID công thức cần xử lý
+     */
+    public function processBatchFormulas($batchId, $startDate, $endDate, array $formulaIds)
+    {
+        Log::info("🔹 Bắt đầu xử lý batch formulas");
+        Log::info("🔹 Batch ID: {$batchId}, Từ {$startDate} đến {$endDate}");
+        Log::info("🔹 Số lượng formula IDs: " . count($formulaIds) . "=>" . json_encode($formulaIds));
+
+        try {
+            // Lấy các formula cần xử lý
+            $cauLos = LotteryFormula::whereIn('id', $formulaIds)
+                ->where('is_processed', false)
+                ->get();
+
+            Log::info("📊 Số lượng cầu lô chưa xử lý: " . $cauLos->count());
+
+            // Lấy dữ liệu kết quả xổ số trong khoảng thời gian
+            $results = LotteryResult::whereBetween('draw_date', [$startDate, $endDate])
+                ->orderBy('draw_date')
+                ->get();
+
+            Log::info("📌 Số lượng kết quả xổ số: " . $results->count());
+
+            // Xử lý từng cầu lô
+            foreach ($cauLos as $cauLo) {
+                try {
+                    Log::info("🔄 Bắt đầu xử lý cầu lô ID: {$cauLo->id}");
+
+                    $processDays = 0;
+                    $lastDay = '';
+                    foreach ($results as $result) {
+                        $this->calculateResults($cauLo->id, $result->draw_date);
+                        $processDays++;
+                        $lastDay = $result->draw_date;
+                    }
+
+                    // Cập nhật trạng thái đã xử lý
+                    $cauLo->processed_days += $processDays;
+                    $cauLo->last_processed_date = $lastDay;
+                    $cauLo->processing_status = $cauLo->is_processed ? 'completed' : 'partial';
+                    $cauLo->save();
+
+                    Log::info("✅ Hoàn thành xử lý cầu lô ID: {$cauLo->id}. Số ngày xử lý: {$processDays}");
+
+                } catch (NotPositionResult $e) {
+                    Log::error("Lỗi vị trí tại cầu lô ID {$cauLo->id}: " . $e->getMessage(), [
+                        'formula_id' => $cauLo->id,
+                        'error' => $e
+                    ]);
+
+                    // Cập nhật trạng thái lỗi
+                    $cauLo->processing_status = 'error';
+                    $cauLo->save();
+                }
+            }
+
+            // Lưu checkpoint vào cache
+            Cache::put("formula_checkpoint_{$batchId}", [
+                'processed_at' => Carbon::now(),
+                'formula_count' => $cauLos->count(),
+                'result_count' => $results->count(),
+                'start_date' => $startDate,
+                'end_date' => $endDate
+            ], now()->addDays(7));
+
+            Log::info("📝 Đã lưu checkpoint vào cache với batch ID: {$batchId}");
+
+        } catch (Exception $e) {
+            Log::error("⛔ Lỗi trong quá trình xử lý batch: " . $e->getMessage(), [
+                'exception' => $e,
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            throw $e;
+        }
+    }
+
     public function saveProcessedResults($cauLoId, $processedData)
     {
         $cauLo = LotteryFormula::findOrFail($cauLoId);
