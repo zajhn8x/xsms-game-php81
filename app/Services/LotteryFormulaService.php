@@ -148,7 +148,7 @@ class LotteryFormulaService
     {
         $cauLo = LotteryFormula::findOrFail($cauLoId);
         $cauLo->is_processed = true;
-        $cauLo->last_processed_date = Carbon::now();
+        $cauLo->last_processed_date = $resultNextDay->draw_date;
 
         // Gộp kết quả mới với dữ liệu cũ (nếu có)
         $cauLo->result_data = array_merge(
