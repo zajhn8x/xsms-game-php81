@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 class CheckLotteryFormulas extends Command
 {
     protected $signature = 'lottery:check-formulas 
+                           {--get-new=0 : Number of days to check}
                            {--days=3 : Number of days to check}
                            {--start-date= : Optional start date in Y-m-d format}
                            {--max-formula-batch=2 : Max number of formulas per batch}
@@ -22,6 +23,9 @@ class CheckLotteryFormulas extends Command
 
     public function handle()
     {
+        if($this->option('get-new')){
+            return $this->prepareFormulas(10);
+        }
         $days = (int) $this->option('days');
         $userStartDate = $this->option('start-date');
         $maxFormulaBatch = (int) $this->option('max-formula-batch');
@@ -81,6 +85,7 @@ class CheckLotteryFormulas extends Command
         }
     }
 
+
     /**
      * Chuẩn bị các formula chưa được xử lý từ LotteryFormulaMeta
      */
@@ -123,11 +128,13 @@ class CheckLotteryFormulas extends Command
             // Chỉ lấy các formula có trạng thái partial
             $query->where('processing_status', 'partial');
         } else {
-            // Lấy các formula chưa được xử lý
-            $query->where('is_processed', false);
+            $query->where('processing_status', 'pending');
         }
+        // Lấy các formula chưa được xử lý
+        $query->where('is_processed', false);
 
-        return $query->orderBy('processed_days')  // Ưu tiên các formula ít được xử lý
+        return $query
+            ->orderBy('processed_days')  // Ưu tiên các formula ít được xử lý
             ->orderBy('last_processed_date', 'asc')  // Ưu tiên các formula lâu không xử lý
             ->limit($limit)
             ->get();

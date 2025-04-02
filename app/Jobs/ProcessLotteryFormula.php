@@ -10,7 +10,7 @@ use Illuminate\Queue\SerializesModels;
 use App\Models\LotteryFormula;
 use App\Services\LotteryFormulaService;
 use Illuminate\Support\Facades\Cache;
-use Carbon\Carbon; 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
 class ProcessLotteryFormula implements ShouldQueue
@@ -26,7 +26,7 @@ class ProcessLotteryFormula implements ShouldQueue
     {
         $this->batchId = $batchId;
         $this->startDate = $startDate ?? Carbon::now()->subDays(7)->format('Y-m-d');
-        $this->endDate = $endDate ?? Carbon::now()->format('Y-m-d');
+        $this->endDate = $endDate ?? Carbon::now()->subDays(1)->format('Y-m-d');
         $this->formulaIds = $formulaIds;
     }
 
@@ -54,7 +54,7 @@ class ProcessLotteryFormula implements ShouldQueue
                 'end_date' => $this->endDate
             ], now()->addDays(7));
 
-            Log::info("✅ Hoàn thành xử lý job ProcessLotteryFormula", $result);
+            Log::info("✅ Hoàn thành xử lý job ProcessLotteryFormula", [$result]);
 
         } catch (Exception $e) {
             Log::error("⛔ Lỗi trong job ProcessLotteryFormula: " . $e->getMessage(), [

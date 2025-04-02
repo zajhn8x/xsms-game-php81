@@ -7,6 +7,7 @@ use App\Models\LotteryFormula;
 use App\Models\LotteryResult;
 use App\Exceptions\Lottery\NotPositionResult;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Exception;
 
@@ -50,7 +51,7 @@ class LotteryFormulaService
         if(empty($soTrungs)) return null; //không trúng thì thoát sớm.
         foreach ($soTrungs as $soTrung){
             // Lưu kết quả trúng vào bảng LotteryFormulaHit
-            FormulaHit::create([
+            FormulaHit::firstOrCreate([
                 'cau_lo_id' => $cauLo->id,
                 'ngay' => $nextDay,
                 'so_trung' => $soTrung
@@ -185,7 +186,7 @@ class LotteryFormulaService
 
                     // Cập nhật trạng thái đã xử lý
                     $cauLo->processed_days += $processDays;
-                    $cauLo->last_processed_date = $lastDay;
+                    $cauLo->last_processed_date = $lastDay ?  $lastDay : $cauLo->last_processed_date;
                     $cauLo->processing_status = $cauLo->is_processed ? 'completed' : 'partial';
                     $cauLo->save();
 
