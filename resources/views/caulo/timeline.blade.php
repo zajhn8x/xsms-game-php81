@@ -24,14 +24,7 @@
             <h5 class="mb-0">Lịch sử 30 ngày gần nhất</h5>
         </div>
         <div class="card-body">
-            <div class="list-group">
-                @foreach($dateRange as $date)
-                    @php
-                        $hit = $hits[$date] ?? null;
-                        $result = $results[$date] ?? null;
-                        $formulaValues = isset($resultsIndexs[$date]) ? $resultsIndexs[$date]['values'] : [];
-                        $formulaPairs  =  isset($resultsIndexs[$date]) ? $resultsIndexs[$date]['pairs'] : [];
-                    @endphp
+            <livewire:cau-lo-timeline :cauLoId="$cauLo->id" />
                     <div class="list-group-item {{ $hit ? 'list-group-item-success' : '' }}">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>

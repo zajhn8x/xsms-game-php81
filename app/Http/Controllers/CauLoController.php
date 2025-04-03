@@ -29,25 +29,19 @@ class CauLoController extends Controller
         return response()->json($hits);
     }
 
+    /**
+     * Hiển thị timeline của cầu lô với chức năng tải thêm
+     * @param int $id ID của cầu lô
+     * @return \Illuminate\View\View
+     */
     public function timeline($id)
     {
         $cauLo = LotteryFormula::with('formula')->findOrFail($id);
-        $startDate = Carbon::parse(request('date', Carbon::today()->format('Y-m-d')));
-
-        $timelineData = $this->cauLoHitService->getTimelineData(
-            $cauLo,
-            $startDate,
-            200 // days before
-        );
-
+        
         return view('caulo.timeline', [
             'cauLo' => $cauLo,
             'meta' => $cauLo->formula,
-            'metaPosition' => $cauLo->formula->positions,
-            'dateRange' => $timelineData['dateRange'],
-            'hits' => $timelineData['hits'],
-            'results' => $timelineData['results'],
-            'resultsIndexs' => $timelineData['resultIndexs']
+            'metaPosition' => $cauLo->formula->positions
         ]);
     }
 }
