@@ -1,0 +1,58 @@
+Câu lô streak 2
+
+SELECT t1.cau_lo_id, MAX(t1.ngay) AS ngay_moi_nhat
+FROM formula_hit t1
+JOIN formula_hit t2 ON t1.cau_lo_id = t2.cau_lo_id
+    AND t2.ngay = DATE_SUB(t1.ngay, INTERVAL 1 DAY)
+WHERE t1.ngay >= '2025-02-29'
+GROUP BY t1.cau_lo_id
+ORDER BY ngay_moi_nhat DESC
+LIMIT 3;
+
+Câu lô streak 4
+SELECT t1.cau_lo_id, MAX(t1.ngay) AS ngay_moi_nhat
+FROM formula_hit t1
+JOIN formula_hit t2 ON t1.cau_lo_id = t2.cau_lo_id
+    AND t2.ngay = DATE_SUB(t1.ngay, INTERVAL 1 DAY)
+JOIN formula_hit t3 ON t1.cau_lo_id = t3.cau_lo_id
+    AND t3.ngay = DATE_SUB(t1.ngay, INTERVAL 2 DAY)
+JOIN formula_hit t4 ON t1.cau_lo_id = t4.cau_lo_id
+    AND t4.ngay = DATE_SUB(t1.ngay, INTERVAL 3 DAY)
+WHERE t1.ngay >= '2025-02-29'
+GROUP BY t1.cau_lo_id
+ORDER BY ngay_moi_nhat DESC
+LIMIT 3;
+
+cầu lô streak 5
+SELECT t1.cau_lo_id, MAX(t1.ngay) AS ngay_moi_nhat
+FROM formula_hit t1
+JOIN formula_hit t2 ON t1.cau_lo_id = t2.cau_lo_id
+    AND t2.ngay = DATE_SUB(t1.ngay, INTERVAL 1 DAY)
+JOIN formula_hit t3 ON t1.cau_lo_id = t3.cau_lo_id
+    AND t3.ngay = DATE_SUB(t1.ngay, INTERVAL 2 DAY)
+JOIN formula_hit t4 ON t1.cau_lo_id = t4.cau_lo_id
+    AND t4.ngay = DATE_SUB(t1.ngay, INTERVAL 3 DAY)
+JOIN formula_hit t5 ON t1.cau_lo_id = t5.cau_lo_id
+    AND t5.ngay = DATE_SUB(t1.ngay, INTERVAL 4 DAY)
+WHERE t1.ngay >= '2025-02-29'
+GROUP BY t1.cau_lo_id
+ORDER BY ngay_moi_nhat DESC
+LIMIT 3;
+
+câu lô streak 6
+SELECT t1.cau_lo_id, MAX(t1.ngay) AS ngay_moi_nhat
+FROM formula_hit t1
+JOIN formula_hit t2 ON t1.cau_lo_id = t2.cau_lo_id
+    AND t2.ngay = DATE_SUB(t1.ngay, INTERVAL 1 DAY)
+JOIN formula_hit t3 ON t1.cau_lo_id = t3.cau_lo_id
+    AND t3.ngay = DATE_SUB(t1.ngay, INTERVAL 2 DAY)
+JOIN formula_hit t4 ON t1.cau_lo_id = t4.cau_lo_id
+    AND t4.ngay = DATE_SUB(t1.ngay, INTERVAL 3 DAY)
+JOIN formula_hit t5 ON t1.cau_lo_id = t5.cau_lo_id
+    AND t5.ngay = DATE_SUB(t1.ngay, INTERVAL 4 DAY)
+JOIN formula_hit t6 ON t1.cau_lo_id = t6.cau_lo_id
+    AND t6.ngay = DATE_SUB(t1.ngay, INTERVAL 5 DAY)
+WHERE t1.ngay >= '2025-02-29'
+GROUP BY t1.cau_lo_id
+ORDER BY ngay_moi_nhat DESC
+LIMIT 3;
