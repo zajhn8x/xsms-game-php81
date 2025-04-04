@@ -6,7 +6,18 @@
     <h2>Tìm Cầu Lô</h2>
     <div class="card">
         <div class="card-body">
-            <input type="date" id="searchDate" class="form-control mb-3" value="{{ date('Y-m-d') }}">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <input type="date" id="searchDate" class="form-control" value="{{ date('Y-m-d') }}">
+                </div>
+                <div class="col-md-6">
+                    <select id="streakSelect" class="form-control">
+                        @foreach(range(2, 6) as $s)
+                            <option value="{{ $s }}">Streak {{ $s }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
             <div id="results" class="list-group">
             </div>
         </div>
@@ -14,8 +25,13 @@
 </div>
 
 <script>
-    document.getElementById('searchDate').addEventListener('change', function() {
-        fetch(`/caulo/search?date=${this.value}`)
+    const searchDate = document.getElementById('searchDate');
+    const streakSelect = document.getElementById('streakSelect');
+
+    function performSearch() {
+        const date = searchDate.value;
+        const streak = streakSelect.value;
+        fetch(`/caulo/search?date=${date}&streak=${streak}`)
             .then(res => res.json())
             .then(data => {
                 const results = document.getElementById('results');
@@ -76,6 +92,9 @@
                 `;
                 }).join('');
             });
-    });
+    }
+
+    searchDate.addEventListener('change', performSearch);
+    streakSelect.addEventListener('change', performSearch);
 </script>
 @endsection
