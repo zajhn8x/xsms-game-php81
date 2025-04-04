@@ -43,6 +43,13 @@ class ImportLotteryFromApi extends Command
             foreach ($apiData['issueList'] as $issue) {
                 // Chuyển đổi định dạng ngày
                 $drawDate = Carbon::createFromFormat('d/m/Y', $issue['turnNum'])->format('Y-m-d');
+                
+                // Kiểm tra xem đã có kết quả cho ngày này chưa
+                $existingResult = $this->lotteryResultService->hasResultForDate($drawDate);
+                if ($existingResult) {
+                    $this->info("Đã có kết quả cho ngày {$drawDate}, bỏ qua...");
+                    continue;
+                }
 
                 // Parse detail string thành array
                 $details = json_decode($issue['detail'], true);

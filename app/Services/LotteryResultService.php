@@ -35,4 +35,9 @@ class LotteryResultService implements LotteryResultServiceInterface
         // Implement frequency analysis logic here
         return [];
     }
+
+    public function hasResultForDate($date)
+    {
+        return LotteryResult::where('draw_date', $date)->exists();
+    }
 }
