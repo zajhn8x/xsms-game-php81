@@ -1,64 +1,106 @@
+
 <?php
 
 namespace App\Services;
 
-use App\Models\LotteryBet;
+use App\Models\Campaign;
+use App\Models\CampaignBet;
 use App\Models\LotteryResult;
 use App\Contracts\LotteryBetServiceInterface;
 use Carbon\Carbon;
+use Exception;
+use Illuminate\Support\Facades\DB;
 
 class LotteryBetService implements LotteryBetServiceInterface
 {
-    public function placeBet($userId, $betData)
+    public function createCampaign($userId, array $data)
     {
-        $bet = LotteryBet::create([
-            'user_id' => $userId,
-            'bet_date' => Carbon::now(),
-            'lo_number' => $betData['lo_number'],
-            'amount' => $betData['amount'],
-            'is_win' => false,
-            'win_amount' => 0
-        ]);
-
-        return $bet;
+        return DB::transaction(function() use ($userId, $data) {
+            return Campaign::create([
+                'user_id' => $userId,
+                'start_date' => $data['start_date'],
+                'days' => $data['days'],
+                'initial_balance' => $data['initial_balance'],
+                'current_balance' => $data['initial_balance'],
+                'bet_type' => $data['bet_type'],
+                'status' => 'active'
+            ]);
+        });
     }
 
-    public function processWinnings($resultId)
+    public function placeCampaignBet($campaignId, array $betData)
     {
-        $result = LotteryResult::findOrFail($resultId);
-        $bets = LotteryBet::where('bet_date', $result->draw_date)
-            ->where('is_win', false)
+        return DB::transaction(function() use ($campaignId, $betData) {
+            $campaign = Campaign::findOrFail($campaignId);
+            
+            // Calculate total bet amount
+            $amount = $betData['points'] * 23;
+            
+            // Check if campaign has enough balance
+            if ($campaign->current_balance < $amount) {
+                throw new Exception('Insufficient balance');
+            }
+            
+            // Create bet
+            $bet = CampaignBet::create([
+                'campaign_id' => $campaignId,
+                'lo_number' => $betData['lo_number'],
+                'points' => $betData['points'],
+                'amount' => $amount,
+                'bet_date' => $betData['bet_date'],
+                'status' => 'pending'
+            ]);
+            
+            // Update campaign balance
+            $campaign->current_balance -= $amount;
+            $campaign->save();
+            
+            return $bet;
+        });
+    }
+
+    public function processCampaignResults($date)
+    {
+        $result = LotteryResult::where('draw_date', $date)->first();
+        if (!$result) return;
+
+        $bets = CampaignBet::where('bet_date', $date)
+            ->where('status', 'pending')
             ->get();
 
         foreach ($bets as $bet) {
             if (in_array($bet->lo_number, $result->lo_array)) {
-                $winAmount = $bet->amount * 80; // Tỉ lệ cược 1:80
-                $bet->update([
-                    'is_win' => true,
-                    'win_amount' => $winAmount
-                ]);
+                $winAmount = $bet->amount * 80;
+                
+                DB::transaction(function() use ($bet, $winAmount) {
+                    // Update bet
+                    $bet->update([
+                        'is_win' => true,
+                        'win_amount' => $winAmount,
+                        'status' => 'completed'
+                    ]);
+                    
+                    // Update campaign balance
+                    $bet->campaign->increment('current_balance', $winAmount);
+                });
+            } else {
+                $bet->update(['status' => 'completed']);
             }
         }
+
+        // Update campaigns last_updated
+        Campaign::whereHas('bets', function($query) use ($date) {
+            $query->where('bet_date', $date);
+        })->update(['last_updated' => $date]);
     }
 
-    public function getUserBetHistory($userId, $days = 30)
+    public function checkCompletedCampaigns()
     {
-        return LotteryBet::where('user_id', $userId)
-            ->where('bet_date', '>=', Carbon::now()->subDays($days))
-            ->orderBy('bet_date', 'desc')
-            ->get();
-    }
-
-    public function getBetStatistics($userId)
-    {
-        $bets = LotteryBet::where('user_id', $userId)->get();
+        $today = Carbon::today();
         
-        return [
-            'total_bets' => $bets->count(),
-            'total_amount_bet' => $bets->sum('amount'),
-            'total_wins' => $bets->where('is_win', true)->count(),
-            'total_winnings' => $bets->sum('win_amount'),
-            'net_profit' => $bets->sum('win_amount') - $bets->sum('amount')
-        ];
+        Campaign::where('status', 'active')
+            ->where('start_date', '<=', $today)
+            ->whereRaw('DATE_ADD(start_date, INTERVAL days DAY) < ?', [$today])
+            ->update(['status' => 'completed']);
     }
 }
