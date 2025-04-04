@@ -50,6 +50,35 @@
                             <h6>Thống kê cược</h6>
                             <table class="table table-bordered">
                                 <tr>
+                                    <th>Tổng số cược:</th>
+                                    <td>{{ $stats['total_bets'] }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Số cược thắng:</th>
+                                    <td>{{ $stats['win_bets'] }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Tỷ lệ thắng:</th>
+                                    <td>{{ number_format($campaign->win_rate, 1) }}%</td>
+                                </tr>
+                                <tr>
+                                    <th>Tổng tiền cược:</th>
+                                    <td>{{ number_format($campaign->total_bet_amount) }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Tổng tiền thắng:</th>
+                                    <td>{{ number_format($campaign->total_win_amount) }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Lãi/Lỗ:</th>
+                                    <td class="{{ $campaign->profit >= 0 ? 'text-success' : 'text-danger' }}">
+                                        {{ number_format($campaign->profit) }}
+                                        ({{ number_format($campaign->profit_rate, 1) }}%)
+                                    </td>
+                                </tr>
+                            </table>
+                            <table class="table table-bordered">
+                                <tr>
                                     <th>Tổng số lần cược:</th>
                                     <td>{{ $stats['total_bets'] }}</td>
                                 </tr>
@@ -79,6 +108,47 @@
                                 </tr>
                             </table>
                         </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <h6>Lịch sử cược gần đây</h6>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Ngày cược</th>
+                                        <th>Số lô</th>
+                                        <th>Điểm</th>
+                                        <th>Tiền cược</th>
+                                        <th>Kết quả</th>
+                                        <th>Tiền thắng</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($bets as $bet)
+                                    <tr>
+                                        <td>{{ $bet->bet_date->format('d/m/Y') }}</td>
+                                        <td>{{ str_pad($bet->lo_number, 2, '0', STR_PAD_LEFT) }}</td>
+                                        <td>{{ $bet->points }}</td>
+                                        <td>{{ number_format($bet->amount) }}</td>
+                                        <td>
+                                            @if($bet->status === 'pending')
+                                                <span class="badge bg-warning">Chờ kết quả</span>
+                                            @else
+                                                @if($bet->is_win)
+                                                    <span class="badge bg-success">Thắng</span>
+                                                @else
+                                                    <span class="badge bg-danger">Thua</span>
+                                                @endif
+                                            @endif
+                                        </td>
+                                        <td>{{ $bet->is_win ? number_format($bet->win_amount) : '-' }}</td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        {{ $bets->links() }}
                     </div>
 
                     <h6>Lịch sử cược</h6>
