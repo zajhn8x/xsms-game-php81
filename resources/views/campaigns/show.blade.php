@@ -9,6 +9,9 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Chi tiết chiến dịch</h5>
                     <div>
+                        @if($campaign->status === 'active')
+                            <a href="{{ route('campaigns.bet.form', $campaign) }}" class="btn btn-primary me-2">Đặt cược</a>
+                        @endif
                         <a href="{{ route('campaigns.index') }}" class="btn btn-secondary">Quay lại</a>
                     </div>
                 </div>

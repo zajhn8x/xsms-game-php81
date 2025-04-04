@@ -63,4 +63,29 @@ class CampaignController extends Controller
         return redirect()->route('campaigns.index')
                         ->with('success', 'Chiến dịch đã được xóa.');
     }
+
+    public function showBetForm(Campaign $campaign)
+    {
+        $this->authorize('view', $campaign);
+        return view('campaigns.bet', compact('campaign'));
+    }
+
+    public function placeBet(Request $request, Campaign $campaign)
+    {
+        $this->authorize('view', $campaign);
+        
+        $validated = $request->validate([
+            'bet_date' => 'required|date',
+            'lo_number' => 'required|integer|min:0|max:99',
+            'points' => 'required|integer|min:1'
+        ]);
+
+        try {
+            $bet = $this->betService->placeCampaignBet($campaign->id, $validated);
+            return redirect()->route('campaigns.show', $campaign)
+                           ->with('success', 'Đặt cược thành công');
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage())->withInput();
+        }
+    }
 }
