@@ -10,7 +10,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
-class LotteryBetService implements LotteryBetServiceInterface
+class LotteryBetService
 {
     public function createCampaign($userId, array $data)
     {

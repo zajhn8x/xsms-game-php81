@@ -35,8 +35,8 @@ class ImportLotteryFromApi extends Command
             if (!$response->successful()) {
                 throw new Exception("Không thể kết nối tới API");
             }
-
-            $apiData = $response->json();
+            $baseData = $response->json();
+            $apiData = $baseData["t"];
             $processedData = [];
 
             // Xử lý dữ liệu từ API
