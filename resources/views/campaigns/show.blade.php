@@ -51,19 +51,31 @@
                             <table class="table table-bordered">
                                 <tr>
                                     <th>Tổng số lần cược:</th>
-                                    <td>{{ $bets->total() }}</td>
+                                    <td>{{ $stats['total_bets'] }}</td>
                                 </tr>
                                 <tr>
                                     <th>Số lần thắng:</th>
-                                    <td>{{ $bets->where('is_win', true)->count() }}</td>
+                                    <td>{{ $stats['win_bets'] }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Tỷ lệ thắng:</th>
+                                    <td>{{ $stats['total_bets'] > 0 ? number_format(($stats['win_bets'] / $stats['total_bets']) * 100, 1) : 0 }}%</td>
                                 </tr>
                                 <tr>
                                     <th>Tổng tiền đã cược:</th>
-                                    <td>{{ number_format($bets->sum('amount')) }}</td>
+                                    <td>{{ number_format($stats['total_bet_amount']) }}</td>
                                 </tr>
                                 <tr>
                                     <th>Tổng tiền thắng:</th>
-                                    <td>{{ number_format($bets->sum('win_amount')) }}</td>
+                                    <td>{{ number_format($stats['total_win_amount']) }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Lãi/Lỗ:</th>
+                                    @php
+                                        $profit = $stats['total_win_amount'] - $stats['total_bet_amount'];
+                                        $profitClass = $profit >= 0 ? 'text-success' : 'text-danger';
+                                    @endphp
+                                    <td class="{{ $profitClass }}">{{ number_format($profit) }}</td>
                                 </tr>
                             </table>
                         </div>

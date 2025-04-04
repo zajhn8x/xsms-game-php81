@@ -52,8 +52,16 @@ class CampaignController extends Controller
     public function show(Campaign $campaign)
     {
         $this->authorize('view', $campaign);
+        
         $bets = $campaign->bets()->latest()->paginate(10);
-        return view('campaigns.show', compact('campaign', 'bets'));
+        $stats = [
+            'total_bets' => $campaign->bets()->count(),
+            'win_bets' => $campaign->bets()->where('is_win', true)->count(),
+            'total_bet_amount' => $campaign->bets()->sum('amount'),
+            'total_win_amount' => $campaign->bets()->where('is_win', true)->sum('win_amount'),
+        ];
+        
+        return view('campaigns.show', compact('campaign', 'bets', 'stats'));
     }
 
     public function destroy(Campaign $campaign)
