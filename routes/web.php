@@ -17,6 +17,10 @@ Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
+Route::middleware('auth')->group(function() {
+    Route::resource('campaigns', CampaignController::class);
+});
+
 Route::prefix('caulo')->group(function() {
     Route::get('/find', [CauLoController::class, 'find'])->name('caulo.find');
     Route::get('/search', [CauLoController::class, 'search'])->name('caulo.search');
