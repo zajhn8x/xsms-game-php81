@@ -18,6 +18,33 @@ class FormulaHitService
         $this->resultService = $resultService;
         $this->resultIndexService = $resultIndexService;
     }
+
+    /**
+     * Lấy danh sách công thức có streak liên tiếp
+     * @param string $fromDate Ngày bắt đầu
+     * @param int $streak Số ngày liên tiếp (2-6)
+     * @param int $limit Giới hạn kết quả
+     */
+    public function getStreakFormulas($fromDate, $streak = 2, $limit = 3)
+    {
+        $query = FormulaHit::select('t1.cau_lo_id', DB::raw('MAX(t1.ngay) as ngay_moi_nhat'))
+            ->from('formula_hit as t1');
+
+        // Thêm các JOIN cho mỗi ngày trong streak
+        for ($i = 1; $i < $streak; $i++) {
+            $alias = 't' . ($i + 1);
+            $query->join("formula_hit as $alias", function($join) use ($alias, $i) {
+                $join->on("t1.cau_lo_id", "=", "$alias.cau_lo_id")
+                    ->whereRaw("$alias.ngay = DATE_SUB(t1.ngay, INTERVAL $i DAY)");
+            });
+        }
+
+        return $query->where('t1.ngay', '>=', $fromDate)
+            ->groupBy('t1.cau_lo_id')
+            ->orderBy('ngay_moi_nhat', 'desc')
+            ->limit($limit)
+            ->get();
+    }
     public function getTimelineData(LotteryFormula $cauLo, Carbon $startDate, int $daysBack = 30): array
     {
         // Get date range

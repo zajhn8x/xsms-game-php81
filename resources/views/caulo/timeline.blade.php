@@ -7,8 +7,16 @@
 
     <!-- Meta Information Card -->
     <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Thông tin Cầu Lô</h5>
+            <div class="btn-group">
+                @foreach([2,3,4,5,6] as $streak)
+                <a href="{{ route('caulo.timeline', ['id' => $cauLo->id, 'streak' => $streak]) }}" 
+                   class="btn btn-sm {{ $currentStreak == $streak ? 'btn-light' : 'btn-outline-light' }}">
+                    Streak {{ $streak }}
+                </a>
+                @endforeach
+            </div>
         </div>
         <div class="card-body">
             <p><strong>Tên công thức:</strong> {{ $meta['formula_name'] }}</p>
