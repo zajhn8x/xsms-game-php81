@@ -25,7 +25,8 @@ class CauLoController extends Controller
     public function search()
     {
         $date = request('date', Carbon::today()->format('Y-m-d'));
-        $hits = $this->cauLoHitService->findConsecutiveHits($date, 1);
+        $streak = request('streak', 2);
+        $hits = $this->cauLoHitService->findConsecutiveHits($date, (int)$streak);
         return response()->json($hits);
     }
 
