@@ -38,8 +38,8 @@ class LotteryResults extends Component
         $result = [];
         // Nếu là mảng số (các giải khác)
         if (is_array($numbers)) {
-            foreach ($numbers as $number){
-                 $result[] = $this->highlightHits($number);
+            foreach ($numbers as $number) {
+                $result[] = $this->highlightHits($number);
             }
         }
         return implode(' ,  ', $result);
@@ -49,29 +49,30 @@ class LotteryResults extends Component
     {
         $arrAsb = [];
         $arrHit = [];
-        $arrAsb =  $this->getAbsolutePositionIndex($num);
-        if(!empty($this->hits)){
+        $arrAsb = $this->getAbsolutePositionIndex($num);
+        if (!empty($this->hits)) {
             $lastTwoDigits = substr($num, -2); // Lấy 2 số cuối
             if (in_array($lastTwoDigits, $this->hits)) {
                 $arrHit = $this->applyHighlight($num, 'hit'); // Bôi đậm cả 2 số cuối
             }
         }
-        if(empty($arrHit)){
+        if (empty($arrHit)) {
             return implode(' ', $arrAsb);
-        }else{
+        } else {
             return $num;
         }
     }
-    /** @return  array  */
+
+    /** @return  array */
 
     private function getAbsolutePositionIndex($num)
     {
         $digits = str_split($num);
         //Cất từ số 0-9 vào mảng thứ tự 0-106
-        foreach ($digits as $key => $digit){
+        foreach ($digits as $key => $digit) {
             $this->tempAbs[] = $digit;
-            if(in_array(array_key_last(array_keys($this->tempAbs)),$this->posValue)){
-                $digits[$key] =  $this->applyHighlight($digit, 'abs');
+            if (in_array(array_key_last(array_keys($this->tempAbs)), $this->posValue)) {
+                $digits[$key] = $this->applyHighlight($digit, 'abs');
             }
         }
         return $digits;

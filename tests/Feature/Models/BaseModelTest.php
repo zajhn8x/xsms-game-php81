@@ -8,7 +8,9 @@ use Tests\TestCase;
 
 class BaseModelTest extends TestCase
 {
-    use RefreshDatabase; // Hoặc DatabaseTransactions nếu không muốn reset toàn bộ
+    use RefreshDatabase;
+
+    // Hoặc DatabaseTransactions nếu không muốn reset toàn bộ
 
     protected function setUp(): void
     {

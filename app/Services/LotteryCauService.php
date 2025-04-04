@@ -10,7 +10,7 @@ class LotteryCauService
 {
     public function getActiveCaus()
     {
-        return LotteryCauMeta::with(['cauLos' => function($query) {
+        return LotteryCauMeta::with(['cauLos' => function ($query) {
             $query->where('draw_date', '>=', Carbon::now()->subDays(30));
         }])->get();
     }

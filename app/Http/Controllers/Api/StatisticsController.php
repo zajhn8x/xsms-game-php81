@@ -31,9 +31,9 @@ class StatisticsController extends Controller
         $days = request('days', 7);
         $history = $this->betService->getUserBetHistory(Auth::id(), $days);
 
-        $trends = $history->groupBy(function($bet) {
+        $trends = $history->groupBy(function ($bet) {
             return $bet->bet_date->format('Y-m-d');
-        })->map(function($dayBets) {
+        })->map(function ($dayBets) {
             $total = $dayBets->count();
             $wins = $dayBets->where('is_win', true)->count();
             return [

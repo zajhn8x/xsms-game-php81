@@ -60,7 +60,7 @@ class GenerateAndVerifyLotteryCombinations
     public function verifyAndUpdateCombinations($limit = 100)
     {
         // Lấy các cầu cần xử lý
-        $caus = LotteryCau::where(function($query) {
+        $caus = LotteryCau::where(function ($query) {
             $query->where('is_processed', false)
                 ->orWhere('processing_status', 'in_progress');
         })
@@ -100,7 +100,7 @@ class GenerateAndVerifyLotteryCombinations
                 $processedHistory = collect($resultData['history'])->pluck('date')->toArray();
 
                 // Lọc ra các ngày chưa được xử lý
-                $datesToProcess = array_filter($drawDates, function($date) use ($processedHistory) {
+                $datesToProcess = array_filter($drawDates, function ($date) use ($processedHistory) {
                     return !in_array($date, $processedHistory);
                 });
 

@@ -151,8 +151,8 @@ class FormulaStatisticsService
             }
 
             [$year, $quarter] = explode('-Q', $quarterYear);
-            $year = (int) $year;
-            $quarter = (int) $quarter;
+            $year = (int)$year;
+            $quarter = (int)$quarter;
 
             // Tổng số lần trúng trong quý
             $frequency = $dates->count();

@@ -7,7 +7,7 @@ use Illuminate\Console\Command;
 
 class GeneratePairFormulas extends Command
 {
-    protected $signature = 'lottery:generate-pair-formulas {count=1000}';
+    protected $signature   = 'lottery:generate-pair-formulas {count=1000}';
     protected $description = 'Generate pair formulas for lottery predictions';
 
     public function handle()

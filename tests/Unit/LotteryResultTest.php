@@ -1,4 +1,3 @@
-
 <?php
 
 namespace Tests\Unit;
@@ -24,7 +23,7 @@ class LotteryResultTest extends TestCase
         ];
 
         $result = LotteryResult::create($data);
-        
+
         $this->assertInstanceOf(LotteryResult::class, $result);
         $this->assertEquals($data['draw_date'], $result->draw_date->format('Y-m-d'));
         $this->assertEquals($data['prizes'], $result->prizes);

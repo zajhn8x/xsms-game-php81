@@ -1,4 +1,3 @@
-
 <?php
 
 namespace Tests\Browser;
@@ -12,10 +11,10 @@ class StatisticsPageTest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $browser->visit('/statistics')
-                    ->assertSee('Tổng số lần đặt')
-                    ->assertSee('Tổng tiền đã đặt')
-                    ->assertSee('Số lần trúng')
-                    ->assertSee('Tổng tiền thắng');
+                ->assertSee('Tổng số lần đặt')
+                ->assertSee('Tổng tiền đã đặt')
+                ->assertSee('Số lần trúng')
+                ->assertSee('Tổng tiền thắng');
         });
     }
 
@@ -23,10 +22,10 @@ class StatisticsPageTest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $browser->visit('/statistics')
-                    ->assertPresent('#total-bets')
-                    ->assertPresent('#total-amount')
-                    ->assertPresent('#total-wins')
-                    ->assertPresent('#total-winnings');
+                ->assertPresent('#total-bets')
+                ->assertPresent('#total-amount')
+                ->assertPresent('#total-wins')
+                ->assertPresent('#total-winnings');
         });
     }
 }

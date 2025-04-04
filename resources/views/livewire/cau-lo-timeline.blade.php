@@ -1,4 +1,3 @@
-
 <div>
     <div class="list-group">
         @foreach($timelineData['dateRange'] ?? [] as $date)

@@ -8,7 +8,9 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 class ImportLotteryDataTest extends TestCase
 {
     use RefreshDatabase;
-    public function example_test(): void{
+
+    public function example_test(): void
+    {
         $this->assertTrue(true);
     }
 

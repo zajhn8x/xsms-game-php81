@@ -38,18 +38,18 @@ class LotteryFormulaService
         $loArrayNextDay = $resultNextDay->lo_array ?? [];
 
         // Lấy danh sách vị trí từ công thức
-        /** @var LotteryFormulaMeta $cauLo->formula */
+        /** @var LotteryFormulaMeta $cauLo- >formula */
         $formulaPositions = $cauLo->formula->positions ?? [];
         //Không lấy được vị trí thì return
-        if(empty($formulaPositions)) return null; //không lấy được thoát sớm
+        if (empty($formulaPositions)) return null; //không lấy được thoát sớm
 
         // Lấy dữ liệu thống kê theo vị trí từ LotteryIndexResultsService
         $indexResultsService = new LotteryIndexResultsService();
         $cauLoArray = $indexResultsService->getPositionValue($date, $formulaPositions);
         // Kiểm tra số trúng dựa trên dữ liệu vị trí và lô của ngày tiếp theo
         $soTrungs = $this->checkHit($cauLoArray, $loArrayNextDay);
-        if(empty($soTrungs)) return null; //không trúng thì thoát sớm.
-        foreach ($soTrungs as $soTrung){
+        if (empty($soTrungs)) return null; //không trúng thì thoát sớm.
+        foreach ($soTrungs as $soTrung) {
             // Lưu kết quả trúng vào bảng LotteryFormulaHit
             FormulaHit::firstOrCreate([
                 'cau_lo_id' => $cauLo->id,
@@ -72,10 +72,12 @@ class LotteryFormulaService
             ])
         ];
     }
+
     /**
      * Ghép 2 số 0-9 thành số có 2 chữ số
      */
-    function combineNumbers(array $numbers) {
+    function combineNumbers(array $numbers)
+    {
         if (count($numbers) !== 2) {
             throw new NotPositionResult("Mảng phải chứa đúng 2 phần tử.");
         }
@@ -96,17 +98,17 @@ class LotteryFormulaService
      * @param boolean $sorted default false trường hợp đặc biệt xét đến thứ tự theo công thức
      * @return array|null Trả về số trúng nếu có, null nếu không có kết quả
      */
-    protected function checkHit($cauLoArray, $loArrayNextDay,$sorted = false)
+    protected function checkHit($cauLoArray, $loArrayNextDay, $sorted = false)
     {
         $result = null;
         $cauLoPairArray = $this->combineNumbers($cauLoArray);
         // Kiểm tra từng số từ công thức có trùng khớp với lô ngày tiếp theo không
         foreach ($cauLoPairArray as $number) {
             if (in_array($number, $loArrayNextDay)) {
-                $result[]  = $number; // Trả về số trúng đầu tiên tìm thấy
+                $result[] = $number; // Trả về số trúng đầu tiên tìm thấy
             }
         }
-        if($result) return $result;
+        if ($result) return $result;
         return null; // Không có số nào trúng
     }
 
@@ -186,7 +188,7 @@ class LotteryFormulaService
 
                     // Cập nhật trạng thái đã xử lý
                     $cauLo->processed_days += $processDays;
-                    $cauLo->last_processed_date = $lastDay ?  $lastDay : $cauLo->last_processed_date;
+                    $cauLo->last_processed_date = $lastDay ? $lastDay : $cauLo->last_processed_date;
                     $cauLo->processing_status = $cauLo->is_processed ? 'completed' : 'partial';
                     $cauLo->save();
 

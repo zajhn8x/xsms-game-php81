@@ -17,9 +17,11 @@
 .table td {
     padding: 0.5rem;
 }
+
 .table .row {
     margin: 0;
 }
+
 .table .col {
     padding: 0.25rem;
 }

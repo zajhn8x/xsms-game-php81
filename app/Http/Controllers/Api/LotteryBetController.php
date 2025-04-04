@@ -36,7 +36,7 @@ class LotteryBetController extends Controller
     public function update(Request $request, string $id)
     {
         $bet = LotteryBet::findOrFail($id);
-        
+
         $validated = $request->validate([
             'user_id' => 'exists:users,id',
             'lottery_result_id' => 'exists:lottery_results,id',

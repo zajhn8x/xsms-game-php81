@@ -76,7 +76,7 @@ class LotteryResultVerifier
         return DB::table('lottery_cau')
             ->select('lottery_cau.*', 'lottery_cau_meta.formula_structure')
             ->join('lottery_cau_meta', 'lottery_cau.formula_meta_id', '=', 'lottery_cau_meta.id')
-            ->where(function($query) use ($date) {
+            ->where(function ($query) use ($date) {
                 $query->where('lottery_cau.is_verified', false)
                     ->orWhere('lottery_cau.last_date_verified', '<', $date);
             })

@@ -18,7 +18,8 @@ class ExampleModelsTest extends BaseModelTest
         $response->assertStatus(200);
     }
 
-    public function test_set(): void{
+    public function test_set(): void
+    {
         $this->setUp();
         $this->assertTrue(true);
     }

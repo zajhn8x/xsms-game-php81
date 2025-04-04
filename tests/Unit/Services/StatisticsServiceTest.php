@@ -1,4 +1,3 @@
-
 <?php
 
 namespace Tests\Unit\Services;
@@ -33,7 +32,7 @@ class StatisticsServiceTest extends TestCase
         ]);
 
         $stats = $this->service->calculateLoFrequency('2024-03-20', '2024-03-20');
-        
+
         $this->assertIsArray($stats);
         $this->assertArrayHasKey('45', $stats);
         $this->assertArrayHasKey('90', $stats);

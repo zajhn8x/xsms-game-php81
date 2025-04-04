@@ -1,4 +1,3 @@
-
 <?php
 
 namespace Tests\Unit\Commands;
@@ -17,7 +16,7 @@ class CheckLotteryFormulasTest extends TestCase
         Queue::fake();
 
         $this->artisan('lottery:check-formulas')
-             ->assertExitCode(0);
+            ->assertExitCode(0);
 
         Queue::assertPushed(ProcessLotteryFormula::class);
     }

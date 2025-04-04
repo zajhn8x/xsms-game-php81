@@ -26,7 +26,7 @@
                         📅 Ngày {{ \Carbon\Carbon::parse($result->draw_date)->format('d/m/Y') }}
                     </div>
                     <div class="card-body">
-                        <x-lottery-results :prizes="$prizes" :highlightPositions="['G3-2-4', 'G5-1-3']" />
+                        <x-lottery-results :prizes="$prizes" :highlightPositions="['G3-2-4', 'G5-1-3']"/>
                         <h5 class="text-center mt-4 fw-bold text-primary">🔢 LÔ TÔ</h5>
                         <table class="table table-bordered text-center">
                             <tr>

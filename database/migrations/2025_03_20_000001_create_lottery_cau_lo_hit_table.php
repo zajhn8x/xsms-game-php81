@@ -5,8 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up()
     {
         Schema::create('formula_hit', function (Blueprint $table) {
@@ -20,10 +19,10 @@ return new class extends Migration
 
         });
         /**
-        DB::statement("ALTER TABLE lottery_formula_hit PARTITION BY RANGE (YEAR(ngay)) (
-            PARTITION p2023 VALUES LESS THAN (2024),
-            PARTITION p2024 VALUES LESS THAN (2025)
-        )");
+         * DB::statement("ALTER TABLE lottery_formula_hit PARTITION BY RANGE (YEAR(ngay)) (
+         * PARTITION p2023 VALUES LESS THAN (2024),
+         * PARTITION p2024 VALUES LESS THAN (2025)
+         * )");
          * */
     }
 

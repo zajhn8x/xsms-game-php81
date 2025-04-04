@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Models;
@@ -12,7 +11,7 @@ class Campaign extends Model
         'start_date',
         'days',
         'initial_balance',
-        'current_balance', 
+        'current_balance',
         'bet_type',
         'status',
         'last_updated'
@@ -37,7 +36,7 @@ class Campaign extends Model
     {
         $totalBets = $this->bets()->count();
         if ($totalBets === 0) return 0;
-        
+
         $winBets = $this->bets()->where('is_win', true)->count();
         return ($winBets / $totalBets) * 100;
     }
@@ -58,7 +57,7 @@ class Campaign extends Model
         return $this->bets()->sum('amount');
     }
 
-    public function getTotalWinAmountAttribute() 
+    public function getTotalWinAmountAttribute()
     {
         return $this->bets()->where('is_win', true)->sum('win_amount');
     }

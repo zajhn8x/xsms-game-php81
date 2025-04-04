@@ -1,4 +1,3 @@
-
 <?php
 
 namespace Tests\Feature\Api;
@@ -18,11 +17,11 @@ class LotteryCauMetaTest extends TestCase
         $response = $this->getJson('/api/v1/lottery-cau-meta');
 
         $response->assertStatus(200)
-                ->assertJsonStructure([
-                    'data' => [
-                        '*' => ['id', 'name', 'description']
-                    ]
-                ]);
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => ['id', 'name', 'description']
+                ]
+            ]);
     }
 
     public function test_can_create_lottery_cau_meta()
@@ -35,13 +34,13 @@ class LotteryCauMetaTest extends TestCase
         $response = $this->postJson('/api/v1/lottery-cau-meta', $data);
 
         $response->assertStatus(201)
-                ->assertJson(['data' => $data]);
+            ->assertJson(['data' => $data]);
     }
 
     public function test_can_update_lottery_cau_meta()
     {
         $meta = LotteryCauMeta::factory()->create();
-        
+
         $data = [
             'name' => 'Updated Formula'
         ];
@@ -49,7 +48,7 @@ class LotteryCauMetaTest extends TestCase
         $response = $this->putJson("/api/v1/lottery-cau-meta/{$meta->id}", $data);
 
         $response->assertStatus(200)
-                ->assertJson(['data' => ['name' => $data['name']]]);
+            ->assertJson(['data' => ['name' => $data['name']]]);
     }
 
     public function test_can_delete_lottery_cau_meta()

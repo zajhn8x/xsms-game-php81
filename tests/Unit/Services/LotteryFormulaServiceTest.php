@@ -7,7 +7,9 @@ use Tests\TestCase;
 use App\Services\LotteryFormulaService;
 use App\Models\LotteryResult;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Models\LotteryFormula; // Assuming this model exists
+use App\Models\LotteryFormula;
+
+// Assuming this model exists
 
 class LotteryFormulaServiceTest extends TestCase
 {

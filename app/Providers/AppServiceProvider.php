@@ -22,13 +22,13 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         /**
-        if($this->app->environment('production')) {
-            \URL::forceScheme('https');
-        }
-        \Illuminate\Http\Request::setTrustedProxies(
-            ['*'],
-            \Illuminate\Http\Request::HEADER_X_FORWARDED_ALL
-        );
+         * if($this->app->environment('production')) {
+         * \URL::forceScheme('https');
+         * }
+         * \Illuminate\Http\Request::setTrustedProxies(
+         * ['*'],
+         * \Illuminate\Http\Request::HEADER_X_FORWARDED_ALL
+         * );
          * */
     }
 }

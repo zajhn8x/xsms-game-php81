@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 
 class ResetFormulaCommand extends Command
 {
-    protected $signature = 'formula:reset {id : ID của formula cần reset}';
+    protected $signature   = 'formula:reset {id : ID của formula cần reset}';
     protected $description = 'Reset trạng thái và xóa lịch sử hit của một formula';
 
     public function handle()

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -39,17 +40,16 @@ class LotteryFormulaMeta extends Model
     public function getPositionsAttribute()
     {
 
-        if(!empty($this->formula_structure) && isJson($this->formula_structure)){
+        if (!empty($this->formula_structure) && isJson($this->formula_structure)) {
             // Đảm bảo giá trị trả về là một mảng chuỗi công thức
-            return array_map('strval', Arr::get(json_decode($this->formula_structure,true),'positions',[]) );
-        }
-        // Kiểm tra nếu formula_structure không tồn tại hoặc không chứa 'positions'
+            return array_map('strval', Arr::get(json_decode($this->formula_structure, true), 'positions', []));
+        } // Kiểm tra nếu formula_structure không tồn tại hoặc không chứa 'positions'
         else if (empty($this->formula_structure) || !isset($this->formula_structure['positions'])) {
             return ['a'];
         }
 
         // Đảm bảo giá trị trả về là một mảng chuỗi công thức
-        return array_map('strval', (array) $this->formula_structure['positions']);
+        return array_map('strval', (array)$this->formula_structure['positions']);
     }
 
     /**

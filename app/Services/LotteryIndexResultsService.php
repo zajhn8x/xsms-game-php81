@@ -17,7 +17,7 @@ class LotteryIndexResultsService
     public function getPositionValue($date, $position)
     {
         $result = LotteryResultIndex::where('draw_date', $date)
-            ->whereIn('position', (array) $position)
+            ->whereIn('position', (array)$position)
             ->pluck('value')
             ->toArray();
 
@@ -58,7 +58,7 @@ class LotteryIndexResultsService
         }
 
         // Truy vấn dữ liệu
-        $query = LotteryResultIndex::select('draw_date','value' ,'position')
+        $query = LotteryResultIndex::select('draw_date', 'value', 'position')
             ->whereIn('position', $positions);
 
         if ($startDate) {
@@ -73,7 +73,7 @@ class LotteryIndexResultsService
         return $query->orderBy('draw_date', 'desc')
             ->get()
             ->groupBy('draw_date')
-            ->map(fn ($items) => $items->pluck('value')->toArray())
+            ->map(fn($items) => $items->pluck('value')->toArray())
             ->toArray();
     }
 

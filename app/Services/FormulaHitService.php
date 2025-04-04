@@ -1,8 +1,9 @@
 <?php
+
 namespace App\Services;
 
 use App\Models\LotteryFormula;
-use App\Models\FormulaHit; 
+use App\Models\FormulaHit;
 use App\Models\LotteryResult;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -11,7 +12,7 @@ class FormulaHitService
 {
     protected $resultIndexService;
 
-    public function __construct(LotteryResultService $resultService, LotteryIndexResultsService $resultIndexService) 
+    public function __construct(LotteryResultService $resultService, LotteryIndexResultsService $resultIndexService)
     {
         $this->resultService = $resultService;
         $this->resultIndexService = $resultIndexService;
@@ -33,30 +34,30 @@ class FormulaHitService
     /**
      * Lấy dữ liệu streak cho biểu đồ
      */
-    public function getStreakData(array $hits, array $dateRange): array 
+    public function getStreakData(array $hits, array $dateRange): array
     {
         $streakData = [];
         $prevStreak = 0;
-        
+
         foreach ($dateRange as $date) {
             $hit = $hits[$date] ?? null;
             $streak = 0;
-            
+
             if ($hit) {
-                $streak = isset($streakData[array_key_last($streakData)]) 
-                    ? $streakData[array_key_last($streakData)] + 1 
+                $streak = isset($streakData[array_key_last($streakData)])
+                    ? $streakData[array_key_last($streakData)] + 1
                     : 1;
                 if ($streak > 5) $streak = 5;
             } else if ($prevStreak > 0) {
                 $streak = -1; // Đánh dấu gián đoạn
             }
-            
+
             if ($streak != 0) {
                 $streakData[$date] = $streak;
             }
             $prevStreak = $streak > 0 ? $streak : 0;
         }
-        
+
         return $streakData;
     }
 
@@ -86,7 +87,7 @@ class FormulaHitService
         // Get lottery results index for data range
         $resultIndexs = $this->resultIndexService->getDrawDates(
             $cauLo->formula->positions,
-            $endDate->format('Y-m-d'), 
+            $endDate->format('Y-m-d'),
             $startDate->format('Y-m-d')
         );
 

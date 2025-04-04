@@ -33,7 +33,7 @@ class LotteryCauMetaController extends Controller
     public function update(Request $request, string $id)
     {
         $meta = LotteryCauMeta::findOrFail($id);
-        
+
         $validated = $request->validate([
             'name' => 'string|max:255',
             'description' => 'nullable|string'

@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Services;
@@ -15,7 +14,7 @@ class LotteryBetService implements LotteryBetServiceInterface
 {
     public function createCampaign($userId, array $data)
     {
-        return DB::transaction(function() use ($userId, $data) {
+        return DB::transaction(function () use ($userId, $data) {
             return Campaign::create([
                 'user_id' => $userId,
                 'start_date' => $data['start_date'],
@@ -30,17 +29,17 @@ class LotteryBetService implements LotteryBetServiceInterface
 
     public function placeCampaignBet($campaignId, array $betData)
     {
-        return DB::transaction(function() use ($campaignId, $betData) {
+        return DB::transaction(function () use ($campaignId, $betData) {
             $campaign = Campaign::findOrFail($campaignId);
-            
+
             // Calculate total bet amount
             $amount = $betData['points'] * 23;
-            
+
             // Check if campaign has enough balance
             if ($campaign->current_balance < $amount) {
                 throw new Exception('Insufficient balance');
             }
-            
+
             // Create bet
             $bet = CampaignBet::create([
                 'campaign_id' => $campaignId,
@@ -50,11 +49,11 @@ class LotteryBetService implements LotteryBetServiceInterface
                 'bet_date' => $betData['bet_date'],
                 'status' => 'pending'
             ]);
-            
+
             // Update campaign balance
             $campaign->current_balance -= $amount;
             $campaign->save();
-            
+
             return $bet;
         });
     }
@@ -71,15 +70,15 @@ class LotteryBetService implements LotteryBetServiceInterface
         foreach ($bets as $bet) {
             if (in_array($bet->lo_number, $result->lo_array)) {
                 $winAmount = $bet->amount * 80;
-                
-                DB::transaction(function() use ($bet, $winAmount) {
+
+                DB::transaction(function () use ($bet, $winAmount) {
                     // Update bet
                     $bet->update([
                         'is_win' => true,
                         'win_amount' => $winAmount,
                         'status' => 'completed'
                     ]);
-                    
+
                     // Update campaign balance
                     $bet->campaign->increment('current_balance', $winAmount);
                 });
@@ -89,7 +88,7 @@ class LotteryBetService implements LotteryBetServiceInterface
         }
 
         // Update campaigns last_updated
-        Campaign::whereHas('bets', function($query) use ($date) {
+        Campaign::whereHas('bets', function ($query) use ($date) {
             $query->where('bet_date', $date);
         })->update(['last_updated' => $date]);
     }
@@ -97,7 +96,7 @@ class LotteryBetService implements LotteryBetServiceInterface
     public function checkCompletedCampaigns()
     {
         $today = Carbon::today();
-        
+
         Campaign::where('status', 'active')
             ->where('start_date', '<=', $today)
             ->whereRaw('DATE_ADD(start_date, INTERVAL days DAY) < ?', [$today])

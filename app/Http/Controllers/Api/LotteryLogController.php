@@ -34,7 +34,7 @@ class LotteryLogController extends Controller
     public function update(Request $request, string $id)
     {
         $log = LotteryLog::findOrFail($id);
-        
+
         $validated = $request->validate([
             'user_id' => 'exists:users,id',
             'action' => 'string',

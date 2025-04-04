@@ -1,10 +1,12 @@
 <?php
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
-    public function up(): void {
+    public function up(): void
+    {
         Schema::create('lottery_formula', function (Blueprint $table) {
             $table->id();
             $table->foreignId('formula_meta_id')->constrained('lottery_formula_meta')->onDelete('cascade');
@@ -27,7 +29,8 @@ return new class extends Migration {
     }
 
 
-    public function down(): void {
+    public function down(): void
+    {
         Schema::dropIfExists('lottery_formula');
     }
 };

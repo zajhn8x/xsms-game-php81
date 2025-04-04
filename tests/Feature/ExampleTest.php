@@ -9,6 +9,7 @@ use Tests\TestCase;
 class ExampleTest extends TestCase
 {
     use DatabaseMigrations;
+
     /**
      * A basic test example.
      */
@@ -19,7 +20,8 @@ class ExampleTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function test_ok(): void{
+    public function test_ok(): void
+    {
         $this->assertTrue(true);
     }
 }

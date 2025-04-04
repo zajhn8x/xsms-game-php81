@@ -41,7 +41,7 @@ class CreateFormulaStatisticsJob implements ShouldQueue
      */
     public function handle(FormulaStatisticsService $formulaStatisticsService)
     {
-        try{
+        try {
             Log::info("Dispatched job for Formula ID: $this->formulaId, from {$this->startDate} to {$this->endDate}");
             $formulaStatisticsService->generateStatisticsFromHits($this->formulaId, $this->startDate, $this->endDate);
         } catch (Exception $e) {

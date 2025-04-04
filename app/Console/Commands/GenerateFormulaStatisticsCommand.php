@@ -30,9 +30,9 @@ class GenerateFormulaStatisticsCommand extends Command
      */
     public function handle()
     {
-        $formulaId = (int) $this->argument('formulaId');
+        $formulaId = (int)$this->argument('formulaId');
         $startDate = Carbon::parse($this->argument('startDate'));
-        $days = (int) $this->argument('days');
+        $days = (int)$this->argument('days');
         $endDate = $startDate->copy()->addDays($days - 1);
 
         while ($startDate <= $endDate) {

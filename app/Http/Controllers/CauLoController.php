@@ -40,12 +40,12 @@ class CauLoController extends Controller
         $streak = request('streak', 2);
         $startDate = Carbon::now();
         $timelineData = $this->cauLoHitService->getTimelineData($cauLo, $startDate, 30);
-        
+
         $streakData = $this->cauLoHitService->getStreakData(
-            $timelineData['hits']->toArray(), 
+            $timelineData['hits']->toArray(),
             $timelineData['dateRange']
         );
-        
+
         return view('caulo.timeline', [
             'cauLo' => $cauLo,
             'meta' => $cauLo->formula,
@@ -53,7 +53,7 @@ class CauLoController extends Controller
             'currentStreak' => $streak,
             'streakData' => $streakData
         ]);
-        
+
         return view('caulo.timeline', [
             'cauLo' => $cauLo,
             'meta' => $cauLo->formula,

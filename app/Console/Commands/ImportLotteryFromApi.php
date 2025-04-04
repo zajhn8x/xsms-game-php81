@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Console\Commands;
@@ -12,7 +11,7 @@ use Illuminate\Support\Facades\Http;
 
 class ImportLotteryFromApi extends Command
 {
-    protected $signature = 'lottery:import-api {days=7 : Số ngày cần lấy}';
+    protected $signature   = 'lottery:import-api {days=7 : Số ngày cần lấy}';
     protected $description = 'Import lottery results data from API xoso188.net';
 
     private $lotteryResultService;
@@ -22,17 +21,17 @@ class ImportLotteryFromApi extends Command
     {
         parent::__construct();
         $this->lotteryResultService = $lotteryResultService;
-        $this->positions = config('xsmb.positions',[]);
+        $this->positions = config('xsmb.positions', []);
     }
 
     public function handle()
     {
         $days = $this->argument('days');
-        
+
         try {
             // Gọi API lấy dữ liệu
             $response = Http::get("https://xoso188.net/api/front/open/lottery/history/list/{$days}/miba");
-            
+
             if (!$response->successful()) {
                 throw new Exception("Không thể kết nối tới API");
             }
@@ -44,20 +43,20 @@ class ImportLotteryFromApi extends Command
             foreach ($apiData['issueList'] as $issue) {
                 // Chuyển đổi định dạng ngày
                 $drawDate = Carbon::createFromFormat('d/m/Y', $issue['turnNum'])->format('Y-m-d');
-                
+
                 // Parse detail string thành array
                 $details = json_decode($issue['detail'], true);
-                
+
                 // Chuyển đổi dữ liệu theo cấu trúc cũ
                 $prizes = [
                     'special' => $this->formatNumber($details[0], 5), // Giải đặc biệt
-                    'prize1'  => $this->formatNumber($details[1], 5), // Giải nhất
-                    'prize2'  => array_map(fn($num) => $this->formatNumber($num, 5), explode(',', $details[2])), // Giải nhì
-                    'prize3'  => array_map(fn($num) => $this->formatNumber($num, 5), explode(',', $details[3])), // Giải ba
-                    'prize4'  => array_map(fn($num) => $this->formatNumber($num, 4), explode(',', $details[4])), // Giải tư
-                    'prize5'  => array_map(fn($num) => $this->formatNumber($num, 4), explode(',', $details[5])), // Giải năm
-                    'prize6'  => array_map(fn($num) => $this->formatNumber($num, 3), explode(',', $details[6])), // Giải sáu
-                    'prize7'  => array_map(fn($num) => $this->formatNumber($num, 2), explode(',', $details[7]))  // Giải bảy
+                    'prize1' => $this->formatNumber($details[1], 5), // Giải nhất
+                    'prize2' => array_map(fn($num) => $this->formatNumber($num, 5), explode(',', $details[2])), // Giải nhì
+                    'prize3' => array_map(fn($num) => $this->formatNumber($num, 5), explode(',', $details[3])), // Giải ba
+                    'prize4' => array_map(fn($num) => $this->formatNumber($num, 4), explode(',', $details[4])), // Giải tư
+                    'prize5' => array_map(fn($num) => $this->formatNumber($num, 4), explode(',', $details[5])), // Giải năm
+                    'prize6' => array_map(fn($num) => $this->formatNumber($num, 3), explode(',', $details[6])), // Giải sáu
+                    'prize7' => array_map(fn($num) => $this->formatNumber($num, 2), explode(',', $details[7]))  // Giải bảy
                 ];
 
                 // Tạo mảng lô 2 số
@@ -99,21 +98,21 @@ class ImportLotteryFromApi extends Command
                         $parts = explode('-', $posName);
                         if (count($parts) < 3) continue;
 
-                        $groupIndex = (int) $parts[1] - 1;
-                        $digitIndex = (int) $parts[2] - 1;
+                        $groupIndex = (int)$parts[1] - 1;
+                        $digitIndex = (int)$parts[2] - 1;
 
                         if (!isset($prizeNumbers[$groupIndex])) {
                             error_log("⚠️ Không tìm thấy nhóm giải $prizeKey ($posName) cho ngày {$row['draw_date']}");
                             continue;
                         }
 
-                        $prizeValue = (string) $prizeNumbers[$groupIndex];
+                        $prizeValue = (string)$prizeNumbers[$groupIndex];
                         if (!isset($prizeValue[$digitIndex])) continue;
 
                         $positions[] = [
-                            'draw_date'  => $row['draw_date'],
-                            'position'   => $posName,
-                            'value'      => (int) $prizeValue[$digitIndex],
+                            'draw_date' => $row['draw_date'],
+                            'position' => $posName,
+                            'value' => (int)$prizeValue[$digitIndex],
                             'created_at' => now(),
                             'updated_at' => now(),
                         ];
@@ -137,7 +136,8 @@ class ImportLotteryFromApi extends Command
     }
 
     // Hàm định dạng số theo đúng độ dài yêu cầu
-    private function formatNumber($num, $length) {
+    private function formatNumber($num, $length)
+    {
         $num = trim($num);
         if (!is_numeric($num) || empty($num)) {
             return str_pad("", $length, "0", STR_PAD_LEFT);

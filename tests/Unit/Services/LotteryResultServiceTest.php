@@ -1,4 +1,3 @@
-
 <?php
 
 namespace Tests\Unit\Services;
@@ -36,7 +35,7 @@ class LotteryResultServiceTest extends TestCase
 
         $this->assertInstanceOf(LotteryResult::class, $result);
         $this->assertEquals($data['draw_date'], $result->draw_date->format('Y-m-d'));
-        
+
         // Check indexes were created
         $this->assertDatabaseHas('lottery_result_indexes', [
             'draw_date' => $data['draw_date'],
@@ -51,7 +50,7 @@ class LotteryResultServiceTest extends TestCase
         $endDate = Carbon::now();
 
         $results = $this->service->getResultsByDateRange($startDate, $endDate);
-        
+
         $this->assertIsArray($results);
         foreach ($results as $result) {
             $this->assertInstanceOf(LotteryResult::class, $result);

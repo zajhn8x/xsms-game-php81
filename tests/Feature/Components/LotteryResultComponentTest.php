@@ -1,4 +1,3 @@
-
 <?php
 
 namespace Tests\Feature\Components;
@@ -14,12 +13,12 @@ class LotteryResultComponentTest extends TestCase
     public function test_lottery_result_component_renders()
     {
         $result = LotteryResult::factory()->create();
-        
+
         $view = $this->blade(
             '<x-lottery-result :result="$result"/>',
             ['result' => $result]
         );
-        
+
         $view->assertSee($result->draw_date->format('Y-m-d'));
     }
 }

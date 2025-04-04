@@ -17,13 +17,13 @@ Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-Route::middleware('auth')->group(function() {
+Route::middleware('auth')->group(function () {
     Route::resource('campaigns', CampaignController::class);
-Route::get('campaigns/{campaign}/bet', [CampaignController::class, 'showBetForm'])->name('campaigns.bet.form');
-Route::post('campaigns/{campaign}/bet', [CampaignController::class, 'placeBet'])->name('campaigns.bet');
+    Route::get('campaigns/{campaign}/bet', [CampaignController::class, 'showBetForm'])->name('campaigns.bet.form');
+    Route::post('campaigns/{campaign}/bet', [CampaignController::class, 'placeBet'])->name('campaigns.bet');
 });
 
-Route::prefix('caulo')->group(function() {
+Route::prefix('caulo')->group(function () {
     Route::get('/find', [CauLoController::class, 'find'])->name('caulo.find');
     Route::get('/search', [CauLoController::class, 'search'])->name('caulo.search');
     Route::get('/timeline/{id}', [CauLoController::class, 'timeline'])->name('caulo.timeline');

@@ -10,7 +10,7 @@ use Carbon\Carbon;
 
 class ImportLotteryData extends Command
 {
-    protected $signature = 'lottery:import {file : Path to the import file}';
+    protected $signature   = 'lottery:import {file : Path to the import file}';
     protected $description = 'Import lottery results data from CSV/JSON file';
 
     private $lotteryResultService;
@@ -19,7 +19,7 @@ class ImportLotteryData extends Command
     {
         parent::__construct();
         $this->lotteryResultService = $lotteryResultService;
-        $this->positions = config('xsmb.positions',[]);
+        $this->positions = config('xsmb.positions', []);
     }
 
     public function handle()
@@ -34,7 +34,7 @@ class ImportLotteryData extends Command
         $extension = pathinfo($file, PATHINFO_EXTENSION);
 
         try {
-            $data = match($extension) {
+            $data = match ($extension) {
                 'json' => $this->parseJson($file),
                 'csv' => $this->parseCsv($file),
                 default => throw new Exception("Unsupported file type: {$extension}")
@@ -61,22 +61,22 @@ class ImportLotteryData extends Command
                         $parts = explode('-', $posName);
                         if (count($parts) < 3) continue;
 
-                        $groupIndex = (int) $parts[1] - 1; // Chỉ mục nhóm giải (0-based)
-                        $digitIndex = (int) $parts[2] - 1; // Chỉ mục chữ số (0-based)
+                        $groupIndex = (int)$parts[1] - 1; // Chỉ mục nhóm giải (0-based)
+                        $digitIndex = (int)$parts[2] - 1; // Chỉ mục chữ số (0-based)
 
                         if (!isset($prizeNumbers[$groupIndex])) {
                             error_log("⚠️ Không tìm thấy nhóm giải $prizeKey ($posName) cho ngày {$row['draw_date']}");
                             continue;
                         }
 
-                        $prizeValue = (string) $prizeNumbers[$groupIndex];
+                        $prizeValue = (string)$prizeNumbers[$groupIndex];
 
                         if (!isset($prizeValue[$digitIndex])) continue;
 
                         $positions[] = [
-                            'draw_date'  => $row['draw_date'],
-                            'position'   => $posName,
-                            'value'      => (int) $prizeValue[$digitIndex],
+                            'draw_date' => $row['draw_date'],
+                            'position' => $posName,
+                            'value' => (int)$prizeValue[$digitIndex],
                             'created_at' => now(),
                             'updated_at' => now(),
                         ];
@@ -104,15 +104,16 @@ class ImportLotteryData extends Command
         $content = file_get_contents($file);
         return json_decode($content, true);
     }
+
     // Hàm định dạng số theo đúng độ dài yêu cầu
-    private function formatNumber($num, $length) {
+    private function formatNumber($num, $length)
+    {
         $num = trim($num);
         if (!is_numeric($num) || empty($num)) {
             return str_pad("", $length, "0", STR_PAD_LEFT); // Nếu lỗi trả về chuỗi 0 phù hợp
         }
         return str_pad($num, $length, '0', STR_PAD_LEFT);
     }
-
 
 
     private function parseCsv($file)
@@ -130,19 +131,19 @@ class ImportLotteryData extends Command
             try {
                 $prizes = [
                     'special' => $this->formatNumber($row[1], 5),    // Giải đặc biệt (5 số)
-                    'prize1'  => $this->formatNumber($row[2], 5),    // Giải nhất (5 số)
-                    'prize2'  => array_map(fn($num) => $this->formatNumber($num, 5), array_slice($row, 3, 2)),  // Giải nhì (2 số, mỗi số 5 chữ số)
-                    'prize3'  => array_map(fn($num) => $this->formatNumber($num, 5), array_slice($row, 5, 6)),  // Giải ba (6 số, mỗi số 5 chữ số)
-                    'prize4'  => array_map(fn($num) => $this->formatNumber($num, 4), array_slice($row, 11, 4)), // Giải tư (4 số, mỗi số 4 chữ số)
-                    'prize5'  => array_map(fn($num) => $this->formatNumber($num, 4), array_slice($row, 15, 6)), // Giải năm (6 số, mỗi số 4 chữ số)
-                    'prize6'  => array_map(fn($num) => $this->formatNumber($num, 3), array_slice($row, 21, 3)), // Giải sáu (3 số, mỗi số 3 chữ số)
-                    'prize7'  => array_map(fn($num) => $this->formatNumber($num, 2), array_slice($row, 24, 4))  // Giải bảy (4 số, mỗi số 2 chữ số)
+                    'prize1' => $this->formatNumber($row[2], 5),    // Giải nhất (5 số)
+                    'prize2' => array_map(fn($num) => $this->formatNumber($num, 5), array_slice($row, 3, 2)),  // Giải nhì (2 số, mỗi số 5 chữ số)
+                    'prize3' => array_map(fn($num) => $this->formatNumber($num, 5), array_slice($row, 5, 6)),  // Giải ba (6 số, mỗi số 5 chữ số)
+                    'prize4' => array_map(fn($num) => $this->formatNumber($num, 4), array_slice($row, 11, 4)), // Giải tư (4 số, mỗi số 4 chữ số)
+                    'prize5' => array_map(fn($num) => $this->formatNumber($num, 4), array_slice($row, 15, 6)), // Giải năm (6 số, mỗi số 4 chữ số)
+                    'prize6' => array_map(fn($num) => $this->formatNumber($num, 3), array_slice($row, 21, 3)), // Giải sáu (3 số, mỗi số 3 chữ số)
+                    'prize7' => array_map(fn($num) => $this->formatNumber($num, 2), array_slice($row, 24, 4))  // Giải bảy (4 số, mỗi số 2 chữ số)
                 ];
 
                 $lo_array = [];
                 foreach ($row as $key => $number) {
-                    if($key != 0){
-                        $lo_array[] = $this->formatNumber( substr($number, -2),2);
+                    if ($key != 0) {
+                        $lo_array[] = $this->formatNumber(substr($number, -2), 2);
                     }
                 }
 

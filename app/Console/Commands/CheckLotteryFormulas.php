@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Console\Commands;
 
 use Exception;
@@ -23,12 +24,12 @@ class CheckLotteryFormulas extends Command
 
     public function handle()
     {
-        if($this->option('get-new')){
+        if ($this->option('get-new')) {
             return $this->prepareFormulas(10);
         }
-        $days = (int) $this->option('days');
+        $days = (int)$this->option('days');
         $userStartDate = $this->option('start-date');
-        $maxFormulaBatch = (int) $this->option('max-formula-batch');
+        $maxFormulaBatch = (int)$this->option('max-formula-batch');
         $batchId = uniqid('formula_check_');
 
         try {

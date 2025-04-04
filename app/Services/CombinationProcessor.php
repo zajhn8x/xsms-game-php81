@@ -29,8 +29,7 @@ class CombinationProcessor
                     $posKey = "GDB-1-" . ($i + 1);
                     $mappedData[$posKey] = $digits[$i];
                 }
-            }
-            // Các giải khác
+            } // Các giải khác
             else {
                 $prizeLevel = substr($prizeKey, 5); // Lấy số giải (1-7)
 
