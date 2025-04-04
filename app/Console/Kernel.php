@@ -12,7 +12,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        $schedule->command('campaigns:process-results')->dailyAt('19:00');
         //Check 5 phút 1 cầu
         $schedule->command('lottery:check-formulas',['--days' => 7500, '--start-date' => '2005-10-01', '--max-formula-batch' => 1])->everyTwoMinutes();
     }
