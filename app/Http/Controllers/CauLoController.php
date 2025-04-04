@@ -38,9 +38,21 @@ class CauLoController extends Controller
     {
         $cauLo = LotteryFormula::with('formula')->findOrFail($id);
         $streak = request('streak', 2);
-        $fromDate = Carbon::now()->subDays(30)->format('Y-m-d');
+        $startDate = Carbon::now();
+        $timelineData = $this->cauLoHitService->getTimelineData($cauLo, $startDate, 30);
         
-        $streakFormulas = $this->cauLoHitService->getStreakFormulas($fromDate, $streak);
+        $streakData = $this->cauLoHitService->getStreakData(
+            $timelineData['hits']->toArray(), 
+            $timelineData['dateRange']
+        );
+        
+        return view('caulo.timeline', [
+            'cauLo' => $cauLo,
+            'meta' => $cauLo->formula,
+            'metaPosition' => $cauLo->formula->positions,
+            'currentStreak' => $streak,
+            'streakData' => $streakData
+        ]);
         
         return view('caulo.timeline', [
             'cauLo' => $cauLo,

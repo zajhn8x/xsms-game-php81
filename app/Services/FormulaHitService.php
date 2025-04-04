@@ -30,6 +30,36 @@ class FormulaHitService
     /**
      * Lấy dữ liệu timeline cho một công thức
      */
+    /**
+     * Lấy dữ liệu streak cho biểu đồ
+     */
+    public function getStreakData(array $hits, array $dateRange): array 
+    {
+        $streakData = [];
+        $prevStreak = 0;
+        
+        foreach ($dateRange as $date) {
+            $hit = $hits[$date] ?? null;
+            $streak = 0;
+            
+            if ($hit) {
+                $streak = isset($streakData[array_key_last($streakData)]) 
+                    ? $streakData[array_key_last($streakData)] + 1 
+                    : 1;
+                if ($streak > 5) $streak = 5;
+            } else if ($prevStreak > 0) {
+                $streak = -1; // Đánh dấu gián đoạn
+            }
+            
+            if ($streak != 0) {
+                $streakData[$date] = $streak;
+            }
+            $prevStreak = $streak > 0 ? $streak : 0;
+        }
+        
+        return $streakData;
+    }
+
     public function getTimelineData(LotteryFormula $cauLo, Carbon $startDate, int $daysBack = 30): array
     {
         // Get date range
