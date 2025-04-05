@@ -24,7 +24,8 @@ class Kernel extends ConsoleKernel
     {
         $this->load(__DIR__ . '/Commands');
         $this->commands([
-            Commands\ImportLotteryFromApi::class
+            Commands\ImportLotteryFromApi::class,
+            Commands\RunCampaignSimulation::class, // Added this line
         ]);
         require base_path('routes/console.php');
     }
