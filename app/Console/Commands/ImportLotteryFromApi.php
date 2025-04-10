@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Services\LotteryResultService;
 use Exception;
 use Illuminate\Console\Command;
 use App\Contracts\LotteryResultServiceInterface;
@@ -17,7 +18,7 @@ class ImportLotteryFromApi extends Command
     private $lotteryResultService;
     private $positions;
 
-    public function __construct(LotteryResultServiceInterface $lotteryResultService)
+    public function __construct(LotteryResultService $lotteryResultService)
     {
         parent::__construct();
         $this->lotteryResultService = $lotteryResultService;
@@ -43,7 +44,7 @@ class ImportLotteryFromApi extends Command
             foreach ($apiData['issueList'] as $issue) {
                 // Chuyển đổi định dạng ngày
                 $drawDate = Carbon::createFromFormat('d/m/Y', $issue['turnNum'])->format('Y-m-d');
-                
+
                 // Kiểm tra xem đã có kết quả cho ngày này chưa
                 $existingResult = $this->lotteryResultService->hasResultForDate($drawDate);
                 if ($existingResult) {

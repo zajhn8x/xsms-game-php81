@@ -6,7 +6,7 @@ use App\Contracts\LotteryResultServiceInterface;
 use App\Models\LotteryResult;
 use Carbon\Carbon;
 
-class LotteryResultService implements LotteryResultServiceInterface
+class LotteryResultService
 {
     public function getLatestResults($limit)
     {
