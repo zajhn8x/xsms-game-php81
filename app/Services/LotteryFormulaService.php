@@ -24,41 +24,32 @@ class LotteryFormulaService
     {
         // Lấy công thức cầu lô kèm theo thông tin liên kết từ bảng formula
         $cauLo = LotteryFormula::with('formula')->findOrFail($cauLoId);
-        
+
         // Lấy kết quả xổ số của ngày hiện tại và ngày tiếp theo
         $result = LotteryResult::where('draw_date', $date)->first();
         $nextDay = Carbon::parse($date)->addDay()->format('Y-m-d');
         $resultNextDay = LotteryResult::where('draw_date', $nextDay)->first();
-        
+
         if (!$result || !$resultNextDay || !$cauLo) {
             return null;
         }
-
-        // Lấy lịch sử hit của công thức này trong 10 ngày gần nhất
-        $recentHits = FormulaHit::where('cau_lo_id', $cauLoId)
-            ->where('ngay', '<=', $date)
-            ->orderBy('ngay', 'desc')
-            ->take(10)
-            ->get();
 
         // Danh sách các số lô của ngày tiếp theo
         $loArrayNextDay = $resultNextDay->lo_array ?? [];
 
         // Lấy danh sách vị trí từ công thức
-        /** @var LotteryFormulaMeta $cauLo- >formula */
         $formulaPositions = $cauLo->formula->positions ?? [];
-        //Không lấy được vị trí thì return
-        if (empty($formulaPositions)) return null; //không lấy được thoát sớm
+        if (empty($formulaPositions)) return null;
 
         // Lấy dữ liệu thống kê theo vị trí từ LotteryIndexResultsService
         $indexResultsService = new LotteryIndexResultsService();
         $cauLoArray = $indexResultsService->getPositionValue($date, $formulaPositions);
+
         // Kiểm tra số trúng dựa trên dữ liệu vị trí và lô của ngày tiếp theo
         $hitResult = $this->checkHit($cauLoArray, $loArrayNextDay);
-        if (!$hitResult) return null; //không trúng thì thoát sớm.
-        
+        if (!$hitResult) return null;
+
         foreach ($hitResult['numbers'] as $soTrung) {
-            // Lưu kết quả trúng với trạng thái từ checkHit
             FormulaHit::firstOrCreate([
                 'cau_lo_id' => $cauLo->id,
                 'ngay' => $nextDay,
@@ -67,87 +58,12 @@ class LotteryFormulaService
             ]);
         }
 
-        private function determineHitStatus($recentHits, $currentNumber) {
-            if ($recentHits->isEmpty()) {
-                return 0; // Normal hit
-            }
-
-            $consecutiveHits = $this->getConsecutiveHits($recentHits);
-            $hitCount = count($consecutiveHits);
-            
-            if ($hitCount >= 3) {
-                return 4; // Nhiều hơn 2 nháy
-            }
-
-            if ($hitCount == 2) {
-                $lastHit = $consecutiveHits[0];
-                $prevHit = $consecutiveHits[1];
-                
-                // Kiểm tra cùng chiều
-                if ($this->isSameDirection($lastHit, $prevHit, $currentNumber)) {
-                    return 1;
-                }
-                
-                // Kiểm tra 2 nháy 1 số
-                if ($this->isSameNumberHit($lastHit, $prevHit)) {
-                    return 2;
-                }
-                
-                // Kiểm tra 2 nháy cả cặp
-                if ($this->isPairHit($lastHit, $prevHit)) {
-                    return 3;
-                }
-            }
-            
-            return 0; // Normal hit
-        }
-
-        private function getConsecutiveHits($hits) {
-            $consecutive = [];
-            $prevDate = null;
-            
-            foreach ($hits as $hit) {
-                if ($prevDate === null || Carbon::parse($hit->ngay)->addDay()->format('Y-m-d') == $prevDate) {
-                    $consecutive[] = $hit;
-                } else {
-                    break;
-                }
-                $prevDate = $hit->ngay;
-            }
-            
-            return $consecutive;
-        }
-
-        private function isSameDirection($lastHit, $prevHit, $currentNumber) {
-            // Kiểm tra xu hướng tăng/giảm
-            $trend = $lastHit->so_trung - $prevHit->so_trung;
-            $newTrend = $currentNumber - $lastHit->so_trung;
-            return ($trend > 0 && $newTrend > 0) || ($trend < 0 && $newTrend < 0);
-        }
-
-        private function isSameNumberHit($lastHit, $prevHit) {
-            // Kiểm tra có cùng 1 số không
-            return strval($lastHit->so_trung)[0] == strval($prevHit->so_trung)[0] ||
-                   strval($lastHit->so_trung)[1] == strval($prevHit->so_trung)[1];
-        }
-
-        private function isPairHit($lastHit, $prevHit) {
-            // Kiểm tra có phải cặp số không
-            return $lastHit->so_trung == strrev($prevHit->so_trung);
-        }
-
         return [
             'cau_lo_id' => $cauLo->id,
             'formula_name' => $cauLo->formula->formula_name,
             'draw_date' => $date,
             'next_draw_date' => $nextDay,
-            'so_trung' => json_encode($soTrungs),
-            'result_data' => json_encode([
-                'stats' => [
-                    'total_hits' => $cauLo->getTotalHitsAttribute(),
-                    'hit_rate' => $cauLo->getHitRateAttribute()
-                ]
-            ])
+            'hit_result' => $hitResult
         ];
     }
 
@@ -173,21 +89,20 @@ class LotteryFormulaService
      *
      * @param array $cauLoArray Mảng các số từ công thức đã được xử lý
      * @param array $loArrayNextDay Mảng các số lô của ngày tiếp theo
-     * @param boolean $sorted default false trường hợp đặc biệt xét đến thứ tự theo công thức
+     * @param boolean $sorted mặc định false trường hợp đặc biệt xét đến thứ tự theo công thức
      * @return array|null Trả về số trúng nếu có, null nếu không có kết quả
      */
     protected function checkHit($cauLoArray, $loArrayNextDay, $sorted = false)
     {
-        $result = [];
         $originalNumber = $cauLoArray[0] . $cauLoArray[1]; // Số theo chiều ban đầu
         $reverseNumber = $cauLoArray[1] . $cauLoArray[0]; // Số theo chiều ngược lại
-        
+
         // Đếm số lần xuất hiện của mỗi số
         $countOriginal = array_count_values($loArrayNextDay)[$originalNumber] ?? 0;
         $countReverse = array_count_values($loArrayNextDay)[$reverseNumber] ?? 0;
-        
+
         $totalHits = $countOriginal + $countReverse;
-        
+
         if ($totalHits == 0) {
             return null;
         }
@@ -195,18 +110,18 @@ class LotteryFormulaService
         // Xác định status dựa vào các điều kiện
         $status = 0; // Mặc định normal
         $hitNumbers = [];
-        
+
         if ($countOriginal > 0) {
             $hitNumbers[] = $originalNumber;
             if ($countOriginal == 1) {
                 $status = 1; // Cùng chiều
             }
         }
-        
+
         if ($countReverse > 0) {
             $hitNumbers[] = $reverseNumber;
         }
-        
+
         if ($totalHits == 2) {
             if ($countOriginal == 2 || $countReverse == 2) {
                 $status = 2; // 2 nháy 1 số
@@ -214,17 +129,16 @@ class LotteryFormulaService
                 $status = 3; // 2 nháy cả cặp
             }
         }
-        
+
         if ($totalHits > 2) {
             $status = 4; // Nhiều hơn 2 nháy
         }
-        
+
         return [
             'numbers' => $hitNumbers,
             'status' => $status
         ];
     }
-
     /**
      * Xử lý một loạt ngày cho công thức cầu lô
      *
