@@ -94,6 +94,21 @@ class LotteryFormulaService
      */
     protected function checkHit($cauLoArray, $loArrayNextDay, $sorted = false)
     {
+        // Xử lý trường hợp số trùng nhau
+        if ($cauLoArray[0] === $cauLoArray[1]) {
+            $number = $cauLoArray[0] . $cauLoArray[1];
+            $count = array_count_values($loArrayNextDay)[$number] ?? 0;
+            
+            if ($count === 0) {
+                return null;
+            }
+
+            return [
+                'numbers' => [$number],
+                'status' => $count > 1 ? 2 : 0 // 2 nháy 1 số nếu xuất hiện > 1 lần
+            ];
+        }
+
         $originalNumber = $cauLoArray[0] . $cauLoArray[1]; // Số theo chiều ban đầu
         $reverseNumber = $cauLoArray[1] . $cauLoArray[0]; // Số theo chiều ngược lại
 
