@@ -98,7 +98,7 @@ class LotteryFormulaService
         if ($cauLoArray[0] === $cauLoArray[1]) {
             $number = $cauLoArray[0] . $cauLoArray[1];
             $count = array_count_values($loArrayNextDay)[$number] ?? 0;
-            
+
             if ($count === 0) {
                 return null;
             }
@@ -123,30 +123,38 @@ class LotteryFormulaService
         }
 
         // Xác định status dựa vào các điều kiện
-        $status = 0; // Mặc định normal
+        $status = 0; // Mặc định normal 
         $hitNumbers = [];
 
-        if ($countOriginal > 0) {
+        // Cùng chiều (status = 1): Chỉ xuất hiện 1 lần theo chiều ban đầu
+        if ($countOriginal == 1 && $countReverse == 0) {
+            $status = 1;
             $hitNumbers[] = $originalNumber;
-            if ($countOriginal == 1) {
-                $status = 1; // Cùng chiều
+        }
+        // 2 nháy 1 số (status = 2): Số theo một chiều xuất hiện 2 lần
+        else if (($countOriginal == 2 && $countReverse == 0) || ($countOriginal == 0 && $countReverse == 2)) {
+            $status = 2;
+            $hitNumbers = $countOriginal == 2 ? [$originalNumber, $originalNumber] : [$reverseNumber, $reverseNumber];
+        }
+        // 2 nháy cả cặp (status = 3): Xuất hiện cả 2 chiều, mỗi chiều 1 lần
+        else if ($countOriginal == 1 && $countReverse == 1) {
+            $status = 3;
+            $hitNumbers = [$originalNumber, $reverseNumber];
+        }
+        // Nhiều hơn 2 nháy (status = 4)
+        else if ($totalHits > 2) {
+            $status = 4;
+            for ($i = 0; $i < $countOriginal; $i++) {
+                $hitNumbers[] = $originalNumber;
+            }
+            for ($i = 0; $i < $countReverse; $i++) {
+                $hitNumbers[] = $reverseNumber;
             }
         }
-
-        if ($countReverse > 0) {
-            $hitNumbers[] = $reverseNumber;
-        }
-
-        if ($totalHits == 2) {
-            if ($countOriginal == 2 || $countReverse == 2) {
-                $status = 2; // 2 nháy 1 số
-            } else if ($countOriginal == 1 && $countReverse == 1) {
-                $status = 3; // 2 nháy cả cặp
-            }
-        }
-
-        if ($totalHits > 2) {
-            $status = 4; // Nhiều hơn 2 nháy
+        // Trường hợp còn lại: normal (status = 0)
+        else {
+            if ($countOriginal > 0) $hitNumbers[] = $originalNumber;
+            if ($countReverse > 0) $hitNumbers[] = $reverseNumber;
         }
 
         return [
