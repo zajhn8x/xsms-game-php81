@@ -54,18 +54,16 @@ class LotteryFormulaService
         $indexResultsService = new LotteryIndexResultsService();
         $cauLoArray = $indexResultsService->getPositionValue($date, $formulaPositions);
         // Kiểm tra số trúng dựa trên dữ liệu vị trí và lô của ngày tiếp theo
-        $soTrungs = $this->checkHit($cauLoArray, $loArrayNextDay);
-        if (empty($soTrungs)) return null; //không trúng thì thoát sớm.
-        foreach ($soTrungs as $soTrung) {
-            // Xác định trạng thái hit
-            $status = $this->determineHitStatus($recentHits, $soTrung);
-            
-            // Lưu kết quả trúng với trạng thái
+        $hitResult = $this->checkHit($cauLoArray, $loArrayNextDay);
+        if (!$hitResult) return null; //không trúng thì thoát sớm.
+        
+        foreach ($hitResult['numbers'] as $soTrung) {
+            // Lưu kết quả trúng với trạng thái từ checkHit
             FormulaHit::firstOrCreate([
                 'cau_lo_id' => $cauLo->id,
                 'ngay' => $nextDay,
                 'so_trung' => $soTrung,
-                'status' => $status
+                'status' => $hitResult['status']
             ]);
         }
 
@@ -180,16 +178,51 @@ class LotteryFormulaService
      */
     protected function checkHit($cauLoArray, $loArrayNextDay, $sorted = false)
     {
-        $result = null;
-        $cauLoPairArray = $this->combineNumbers($cauLoArray);
-        // Kiểm tra từng số từ công thức có trùng khớp với lô ngày tiếp theo không
-        foreach ($cauLoPairArray as $number) {
-            if (in_array($number, $loArrayNextDay)) {
-                $result[] = $number; // Trả về số trúng đầu tiên tìm thấy
+        $result = [];
+        $originalNumber = $cauLoArray[0] . $cauLoArray[1]; // Số theo chiều ban đầu
+        $reverseNumber = $cauLoArray[1] . $cauLoArray[0]; // Số theo chiều ngược lại
+        
+        // Đếm số lần xuất hiện của mỗi số
+        $countOriginal = array_count_values($loArrayNextDay)[$originalNumber] ?? 0;
+        $countReverse = array_count_values($loArrayNextDay)[$reverseNumber] ?? 0;
+        
+        $totalHits = $countOriginal + $countReverse;
+        
+        if ($totalHits == 0) {
+            return null;
+        }
+
+        // Xác định status dựa vào các điều kiện
+        $status = 0; // Mặc định normal
+        $hitNumbers = [];
+        
+        if ($countOriginal > 0) {
+            $hitNumbers[] = $originalNumber;
+            if ($countOriginal == 1) {
+                $status = 1; // Cùng chiều
             }
         }
-        if ($result) return $result;
-        return null; // Không có số nào trúng
+        
+        if ($countReverse > 0) {
+            $hitNumbers[] = $reverseNumber;
+        }
+        
+        if ($totalHits == 2) {
+            if ($countOriginal == 2 || $countReverse == 2) {
+                $status = 2; // 2 nháy 1 số
+            } else if ($countOriginal == 1 && $countReverse == 1) {
+                $status = 3; // 2 nháy cả cặp
+            }
+        }
+        
+        if ($totalHits > 2) {
+            $status = 4; // Nhiều hơn 2 nháy
+        }
+        
+        return [
+            'numbers' => $hitNumbers,
+            'status' => $status
+        ];
     }
 
     /**
