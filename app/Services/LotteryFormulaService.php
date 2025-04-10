@@ -24,15 +24,22 @@ class LotteryFormulaService
     {
         // Lấy công thức cầu lô kèm theo thông tin liên kết từ bảng formula
         $cauLo = LotteryFormula::with('formula')->findOrFail($cauLoId);
-        // Lấy kết quả xổ số của ngày hiện tại
+        
+        // Lấy kết quả xổ số của ngày hiện tại và ngày tiếp theo
         $result = LotteryResult::where('draw_date', $date)->first();
-
-        // Lấy kết quả xổ số của ngày tiếp theo để kiểm tra số trúng
         $nextDay = Carbon::parse($date)->addDay()->format('Y-m-d');
         $resultNextDay = LotteryResult::where('draw_date', $nextDay)->first();
+        
         if (!$result || !$resultNextDay || !$cauLo) {
-            return null; // Nếu không có dữ liệu thì thoát sớm
+            return null;
         }
+
+        // Lấy lịch sử hit của công thức này trong 10 ngày gần nhất
+        $recentHits = FormulaHit::where('cau_lo_id', $cauLoId)
+            ->where('ngay', '<=', $date)
+            ->orderBy('ngay', 'desc')
+            ->take(10)
+            ->get();
 
         // Danh sách các số lô của ngày tiếp theo
         $loArrayNextDay = $resultNextDay->lo_array ?? [];
@@ -50,12 +57,85 @@ class LotteryFormulaService
         $soTrungs = $this->checkHit($cauLoArray, $loArrayNextDay);
         if (empty($soTrungs)) return null; //không trúng thì thoát sớm.
         foreach ($soTrungs as $soTrung) {
-            // Lưu kết quả trúng vào bảng LotteryFormulaHit
+            // Xác định trạng thái hit
+            $status = $this->determineHitStatus($recentHits, $soTrung);
+            
+            // Lưu kết quả trúng với trạng thái
             FormulaHit::firstOrCreate([
                 'cau_lo_id' => $cauLo->id,
                 'ngay' => $nextDay,
-                'so_trung' => $soTrung
+                'so_trung' => $soTrung,
+                'status' => $status
             ]);
+        }
+
+        private function determineHitStatus($recentHits, $currentNumber) {
+            if ($recentHits->isEmpty()) {
+                return 0; // Normal hit
+            }
+
+            $consecutiveHits = $this->getConsecutiveHits($recentHits);
+            $hitCount = count($consecutiveHits);
+            
+            if ($hitCount >= 3) {
+                return 4; // Nhiều hơn 2 nháy
+            }
+
+            if ($hitCount == 2) {
+                $lastHit = $consecutiveHits[0];
+                $prevHit = $consecutiveHits[1];
+                
+                // Kiểm tra cùng chiều
+                if ($this->isSameDirection($lastHit, $prevHit, $currentNumber)) {
+                    return 1;
+                }
+                
+                // Kiểm tra 2 nháy 1 số
+                if ($this->isSameNumberHit($lastHit, $prevHit)) {
+                    return 2;
+                }
+                
+                // Kiểm tra 2 nháy cả cặp
+                if ($this->isPairHit($lastHit, $prevHit)) {
+                    return 3;
+                }
+            }
+            
+            return 0; // Normal hit
+        }
+
+        private function getConsecutiveHits($hits) {
+            $consecutive = [];
+            $prevDate = null;
+            
+            foreach ($hits as $hit) {
+                if ($prevDate === null || Carbon::parse($hit->ngay)->addDay()->format('Y-m-d') == $prevDate) {
+                    $consecutive[] = $hit;
+                } else {
+                    break;
+                }
+                $prevDate = $hit->ngay;
+            }
+            
+            return $consecutive;
+        }
+
+        private function isSameDirection($lastHit, $prevHit, $currentNumber) {
+            // Kiểm tra xu hướng tăng/giảm
+            $trend = $lastHit->so_trung - $prevHit->so_trung;
+            $newTrend = $currentNumber - $lastHit->so_trung;
+            return ($trend > 0 && $newTrend > 0) || ($trend < 0 && $newTrend < 0);
+        }
+
+        private function isSameNumberHit($lastHit, $prevHit) {
+            // Kiểm tra có cùng 1 số không
+            return strval($lastHit->so_trung)[0] == strval($prevHit->so_trung)[0] ||
+                   strval($lastHit->so_trung)[1] == strval($prevHit->so_trung)[1];
+        }
+
+        private function isPairHit($lastHit, $prevHit) {
+            // Kiểm tra có phải cặp số không
+            return $lastHit->so_trung == strrev($prevHit->so_trung);
         }
 
         return [
