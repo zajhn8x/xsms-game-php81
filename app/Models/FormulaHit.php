@@ -14,7 +14,8 @@ class FormulaHit extends Model
     protected $fillable = [
         'cau_lo_id',
         'ngay',
-        'so_trung'
+        'so_trung',
+        'status'
     ];
 
     protected $casts = [

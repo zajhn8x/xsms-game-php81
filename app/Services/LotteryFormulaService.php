@@ -84,6 +84,8 @@ class LotteryFormulaService
         ];
     }
 
+
+
     /**
      * Kiểm tra số trúng dựa trên dữ liệu vị trí và lô ngày tiếp theo
      *
@@ -94,10 +96,13 @@ class LotteryFormulaService
      */
     protected function checkHit($cauLoArray, $loArrayNextDay, $sorted = false)
     {
+
+        $loArrayNextDay =  (array) $loArrayNextDay;
+        $countBy = collect($loArrayNextDay)->values()->countBy();
         // Xử lý trường hợp số trùng nhau
         if ($cauLoArray[0] === $cauLoArray[1]) {
             $number = $cauLoArray[0] . $cauLoArray[1];
-            $count = array_count_values($loArrayNextDay)[$number] ?? 0;
+            $count = $countBy[$number] ?? 0;
 
             if ($count === 0) {
                 return null;
@@ -113,8 +118,10 @@ class LotteryFormulaService
         $reverseNumber = $cauLoArray[1] . $cauLoArray[0]; // Số theo chiều ngược lại
 
         // Đếm số lần xuất hiện của mỗi số
-        $countOriginal = array_count_values($loArrayNextDay)[$originalNumber] ?? 0;
-        $countReverse = array_count_values($loArrayNextDay)[$reverseNumber] ?? 0;
+        $countOriginal = $countBy[$originalNumber] ?? 0;
+        $countReverse = $countBy[$reverseNumber] ?? 0;
+
+
 
         $totalHits = $countOriginal + $countReverse;
 
@@ -123,7 +130,7 @@ class LotteryFormulaService
         }
 
         // Xác định status dựa vào các điều kiện
-        $status = 0; // Mặc định normal 
+        $status = 0; // Mặc định normal
         $hitNumbers = [];
 
         // Cùng chiều (status = 1): Chỉ xuất hiện 1 lần theo chiều ban đầu
@@ -134,7 +141,7 @@ class LotteryFormulaService
         // 2 nháy 1 số (status = 2): Số theo một chiều xuất hiện 2 lần
         else if (($countOriginal == 2 && $countReverse == 0) || ($countOriginal == 0 && $countReverse == 2)) {
             $status = 2;
-            $hitNumbers = $countOriginal == 2 ? [$originalNumber, $originalNumber] : [$reverseNumber, $reverseNumber];
+            $hitNumbers = $countOriginal == 2 ? [$originalNumber] : [$reverseNumber];
         }
         // 2 nháy cả cặp (status = 3): Xuất hiện cả 2 chiều, mỗi chiều 1 lần
         else if ($countOriginal == 1 && $countReverse == 1) {
@@ -156,7 +163,7 @@ class LotteryFormulaService
             if ($countOriginal > 0) $hitNumbers[] = $originalNumber;
             if ($countReverse > 0) $hitNumbers[] = $reverseNumber;
         }
-
+//        Log::debug("A",["numberhits" => $hitNumbers,"countOrgin" => $countOriginal, "countRe" => $countReverse,"sta" => $status, "totalHit" => $totalHits]);
         return [
             'numbers' => $hitNumbers,
             'status' => $status

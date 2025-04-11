@@ -82,7 +82,7 @@ class ImportLotteryFromApi extends Command
                 $processedData[] = [
                     'draw_date' => $drawDate,
                     'prizes' => $prizes,
-                    'lo_array' => array_unique($lo_array)
+                    'lo_array' => $lo_array
                 ];
             }
 

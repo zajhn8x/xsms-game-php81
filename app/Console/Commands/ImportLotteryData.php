@@ -155,7 +155,7 @@ class ImportLotteryData extends Command
                 $data[] = [
                     'draw_date' => $row[0],
                     'prizes' => $prizes,
-                    'lo_array' => array_unique($lo_array)
+                    'lo_array' => $lo_array
                 ];
             } catch (Exception $e) {
                 //Handle exceptions during row processing.  Log the error for debugging.
