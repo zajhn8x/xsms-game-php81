@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Http\Controllers;
@@ -21,22 +20,11 @@ class HeatmapController extends Controller
     public function index()
     {
         $endDate = Carbon::today();
-        $startDate = $endDate->copy()->subDays(20);
-        
-        // Lấy danh sách các công thức và streak của chúng trong 20 ngày
-        $timelineData = [];
-        $currentDate = $endDate->copy();
-        
-        while($currentDate >= $startDate) {
-            $dateStr = $currentDate->format('Y-m-d');
-            $streakData = $this->formulaHitService->findConsecutiveHits($dateStr, 2);
-            $timelineData[$dateStr] = $streakData;
-            $currentDate->subDay();
-        }
+        $heatmapData = $this->formulaHitService->getHeatMap($endDate);
 
         return view('heatmap.index', [
-            'timelineData' => $timelineData,
-            'startDate' => $startDate,
+            'heatmapData' => $heatmapData,
+            'startDate' => $endDate->copy()->subDays(19),
             'endDate' => $endDate
         ]);
     }
