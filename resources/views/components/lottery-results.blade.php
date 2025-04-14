@@ -34,3 +34,72 @@
     </tr>
     </tbody>
 </table>
+<h5 class="mt-4 fw-bold text-center">📊 BẢNG ĐẦU – ĐUÔI LÔ TÔ</h5>
+
+<div class="row">
+    <!-- Bảng đầu -->
+    <div class="col-md-6 mb-3">
+        <div class="card shadow-sm">
+            <div class="card-header text-center fw-bold bg-primary text-white">
+                ĐẦU
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-bordered text-center mb-0">
+                    <thead>
+                    <tr>
+                        <th class="w-25">Đầu</th>
+                        <th>Lô tô</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @for($i = 0; $i <= 9; $i++)
+                        <tr>
+                            <td class="fw-bold">{{ $i }}</td>
+                            <td>
+                                @if(!empty($heads[$i]))
+                                    {!! implode('; ', $heads[$i]) !!};
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @endfor
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bảng đuôi -->
+    <div class="col-md-6 mb-3">
+        <div class="card shadow-sm">
+            <div class="card-header text-center fw-bold bg-success text-white">
+                ĐUÔI
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-bordered text-center mb-0">
+                    <thead>
+                    <tr>
+                        <th class="w-25">Đuôi</th>
+                        <th>Lô tô</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @for($i = 0; $i <= 9; $i++)
+                        <tr>
+                            <td class="fw-bold">{{ $i }}</td>
+                            <td>
+                                @if(!empty($tails[$i]))
+                                    {!! implode('; ', $tails[$i]) !!};
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @endfor
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

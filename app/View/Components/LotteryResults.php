@@ -3,6 +3,7 @@
 namespace App\View\Components;
 
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\Component;
 use function Symfony\Component\Mime\Test\Constraint\toString;
 
@@ -13,20 +14,26 @@ class LotteryResults extends Component
     public array $posKey;
     public array $defaultPos;
     public array $posAbs; // Lưu danh sách vị trí tuyệt đối (tối ưu)
+    public array $heads;
+    public array $tails;
 
-    public function __construct(array $prizes, array $hits = [], array $positions = [])
+    public function __construct(array $prizes, array $hits = [], array $positions = [], array $arrayLo = [])
     {
         $this->prizes = $prizes;
         $this->hits = $hits;
         $this->posKey = $positions;
         $this->defaultPos = config('xsmb.positions');
         $this->tempAbs = [];
+        $this->arrayLo = $arrayLo;
 
         // Tối ưu: Tạo sẵn danh sách vị trí tuyệt đối, không tính lại nhiều lần
         $this->posAbs = array_merge(...array_values($this->defaultPos));
 
         // Xác định vị trí tuyệt đối của posKey (nếu có trong posAbs)
         $this->posValue = array_keys(array_intersect($this->posAbs, $this->posKey));
+
+        //processHeadTail
+        $this->processHeadTail();
     }
 
     public function highlightPrizes($numbers)
@@ -87,6 +94,37 @@ class LotteryResults extends Component
         $cssClass = $styles[$type] ?? 'fw-bold text-dark';
         return "<span class='{$cssClass}'>{$char}</span>";
     }
+
+    private function processHeadTail(): void
+    {
+        $heads = [];
+        $tails = [];
+
+        foreach ($this->arrayLo as $lo) {
+            $lo = str_pad($lo, 2, '0', STR_PAD_LEFT);
+            $first = $lo[0]; // Đầu
+            $last = $lo[1];  // Đuôi
+
+            $heads[$first][] = $lo;
+            $tails[$last][] = $lo;
+        }
+
+        // Sắp xếp từng mảng con
+        foreach ($heads as &$items) {
+            sort($items);
+        }
+
+        foreach ($tails as &$items) {
+            sort($items);
+        }
+
+        ksort($heads);
+        ksort($tails);
+
+        $this->heads = $heads;
+        $this->tails = $tails;
+    }
+
 
     public function render()
     {

@@ -52,9 +52,25 @@
                                 @endif
 
                                 <!-- Trạng thái trúng -->
+                                @php
+                                    $statusIcons = [
+                                        0 => '🎯 Bình thường',
+                                        1 => '🔁 Cùng chiều',
+                                        2 => '💥 Hai nháy 1 số',
+                                        3 => '🎊 Hai nháy 2 số',
+                                        4 => '🔥 Nhiều hơn hai nháy',
+                                    ];
+                                @endphp
                                 <span class="badge {{ $hit ? 'bg-success' : 'bg-secondary' }}">
-                                    {{ $hit ? '🎯 Số trúng: ' . $hit->so_trung . ' - ' . \GuzzleHttp\json_encode($metaPosition) : '❌ Không trúng' }}
-                                </span>
+    @if($hit)
+                                        🎯 Số trúng: {{ $hit->so_trung }} –
+                                        {{ json_encode($metaPosition) }}
+                                        <br>
+                                        {!! $statusIcons[$hit->status] ?? '❔ Không rõ trạng thái' !!}
+                                    @else
+                                        ❌ Không trúng
+                                    @endif
+</span>
 
                                 <!-- Modal Button -->
                                 @if($result)
@@ -79,7 +95,7 @@
                                     </div>
                                     <div class="modal-body">
                                         @if($result->prizes)
-                                            <x-lottery-results :prizes="$result->prizes" :hits="$formulaValues" :positions="$metaPosition" />
+                                            <x-lottery-results :prizes="$result->prizes" :hits="$formulaValues" :positions="$metaPosition" :arrayLo="$result->lo_array" />
                                         @else
                                             <p class="text-center">Không có dữ liệu chi tiết</p>
                                         @endif

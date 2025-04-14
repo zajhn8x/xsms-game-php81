@@ -16,8 +16,11 @@ class Kernel extends ConsoleKernel
          * $schedule->command('campaigns:process-results')->dailyAt('19:00');
          *
          */
-        //Check 5 phút 1 cầu
+        /** Cap nhat ket qua moi cho cac ngay moiw */
+        //$schedule->command('lottery:import-api',[3])->dailyAt('19:00');
+        //lottery:check-formulas --partial --max-formula-batch=800 --start-date=2025-04-10 --days=4
 
+        //Check 5 phút 1 cầu
         $schedule->command('lottery:check-formulas', ['--days' => 7500, '--start-date' => '2005-10-01', '--max-formula-batch' => 1])->everyTwoMinutes();
 
     }
