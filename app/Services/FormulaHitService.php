@@ -19,6 +19,78 @@ class FormulaHitService
     }
 
     /**
+     * Lấy dữ liệu heatmap cho 100 ID trong 20 ngày
+     * @param string $endDate Ngày kết thúc format Y-m-d
+     * @return array Mảng dữ liệu heatmap theo ngày
+     */
+    public function getHeatMap($endDate = null) 
+    {
+        $endDate = $endDate ? Carbon::parse($endDate) : Carbon::today();
+        $startDate = $endDate->copy()->subDays(19); // Lấy 20 ngày tính cả ngày hiện tại
+        
+        $heatmapData = [];
+        $currentDate = $endDate->copy();
+
+        // Lặp qua 20 ngày
+        while ($currentDate >= $startDate) {
+            $dateStr = $currentDate->format('Y-m-d');
+            $dayData = [];
+
+            // Query cho từng mức streak
+            for ($streak = 7; $streak >= 2; $streak--) {
+                $hits = FormulaHit::select([
+                        'formula_hit.cau_lo_id',
+                        'meta.formula_name',
+                        DB::raw('GROUP_CONCAT(formula_hit.ngay ORDER BY formula_hit.ngay ASC) as ngay_trung'),
+                        DB::raw('COUNT(DISTINCT formula_hit.ngay) as streak_count')
+                    ])
+                    ->join('lottery_formula_meta as meta', 'formula_hit.cau_lo_id', '=', 'meta.id')
+                    ->where('formula_hit.ngay', '<=', $dateStr)
+                    ->whereExists(function ($query) use ($dateStr, $streak) {
+                        $query->from('formula_hit as h2')
+                            ->whereColumn('h2.cau_lo_id', 'formula_hit.cau_lo_id')
+                            ->whereRaw('DATEDIFF(?, h2.ngay) BETWEEN 0 AND ?', [$dateStr, $streak - 1]);
+                    })
+                    ->groupBy(['formula_hit.cau_lo_id', 'meta.formula_name'])
+                    ->having('streak_count', '=', $streak)
+                    ->get();
+
+                // Thêm các hits vào dayData
+                foreach ($hits as $hit) {
+                    $value = substr($hit->formula_name, -2); // Lấy 2 số cuối của formula_name
+                    $dayData[$hit->cau_lo_id] = [
+                        'id' => 'CL_' . $value,
+                        'streak' => $hit->streak_count,
+                        'value' => $value,
+                        'hit' => $value,
+                        'status' => $hit->streak_count >= 7 ? 4 : ($hit->streak_count == 6 ? 2 : 0)
+                    ];
+                }
+            }
+
+            // Đảm bảo có đủ 100 ô cho mỗi ngày
+            for ($i = 0; $i < 100; $i++) {
+                $id = str_pad($i, 2, '0', STR_PAD_LEFT);
+                if (!isset($dayData[$i])) {
+                    $dayData[$i] = [
+                        'id' => 'CL_' . $id,
+                        'streak' => 0,
+                        'value' => $id,
+                        'hit' => null,
+                        'status' => 0
+                    ];
+                }
+            }
+
+            ksort($dayData);
+            $heatmapData[$dateStr] = array_values($dayData);
+            $currentDate->subDay();
+        }
+
+        return $heatmapData;
+    }
+
+    /**
      * Lấy danh sách công thức có streak liên tiếp
      */
     public function getStreakFormulas($fromDate, $streak = 2, $limit = 3)
