@@ -28,3 +28,5 @@ Route::prefix('caulo')->group(function () {
     Route::get('/search', [CauLoController::class, 'search'])->name('caulo.search');
     Route::get('/timeline/{id}', [CauLoController::class, 'timeline'])->name('caulo.timeline');
 });
+
+Route::get('/heatmap', [HeatmapController::class, 'index'])->name('heatmap.index');
