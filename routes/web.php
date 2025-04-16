@@ -5,6 +5,7 @@ use App\Http\Controllers\LotteryController;
 use App\Http\Controllers\BetController;
 use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\CauLoController;
+use App\Http\Controllers\HeatmapController;
 
 Route::get('/', [LotteryController::class, 'index'])->name('home');
 Route::get('/lottery', [LotteryController::class, 'index'])->name('lottery.index');
@@ -24,9 +25,10 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::prefix('caulo')->group(function () {
+    Route::get('/heatmap', [HeatmapController::class, 'index'])->name('heatmap.index');
     Route::get('/find', [CauLoController::class, 'find'])->name('caulo.find');
     Route::get('/search', [CauLoController::class, 'search'])->name('caulo.search');
     Route::get('/timeline/{id}', [CauLoController::class, 'timeline'])->name('caulo.timeline');
 });
 
-Route::get('/heatmap', [HeatmapController::class, 'index'])->name('heatmap.index');
+

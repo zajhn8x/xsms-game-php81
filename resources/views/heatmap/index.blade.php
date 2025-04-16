@@ -29,7 +29,11 @@
                         </div>
                         <div class="d-flex align-items-center">
                             <div class="bg-success border" style="width: 20px; height: 20px;"></div>
-                            <span class="ms-2">Streak 3-4</span>
+                            <span class="ms-2">Streak 3</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="bg-success-dark border" style="width: 20px; height: 20px;"></div>
+                            <span class="ms-2">Streak 4</span>
                         </div>
                         <div class="d-flex align-items-center">
                             <div class="bg-success-darker border" style="width: 20px; height: 20px;"></div>
@@ -63,13 +67,14 @@
                                         $colorClass = match($cell['streak']) {
                                             0 => 'bg-dark',
                                             2 => 'bg-success-light',
-                                            3, 4 => 'bg-success',
+                                            3 => 'bg-success',
+                                            4 => 'bg-success-dark',
                                             5 => 'bg-success-darker',
                                             6 => 'bg-warning',
                                             default => 'bg-danger'
                                         };
                                     @endphp
-                                    <div class="heatmap-cell {{ $colorClass }}" 
+                                    <div class="heatmap-cell {{ $colorClass }}"
                                          data-bs-toggle="tooltip"
                                          data-bs-placement="top"
                                          title="ID: {{ $cell['id'] }}, Streak: {{ $cell['streak'] }}"
@@ -88,6 +93,17 @@
 </div>
 
 <style>
+    .bg-streak-2 { background-color: #C8FACC !important; }  /* Xanh nhạt dễ chịu */
+    .bg-streak-3 { background-color: #A3E4A3 !important; }
+    .bg-streak-4 { background-color: #6DC96D !important; }
+    .bg-streak-5 { background-color: #3DAB3D !important; }  /* Xanh đậm rõ nét */
+    .bg-streak-6 { background-color: #FFA726 !important; }  /* Cam tươi */
+    .bg-streak-7 { background-color: #FB4C4C !important; }  /* Đỏ nhạt */
+    .bg-streak-max { background-color: #B71C1C !important; }/* Đỏ đậm */
+    .heatmap-scroll {
+        overscroll-behavior-x: contain;
+        overflow-x: auto;
+    }
 .heatmap-scroll {
     overflow-x: auto;
     padding: 20px 0;
@@ -122,14 +138,58 @@
     z-index: 1;
 }
 
-.bg-success-light { background-color: #90EE90 !important; }
-.bg-success-darker { background-color: #006400 !important; }
+.bg-success-light {
+    background-color: #C3F7C3 !important; /* xanh rất nhạt */
+}
+
+.bg-success-dark {
+    background-color: #1f8a3a !important; /* xanh đậm hơn, nhưng vẫn khác biệt */
+}
+
+.bg-success-darker {
+    background-color: #006400 !important; /* xanh rất đậm */
+}
+
+.heatmap-cell {
+    aspect-ratio: 1;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.heatmap-cell:hover {
+    transform: scale(1.1);
+    z-index: 1;
+}
 
 .selected-cell {
-    border: 2px solid #fff !important;
-    box-shadow: 0 0 0 2px #000;
+    outline: 2px solid #fff;
+    box-shadow: 0 0 0 3px #0d6efd;
+    transform: scale(1.15);
+    z-index: 2;
+}
+.heatmap-scroll::-webkit-scrollbar {
+    height: 10px;
+}
+
+.heatmap-scroll::-webkit-scrollbar-thumb {
+    background-color: #bbb;
+    border-radius: 4px;
+}
+
+.heatmap-scroll::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+.heatmap-scroll {
+    overflow-x: scroll; /* luôn hiển thị thanh scroll */
+    padding: 20px 0;
+    scrollbar-color: #ccc transparent; /* Firefox */
+    scrollbar-width: thin;
 }
 </style>
+
+
 
 @push('scripts')
 <script>
@@ -145,10 +205,10 @@ document.addEventListener('DOMContentLoaded', function() {
     cells.forEach(cell => {
         cell.addEventListener('click', function() {
             const formulaId = this.dataset.formulaId;
-            
+
             // Reset all cells
             cells.forEach(c => c.classList.remove('selected-cell'));
-            
+
             // Highlight cells with same formula ID
             cells.forEach(c => {
                 if(c.dataset.formulaId === formulaId) {

@@ -38,10 +38,11 @@ class ImportLotteryFromApi extends Command
             }
             $baseData = $response->json();
             $apiData = $baseData["t"];
+            $issueList = array_reverse($apiData['issueList']);
             $processedData = [];
 
             // Xử lý dữ liệu từ API
-            foreach ($apiData['issueList'] as $issue) {
+            foreach ($issueList as $issue) {
                 // Chuyển đổi định dạng ngày
                 $drawDate = Carbon::createFromFormat('d/m/Y', $issue['turnNum'])->format('Y-m-d');
 
