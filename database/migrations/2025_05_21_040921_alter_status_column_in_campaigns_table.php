@@ -1,0 +1,30 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('campaigns', function (Blueprint $table) {
+             // Sửa cột status thành varchar
+             $table->string('status')->default('waiting')->change();
+             $table->string('bet_type')->default('manual')->change();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('campaigns', function (Blueprint $table) {
+            //
+        });
+    }
+};

@@ -13,35 +13,35 @@
             </div>
         </div>
 
-        <div class="card">
-            <div class="card-body">
-                <div class="table-responsive">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
                     <table class="table table-hover">
-                        <thead>
-                            <tr>
+                                <thead>
+                                <tr>
                                 <th>ID</th>
                                 <th>Tên chiến dịch</th>
-                                <th>Ngày bắt đầu</th>
+                                    <th>Ngày bắt đầu</th>
                                 <th>Ngày kết thúc</th>
-                                <th>Trạng thái</th>
+                                    <th>Trạng thái</th>
                                 <th>Tổng tiền cược</th>
                                 <th>Lợi nhuận</th>
                                 <th>Tỷ lệ thắng</th>
-                                <th>Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($campaigns as $campaign)
-                            <tr>
+                                    <th>Thao tác</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                @foreach($campaigns as $campaign)
+                                    <tr>
                                 <td>{{ $campaign->id }}</td>
                                 <td>
                                     <a href="{{ route('campaigns.show', $campaign->id) }}">
                                         {{ $campaign->name }}
                                     </a>
-                                </td>
+                                        </td>
                                 <td>{{ $campaign->start_date->format('d/m/Y') }}</td>
                                 <td>{{ $campaign->end_date ? $campaign->end_date->format('d/m/Y') : '-' }}</td>
-                                <td>
+                                        <td>
                                     @switch($campaign->status)
                                         @case('running')
                                             <span class="badge bg-success">Đang chạy</span>
@@ -50,14 +50,14 @@
                                             <span class="badge bg-warning">Tạm dừng</span>
                                             @break
                                         @case('finished')
-                                            <span class="badge bg-secondary">Đã kết thúc</span>
+                                                <span class="badge bg-secondary">Đã kết thúc</span>
                                             @break
                                     @endswitch
                                 </td>
                                 <td>{{ number_format($campaign->total_bet) }}đ</td>
                                 <td class="{{ $campaign->total_profit >= 0 ? 'text-success' : 'text-danger' }}">
                                     {{ number_format($campaign->total_profit) }}đ
-                                </td>
+                                        </td>
                                 <td>{{ $campaign->win_rate }}%</td>
                                 <td>
                                     <div class="btn-group">
@@ -83,13 +83,13 @@
                                                 onclick="finishCampaign({{ $campaign->id }})">
                                             <i class="fas fa-stop"></i>
                                         </button>
-                                        @endif
+                                            @endif
                                     </div>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                                </tbody>
+                            </table>
                 </div>
             </div>
         </div>

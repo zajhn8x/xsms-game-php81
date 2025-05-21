@@ -46,7 +46,8 @@ class CampaignController extends Controller
             // 'max_loss_total' => 'required|numeric|min:0',
             'target_profit' => 'nullable|numeric|min:0',
             'auto_stop_loss' => 'boolean',
-            'auto_take_profit' => 'boolean'
+            'auto_take_profit' => 'boolean',
+            'status' => 'required|string|in:waiting,active,running,paused,finished,completed',
         ]);
 
         // Tính số ngày
@@ -128,12 +129,18 @@ class CampaignController extends Controller
 
         $validated = $request->validate([
             'bet_date' => 'required|date',
-            'lo_number' => 'required|integer|min:0|max:99',
+            'lo_number' => 'required|integer|min:0|max:99', 
             'points' => 'required|integer|min:1'
         ]);
 
         try {
-            $bet = $this->campaignService->placeCampaignBet($campaign->id, $validated);
+            $betData = [
+                'bet_date' => $validated['bet_date'],
+                'bet_numbers' => [$validated['lo_number']],
+                'bet_amount' => $validated['points'] * 10000 // 10k/điểm
+            ];
+            
+            $bet = $this->campaignService->addBet($campaign->id, $betData);
             return redirect()->route('campaigns.show', $campaign)
                 ->with('success', 'Đặt cược thành công');
         } catch (\Exception $e) {
@@ -143,7 +150,7 @@ class CampaignController extends Controller
 
     public function run(Campaign $campaign)
     {
-        if ($campaign->status !== 'running') {
+        if ($campaign->status !== 'running' && $campaign->status !== 'waiting') {
             return response()->json([
                 'message' => 'Chiến dịch không ở trạng thái running'
             ], 400);

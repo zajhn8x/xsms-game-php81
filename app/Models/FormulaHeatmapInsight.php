@@ -236,9 +236,9 @@ class FormulaHeatmapInsight extends Model
             ['formula_id' => $formulaId, 'date' => $date],
             [
                 'formula_id' => $formulaId,
-                'type' => $type,
-                'extra' => $extra,
-                'score' => $score
+            'type' => $type,
+            'extra' => $extra,
+            'score' => $score
             ]
         );
     }

@@ -10,7 +10,7 @@
                 <a href="{{ route('campaigns.index') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Quay lại
                 </a>
-                @if($campaign->status == 'running')
+                @if($campaign->status == 'running' or $campaign->status == 'waiting')
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBetModal">
                     <i class="fas fa-plus"></i> Thêm cược
                 </button>
@@ -27,6 +27,9 @@
                             @case('active')
                                 <span class="badge bg-success">Đang chạy</span>
                                 @break
+                            @case('waiting')
+                                <span class="badge bg-warning">Chờ</span>
+                                @break
                             @case('paused')
                                 <span class="badge bg-warning">Tạm dừng</span>
                                 @break
@@ -39,7 +42,7 @@
                     </div>
                     <div class="col-md-6 text-end">
                         <div class="btn-group">
-                            @if($campaign->status === 'active')
+                            @if($campaign->status === 'waiting')
                             <button class="btn btn-success btn-sm" onclick="runCampaign({{ $campaign->id }})">
                                 <i class="fas fa-play"></i> Chạy
                             </button>

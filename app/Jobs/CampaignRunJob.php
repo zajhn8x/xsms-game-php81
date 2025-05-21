@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Campaign;
+use App\Models\CampaignBet;
 use App\Services\CampaignService;
 use App\Services\HeatmapInsightService;
 use Illuminate\Bus\Queueable;
@@ -29,69 +30,46 @@ class CampaignRunJob implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(CampaignService $campaignService, HeatmapInsightService $heatmapService)
+    public function handle(CampaignService $campaignService, HeatmapInsightService $insightService)
     {
-        try {
-            $campaign = Campaign::findOrFail($this->campaignId);
+        $campaign = Campaign::findOrFail($this->campaignId);
 
-            // Kiểm tra trạng thái campaign
-            if ($campaign->status !== 'running') {
-                Log::warning("Campaign không ở trạng thái running", [
-                    'campaign_id' => $this->campaignId,
-                    'status' => $campaign->status
-                ]);
-                return;
-            }
+        if ($campaign->status !== 'running') {
+            Log::info("Campaign {$this->campaignId} không ở trạng thái running");
+            return;
+        }
 
-            // Lấy 3 cặp heatmap insight tốt nhất
-            $insights = $heatmapService->getTopInsights(3, [
-                'type' => 'long_run_stop',
-                'day_stop' => 2 // Đang ở ngày thứ 2 sau khi dừng streak
-            ]);
+        $lastBet = CampaignBet::where('campaign_id', $this->campaignId)
+            ->orderBy('bet_date', 'desc')
+            ->first();
 
-            if (empty($insights)) {
-                Log::info("Không tìm thấy insight phù hợp", [
-                    'campaign_id' => $this->campaignId
-                ]);
-                return;
-            }
+        $runDate = $lastBet ? $lastBet->bet_date->addDay() : $campaign->start_date;
 
-            // Tạo bet với các số từ insight
-            $betNumbers = [];
-            foreach ($insights as $insight) {
-                $betNumbers[] = $insight->value;
-            }
+        if ($runDate->gt($campaign->end_date)) {
+            Log::info("Campaign {$this->campaignId} đã vượt quá ngày kết thúc");
+            return;
+        }
 
-            // Thêm bet vào campaign
-            $bet = $campaignService->addBet($campaign->id, [
-                'bet_date' => now()->format('Y-m-d'),
-                'bet_numbers' => $betNumbers,
-                'bet_amount' => $campaign->bet_amount ?? 10000 // Số tiền mặc định
-            ]);
+        $insights = $insightService->getTopInsights(
+            $runDate->format('Y-m-d'),
+            $campaign->strategy,
+            $campaign->max_bets_per_day
+        );
 
-            // Gửi thông báo
-            CampaignNotificationJob::dispatch('bet_created', [
-                'bet_id' => $bet->id
-            ]);
+        if (empty($insights)) {
+            Log::info("Không tìm thấy insight nào cho ngày {$runDate->format('Y-m-d')}");
+            return;
+        }
 
-            Log::info("Đã tạo bet tự động", [
-                'campaign_id' => $this->campaignId,
-                'bet_id' => $bet->id,
-                'numbers' => $betNumbers
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error("Lỗi khi chạy campaign", [
-                'campaign_id' => $this->campaignId,
-                'error' => $e->getMessage()
-            ]);
-
-            // Gửi thông báo lỗi
-            CampaignNotificationJob::dispatch('error', [
-                'campaign_id' => $this->campaignId,
-                'error' => $e->getMessage()
+        foreach ($insights as $insight) {
+            $campaignService->addBet($this->campaignId, [
+                'bet_date' => $runDate->format('Y-m-d'),
+                'bet_numbers' => $insight->formula->numbers,
+                'bet_amount' => $campaign->bet_amount_per_number
             ]);
         }
+
+        Log::info("Đã tạo bet cho campaign {$this->campaignId} ngày {$runDate->format('Y-m-d')}");
     }
 
     /**

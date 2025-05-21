@@ -10,27 +10,25 @@ use Illuminate\Support\Collection;
 
 class HeatmapInsightService
 {
-    private array $heatmap;
     private $lotteryIndexResultsService;
 
-    public function __construct(array $heatmap, LotteryIndexResultsService $lotteryIndexResultsService)
+    public function __construct(LotteryIndexResultsService $lotteryIndexResultsService)
     {
-        $this->heatmap = $heatmap;
         $this->lotteryIndexResultsService = $lotteryIndexResultsService;
     }
 
     /**
      * Xử lý toàn bộ heatmap và tạo insights
      */
-    public function process(): void
+    public function process(array $heatmap): void
     {
         $history = [];
-        $dates = array_keys($this->heatmap);
+        $dates = array_keys($heatmap);
         sort($dates); // Sắp xếp ngày tăng dần
         $dateCount = count($dates);
 
         foreach ($dates as $i => $date) {
-            $day = $this->heatmap[$date];
+            $day = $heatmap[$date];
             if (empty($day['data'])) continue;
 
             // Rollback: xử lý cho tất cả các ngày, không chỉ ngày cuối cùng
@@ -111,7 +109,7 @@ class HeatmapInsightService
                     $isRebound = false;
                     for ($j = $i - 1; $j >= max(0, $i - 3); $j--) {
                         $prevDate = $dates[$j];
-                        $prevData = $this->heatmap[$prevDate]['data'] ?? [];
+                        $prevData = $heatmap[$prevDate]['data'] ?? [];
                         foreach ($prevData as $prevItem) {
                             if ($prevItem['id'] == $id && $prevItem['streak'] >= 4) {
                                 $isRebound = true;
@@ -177,20 +175,16 @@ class HeatmapInsightService
     /**
      * Lấy danh sách insight tốt nhất theo điều kiện
      */
-    public function getTopInsights($limit = 3, $filters = [])
+    public function getTopInsights(string $date, string $strategy, int $limit, array $heatmap)
     {
         $query = FormulaHeatmapInsight::query();
 
-        if (!empty($filters['type'])) {
-            $query->where('type', $filters['type']);
+        if (!empty($strategy)) {
+            $query->where('type', $strategy);
         }
 
-        if (!empty($filters['day_stop'])) {
-            $query->where('day_stop', $filters['day_stop']);
-        }
-
-        if (!empty($filters['streak_length'])) {
-            $query->where('streak_length', '>=', $filters['streak_length']);
+        if (!empty($date)) {
+            $query->where('date', $date);
         }
 
         // Sắp xếp theo điểm số và streak
