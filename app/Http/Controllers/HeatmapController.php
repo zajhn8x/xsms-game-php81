@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\FormulaHitService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class HeatmapController extends Controller
 {
@@ -20,13 +21,31 @@ class HeatmapController extends Controller
     public function index()
     {
         $endDate = Carbon::today();
-        $heatmapData = $this->formulaHitService->getHeatMap($endDate);
-        dump($heatmapData);
-//dump($heatmapData = $this->formulaHitService->getHitDataWithStreak(['31','247','324'],['2025-04-01','2025-04-02','2025-04-03']));
-//        ($this->formulaHitService->getStreakFormulas('2025-04-01',2,50));
-//        dump($this->formulaHitService->findConsecutiveHits('2025-04-01',3));
+        $cacheKey = 'heatmap_data_' . $endDate->format('Y-m-d');
+        $heatmapData = cache()->remember($cacheKey, now()->addDay(), function () use ($endDate) {
+            return $this->formulaHitService->getHeatMap($endDate);
+        });
+
+        // Chuẩn bị dữ liệu cho view
+        $processedData = [];
+        foreach ($heatmapData as $date => $dayData) {
+            $processedData[$date] = [
+                'data' => array_map(function($cell) {
+                    $extra = $cell['extra'] ?? [];
+                    unset($extra['hit']); // Loại bỏ hit khỏi extra
+                    
+                    return [
+                        'id' => $cell['id'],
+                        'streak' => $cell['streak'],
+                        'hit' => $cell['hit'] ?? null,
+                        'extra' => $extra
+                    ];
+                }, $dayData['data'])
+            ];
+        }
+
         return view('heatmap.index', [
-            'heatmapData' => $heatmapData,
+            'heatmapData' => $processedData,
             'startDate' => $endDate->copy()->subDays(19),
             'endDate' => $endDate
         ]);

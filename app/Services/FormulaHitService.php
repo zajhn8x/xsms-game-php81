@@ -7,6 +7,7 @@ use App\Models\FormulaHit;
 use App\Models\LotteryResult;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use function PHPUnit\Framework\isEmpty;
 
 class FormulaHitService
 {
@@ -182,8 +183,9 @@ class FormulaHitService
      */
     public function getHeatMap($endDate = null)
     {
+        $lotteryFormulaService = new LotteryFormulaService();
         $endDate = $endDate ? Carbon::parse($endDate) : Carbon::today();
-        $startDate = $endDate->copy()->subDays(19); // 20 ngày: từ start đến end
+        $startDate = $endDate->copy()->subDays(7); // 20 ngày: từ start đến end
         $currentDate = $startDate->copy();
         $trackedIds = [];
         $heatmapData = [];
@@ -193,9 +195,9 @@ class FormulaHitService
             $dateStr = $currentDate->format('Y-m-d');
             $dayData = [];
             $seenIds = [];
-
+            $idsNextDay = [];
             for ($streak = 7; $streak >= 2; $streak--) {
-                $hits = $this->getStreakFormulas($dateStr, $streak, 30); // bỏ limit nếu không cần
+                $hits = $this->getStreakFormulas($dateStr, $streak, 20); // bỏ limit nếu không cần
 
                 foreach ($hits as $hit) {
                     $id = $hit->cau_lo_id;
@@ -205,32 +207,48 @@ class FormulaHitService
                         'id' => $id,
                         'streak' => $streak,
                         'value' => $id,
-                        'hit' => null,
-                        'status' => 0
+                        // 'hit' => null,
+                        // 'status' => 0
                     ];
 
                     $seenIds[$id] = true;
-                    $trackedIds[$id] = true; // ➕ luôn cả ID mới
+                    if($streak >= 4){
+                        $trackedIds[$id] = true; // ➕ luôn cả ID mới
+                    }
                 }
             }
+            $dateValues =  $lotteryFormulaService->getValuePositionFormulasByDate(array_keys($trackedIds), $dateStr);
+            $headsTails = $this->getLotteryListByFormulas($dateValues);
+//dump($headsTails);
 
-            $heatmapData[$dateStr] = $dayData;
+            //ID tracking là ID chưa lấy streak ở trên nhưng cần track
+            $idsNextDay = array_diff_key($trackedIds,  $seenIds);
+            if(!empty($idsNextDay)){
+                $dayData2 =  $this->getHitData(array_keys($idsNextDay), [$dateStr]);
+                $dayData += $dayData2[$dateStr];
+            }
+
+
+            $dayData = array_values($dayData);
+            usort($dayData, fn($a, $b) => $b['streak'] <=> $a['streak']);
+            // $heatmapData[$dateStr] = ["data" =>$dayData, "heads-tails" =>  $headsTails] ;
+            $heatmapData[$dateStr] = ["data" =>$dayData] ;
             $allDates[] = $dateStr;
             $currentDate->addDay();
         }
 //        dump($heatmapData);
 //        dump($allDates);
         // ✅ Lấy toàn bộ thông tin hit/status
-        $hitData = $this->getHitData(array_keys($trackedIds), $allDates);
+//        $hitData = $this->getHitData(array_keys($trackedIds), $allDates);
 
 
 
         // ✅ Gộp lại
         $finalHeatmap = [];
 
-        foreach ($hitData as $date => $row){
-            $finalHeatmap = collect($row)->merge($heatmapData[$date])->toArray();
-        }
+//        foreach ($hitData as $date => $row){
+//            $finalHeatmap = collect($row)->merge($heatmapData[$date])->toArray();
+//        }
 //        dump($finalHeatmap);
 
 //        $aaa = collect($hitData)->merge($heatmapData)->toArray();
@@ -304,6 +322,44 @@ class FormulaHitService
         }
 
         return $result;
+    }
+
+    /**
+     * Generate lottery number lists (normal & forward) from formula results
+     *
+     * @param array $formulasData  // Output from getValuePositionFormulasByDate
+     * @return array [
+     *   'normal' => ['05' => [2], '50' => [2]],
+     *   'forward_only' => ['05' => [2]]
+     * ]
+     */
+    public function getLotteryListByFormulas(array $formulasData): array
+    {
+        $normal = [];
+        $forwardOnly = [];
+
+        foreach ($formulasData as $item) {
+            $id = $item['id'];
+            $valueStrings = $item['value_string'] ?? [];
+
+            if (count($valueStrings) !== 2) {
+                continue;
+            }
+
+            [$xy, $yx] = $valueStrings;
+
+            // Add both directions to "normal"
+            $normal[$xy][] = $id;
+            $normal[$yx][] = $id;
+
+            // Only forward order to "forward_only"
+            $forwardOnly[$xy][] = $id;
+        }
+
+        return [
+            'normal' => $normal,
+            'forward_only' => $forwardOnly,
+        ];
     }
 
     /**

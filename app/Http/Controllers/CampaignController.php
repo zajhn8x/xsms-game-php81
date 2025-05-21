@@ -3,25 +3,25 @@
 namespace App\Http\Controllers;
 
 use App\Models\Campaign;
-use App\Services\LotteryBetService;
+use App\Models\CampaignBet;
+use App\Services\CampaignService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Jobs\CampaignRunJob;
 
 class CampaignController extends Controller
 {
-    protected $betService;
+    protected $campaignService;
 
-    public function __construct(LotteryBetService $betService)
+    public function __construct(CampaignService $campaignService)
     {
-        $this->betService = $betService;
+        $this->campaignService = $campaignService;
         $this->middleware('auth');
     }
 
     public function index()
     {
-        $campaigns = Campaign::where('user_id', Auth::id())
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        $campaigns = $this->campaignService->search();
         return view('campaigns.index', compact('campaigns'));
     }
 
@@ -33,34 +33,79 @@ class CampaignController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
             'start_date' => 'required|date',
-            'days' => 'required|integer|min:1',
-            'initial_balance' => 'required|numeric|min:1000',
-            'bet_type' => 'required|in:manual,formula'
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'bet_type' => 'required|string|in:manual,auto',
+            // 'bet_amount' => 'required|numeric|min:1000',
+            // 'max_bet_amount' => 'required|numeric|min:1000',
+            // 'min_bet_amount' => 'required|numeric|min:1000',
+            // 'max_bet_per_day' => 'required|integer|min:1',
+            // 'max_loss_per_day' => 'required|numeric|min:0',
+            // 'max_loss_total' => 'required|numeric|min:0',
+            'target_profit' => 'nullable|numeric|min:0',
+            'auto_stop_loss' => 'boolean',
+            'auto_take_profit' => 'boolean'
         ]);
 
-        try {
-            $campaign = $this->betService->createCampaign(Auth::id(), $validated);
-            return redirect()->route('campaigns.show', $campaign)
-                ->with('success', 'Chiến dịch được tạo thành công.');
-        } catch (\Exception $e) {
-            return back()->with('error', $e->getMessage());
+        // Tính số ngày
+        if (!empty($validated['end_date'])) {
+            $start = \Carbon\Carbon::parse($validated['start_date']);
+            $end = \Carbon\Carbon::parse($validated['end_date']);
+            $validated['days'] = $start->diffInDays($end) + 1;
+        } else {
+            $validated['days'] = 30;
         }
+
+        // Thêm các trường mặc định
+        $validated['status'] = 'waiting';
+        $validated['total_bet'] = 0;
+        $validated['total_profit'] = 0; 
+        $validated['total_bet_count'] = 0;
+        $validated['win_rate'] = 0;
+
+        $campaign = $this->campaignService->createWithUser(Auth::user(), $validated);
+
+        return redirect()
+            ->route('campaigns.show', $campaign->id)
+            ->with('success', 'Tạo chiến dịch thành công!');
     }
 
     public function show(Campaign $campaign)
     {
-        $this->authorize('view', $campaign);
+        $bets = $this->campaignService->getBets($campaign->id);
+        return view('campaigns.show', compact('campaign', 'bets'));
+    }
 
-        $bets = $campaign->bets()->latest()->paginate(10);
-        $stats = [
-            'total_bets' => $campaign->bets()->count(),
-            'win_bets' => $campaign->bets()->where('is_win', true)->count(),
-            'total_bet_amount' => $campaign->bets()->sum('amount'),
-            'total_win_amount' => $campaign->bets()->where('is_win', true)->sum('win_amount'),
-        ];
+    public function pause(Campaign $campaign)
+    {
+        $this->campaignService->pause($campaign->id);
+        return response()->json(['message' => 'Đã tạm dừng chiến dịch']);
+    }
 
-        return view('campaigns.show', compact('campaign', 'bets', 'stats'));
+    public function finish(Campaign $campaign)
+    {
+        $this->campaignService->finish($campaign->id);
+        return response()->json(['message' => 'Đã kết thúc chiến dịch']);
+    }
+
+    public function storeBet(Request $request, Campaign $campaign)
+    {
+        $validated = $request->validate([
+            'bet_date' => 'required|date',
+            'bet_numbers' => 'required|string',
+            'bet_amount' => 'required|numeric|min:1000',
+        ]);
+
+        // Convert bet_numbers from string to array
+        $validated['bet_numbers'] = array_map('trim', explode(',', $validated['bet_numbers']));
+
+        $this->campaignService->addBet($campaign->id, $validated);
+
+        return redirect()
+            ->route('campaigns.show', $campaign->id)
+            ->with('success', 'Thêm cược thành công!');
     }
 
     public function destroy(Campaign $campaign)
@@ -88,11 +133,27 @@ class CampaignController extends Controller
         ]);
 
         try {
-            $bet = $this->betService->placeCampaignBet($campaign->id, $validated);
+            $bet = $this->campaignService->placeCampaignBet($campaign->id, $validated);
             return redirect()->route('campaigns.show', $campaign)
                 ->with('success', 'Đặt cược thành công');
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage())->withInput();
         }
+    }
+
+    public function run(Campaign $campaign)
+    {
+        if ($campaign->status !== 'running') {
+            return response()->json([
+                'message' => 'Chiến dịch không ở trạng thái running'
+            ], 400);
+        }
+
+        // Dispatch job chạy chiến dịch
+        CampaignRunJob::dispatch($campaign->id);
+
+        return response()->json([
+            'message' => 'Đã bắt đầu chạy chiến dịch'
+        ]);
     }
 }

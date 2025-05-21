@@ -62,10 +62,11 @@
                         <div class="heatmap-day me-3">
                             <h6 class="text-center mb-2">{{ \Carbon\Carbon::parse($date)->format('d/m/Y') }}</h6>
                             <div class="heatmap-grid">
-                                @foreach($dayData as $cell)
+                                @foreach($dayData["data"] as $cell)
                                     @php
                                         $colorClass = match($cell['streak']) {
                                             0 => 'bg-dark',
+                                            1 => 'default',
                                             2 => 'bg-success-light',
                                             3 => 'bg-success',
                                             4 => 'bg-success-dark',
@@ -84,6 +85,20 @@
                                     </div>
                                 @endforeach
                             </div>
+                            @php
+                            /**
+                            <ul class="col-12 w-25">
+                                <h6>Normal</h6>
+                                @foreach($dayData["heads-tails"]["normal"] as $key => $cell)
+                                    <li> {{$key . " => " . json_encode($cell)  }}</li>
+                                @endforeach
+                                <h6>Forward - only</h6>
+                                @foreach($dayData["heads-tails"]["forward_only"] as $cell)
+                                    <li>{{$key . " => " . json_encode($cell)  }}</li>
+                                @endforeach
+                            </ul>
+                            */
+                            @endphp
                         </div>
                     @endforeach
                 </div>
@@ -102,6 +117,7 @@
     .bg-streak-max { background-color: #B71C1C !important; }/* Đỏ đậm */
     .heatmap-scroll {
         overscroll-behavior-x: contain;
+
         overflow-x: auto;
     }
 .heatmap-scroll {

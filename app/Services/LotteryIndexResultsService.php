@@ -127,4 +127,41 @@ class LotteryIndexResultsService
             ->get()
             ->toArray();
     }
+
+    /**
+     * Lấy giá trị các vị trí theo nhiều formula_id cho 1 ngày
+     *
+     * @param array $ids Danh sách formula_id
+     * @param string $date Ngày xổ số (Y-m-d)
+     * @return array
+     *   [
+     *     ["id" => 22, "position" => ["G2" => 2, "G33" => 5]],
+     *     ...
+     *   ]
+     */
+    public function getPositionsByFormulaIds(array $ids, string $date)
+    {
+        // Lấy thông tin các công thức kèm liên kết formula
+        $formulas = \App\Models\LotteryFormula::with('formula')->whereIn('id', $ids)->get();
+        $result = [];
+        foreach ($formulas as $formula) {
+            // Ưu tiên lấy positions từ quan hệ formula nếu có
+            $positions = $formula->formula->positions ?? $formula->positions ?? [];
+            $values = [];
+            if (!empty($positions)) {
+                $positionValues = $this->getPositionValue($date, $positions);
+                // Đảm bảo trả về map [position => value]
+                if (is_array($positions)) {
+                    foreach ($positions as $idx => $pos) {
+                        $values[$pos] = $positionValues[$idx] ?? null;
+                    }
+                }
+            }
+            $result[] = [
+                'id' => $formula->id,
+                'position' => $values
+            ];
+        }
+        return $result;
+    }
 }

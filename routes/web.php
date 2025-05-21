@@ -6,6 +6,8 @@ use App\Http\Controllers\BetController;
 use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\CauLoController;
 use App\Http\Controllers\HeatmapController;
+use App\Http\Controllers\HeatmapAnalyticController;
+use App\Http\Controllers\CampaignController;
 
 Route::get('/', [LotteryController::class, 'index'])->name('home');
 Route::get('/lottery', [LotteryController::class, 'index'])->name('lottery.index');
@@ -29,6 +31,20 @@ Route::prefix('caulo')->group(function () {
     Route::get('/find', [CauLoController::class, 'find'])->name('caulo.find');
     Route::get('/search', [CauLoController::class, 'search'])->name('caulo.search');
     Route::get('/timeline/{id}', [CauLoController::class, 'timeline'])->name('caulo.timeline');
+    Route::get('/heatmap-analytic/{date?}', [HeatmapAnalyticController::class, 'index'])->name('heatmap.analytic');
+});
+
+// Campaign routes
+Route::prefix('campaigns')->group(function () {
+    Route::get('/', [\App\Http\Controllers\CampaignController::class, 'index'])->name('campaigns.index');
+    Route::get('/create', [\App\Http\Controllers\CampaignController::class, 'create'])->name('campaigns.create');
+    Route::post('/', [\App\Http\Controllers\CampaignController::class, 'store'])->name('campaigns.store');
+    Route::get('/{campaign}', [\App\Http\Controllers\CampaignController::class, 'show'])->name('campaigns.show');
+    Route::post('/{campaign}/run', [\App\Http\Controllers\CampaignController::class, 'run'])->name('campaigns.run');
+    Route::post('/{campaign}/pause', [\App\Http\Controllers\CampaignController::class, 'pause'])->name('campaigns.pause');
+    Route::post('/{campaign}/finish', [\App\Http\Controllers\CampaignController::class, 'finish'])->name('campaigns.finish');
+    Route::delete('/{campaign}', [\App\Http\Controllers\CampaignController::class, 'destroy'])->name('campaigns.destroy');
+    Route::post('/{campaign}/bets', [\App\Http\Controllers\CampaignController::class, 'storeBet'])->name('campaigns.bets.store');
 });
 
 

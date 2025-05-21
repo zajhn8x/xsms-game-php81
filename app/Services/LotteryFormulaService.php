@@ -299,4 +299,62 @@ class LotteryFormulaService
 
         $cauLo->save();
     }
+
+
+    /**
+     * Trả về danh sách các cầu lô (với giá trị theo vị trí) đã xuất hiện trong ngày
+     *
+     * @param array $ids Mảng id các LotteryFormula cần lấy
+     * @param string $date Ngày cần tra cứu, định dạng 'Y-m-d'
+     * @return array Mỗi phần tử gồm: ['id' => ..., 'value' => [x,y], 'value_string' => ['xy','yx']]
+     * @throws Exception
+     */
+    public function getValuePositionFormulasByDate(array $ids, string $date): array
+    {
+        $result = [];
+
+        // Lấy danh sách các LotteryFormula một lần duy nhất
+        $formulas = LotteryFormula::with('formula')->whereIn('id', $ids)->get();
+//        dump($formulas);
+        $indexResultsService = new \App\Services\LotteryIndexResultsService();
+
+        foreach ($formulas as $formula) {
+            $formulaPositions = $formula->formula->positions ?? [];
+//            dump($formulaPositions);
+            // Bỏ qua nếu không có positions
+            if (empty($formulaPositions)) {
+                continue;
+            }
+
+            try {
+                // Lấy giá trị theo vị trí từ service
+                $values = $indexResultsService->getPositionValue($date, $formulaPositions);
+
+                // Chỉ xử lý khi có ít nhất 2 giá trị
+                if ($values && count($values) >= 2) {
+                    $value = array_values(array_slice($values, 0, 2)); // ép về dạng liên tục [x,y]
+
+                    // Tạo các số lô: xy và yx
+                    $valueString = [
+                        str_pad($value[0], 1, '0', STR_PAD_LEFT) . str_pad($value[1], 1, '0', STR_PAD_LEFT),
+                        str_pad($value[1], 1, '0', STR_PAD_LEFT) . str_pad($value[0], 1, '0', STR_PAD_LEFT),
+                    ];
+
+                    $result[] = [
+                        'id' => $formula->id,
+                        'value' => $value,
+                        'value_string' => $valueString,
+                    ];
+                }
+
+            } catch (\Exception $e) {
+                Log::error("Lỗi xử lý cầu lô ID {$formula->id} ngày $date: " . $e->getMessage());
+            }
+        }
+
+        return $result;
+    }
+
+
+
 }

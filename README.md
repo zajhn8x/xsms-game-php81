@@ -1,77 +1,67 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Hệ Thống Phân Tích Heatmap & Cầu Lô
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Tổng quan
+Hệ thống phân tích và theo dõi các cầu lô dựa trên dữ liệu heatmap, mô phỏng chiến lược chơi, và thống kê kết quả xổ số.
 
-## About Laravel
+## Định nghĩa nghiệp vụ
+- **Lô**: Hai chữ số cuối của mỗi giải trong kết quả xổ số. Mỗi ngày có 27 con lô.
+- **Cầu Lô**: Cặp số được tạo bằng cách ghép các chữ số tại các vị trí cụ thể trong bảng kết quả xổ số (VD: DB-1 và G7-4-2 → 18).
+- **Cấu trúc vị trí**: DB-1, G1-1, G2-1-1, G3-1-1, G7-1-1, ...
+- **Cách ghép cầu**: Chọn 2 vị trí, lấy số, ghép lại, kiểm tra xuất hiện ở 27 lô ngày hôm sau.
+- **Thông tin cần lưu cho mỗi cầu**: position_1, position_2, ngay_bat_dau, so_ngay_chay, so_lan_trung, ty_le_trung, streak.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and
-creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in
-many web projects, such as:
+## Cài đặt & cấu trúc thư mục
+- Framework: Laravel v10.x
+- Database: MySQL
+- PHP: >=8.1
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache)
-  storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Cấu trúc tài liệu
+- README.md (tổng quan, định nghĩa, hướng dẫn)
+- readme.LotteryResultService.md
+- readme.LotteryIndexResultsService.md
+- readme.FormulaHitService.md
+- ...
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Mô tả chức năng từng service
+- **LotteryResultService**
+  - Quản lý, truy vấn, lưu trữ kết quả xổ số từng ngày.
+  - Chỉ làm việc với bảng LotteryResult, không xử lý logic cầu lô.
+- **LotteryIndexResultsService**
+  - Truy vấn, phân tích dữ liệu từng vị trí số (theo index: DB-1, G1-1, ...).
+  - Hỗ trợ lấy giá trị các cặp số, kiểm tra dữ liệu đầy đủ, truy vấn lịch sử vị trí.
+- **FormulaHitService**
+  - Phân tích cầu lô, tính streak, sinh heatmap, thống kê timeline, tìm các cầu lô trúng liên tiếp.
+  - Sinh danh sách lô từ kết quả công thức, phục vụ cho các phân tích sâu hơn.
+- **HeatmapInsightService**
+  - Phân tích dữ liệu heatmap, phát hiện và lưu insight về các cầu lô (long_run, long_run_stop, rebound_after_long_run).
+  - Phục vụ đánh giá, tối ưu chiến lược chơi, và cung cấp dữ liệu cho analytic.
+- **CauLoStrategyService** (nếu có)
+  - Mô phỏng, đánh giá các chiến lược chọn cầu lô tối ưu dựa trên dữ liệu lịch sử và các chỉ số phân tích.
+- **CauLoSimulationService** (nếu có)
+  - Mô phỏng kết quả khi áp dụng các cầu lô theo từng chiến lược, giúp kiểm thử hiệu quả thực tế.
 
-## Learning Laravel
+## Cấu trúc các route chính
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all
-modern web application frameworks, making it a breeze to get started with the framework.
+### 1. `timeline/{id}`
+- **Đầu vào:** 1 id (cầu lô)
+- **Chức năng:** Hiển thị timeline các cặp số gợi ý cho cầu lô này, thể hiện rõ từng ngày có hit hay không, tổng số lần hit, tỷ lệ hit trên 500 ngày gần nhất.
+- **Luồng xử lý:** Sử dụng `FormulaHitService->getTimelineData` để lấy dữ liệu timeline, kết hợp kết quả xổ số, index, và lịch sử hit.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a
-modern Laravel application from scratch.
+### 2. `heatmap`
+- **Đầu vào:** Không (hoặc có thể truyền ngày kết thúc)
+- **Chức năng:** Xét trong 30 ngày gần nhất, lấy các cầu lô có streak lớn nhất, đồng thời theo dõi các cầu lô đó trong 30 ngày trước đó để phân tích chuỗi streak và hiệu suất.
+- **Luồng xử lý:** Sử dụng `FormulaHitService->getHeatMap` để sinh dữ liệu heatmap, lọc các cầu lô nổi bật theo streak.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video
-tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging
-into our comprehensive video library.
+### 3. `heatmap-analytic`
+- **Đầu vào:** Không (hoặc có thể truyền ngày/filter)
+- **Chức năng:** Dựa trên dữ liệu heatmap đã sinh, chọn lọc và lưu insight các cầu lô theo các nhóm: long_run, rebound_after_long_run, long_run_stop, ...
+- **Luồng xử lý:** Sử dụng `HeatmapInsightService` để phân tích, chọn lọc, và lưu insight vào DB. Giao diện analytic cho phép lọc, phân tích sâu theo từng loại insight.
 
-## Laravel Sponsors
+## Tài liệu chi tiết từng service
+- [LotteryResultService](readme.LotteryResultService.md)
+- [LotteryIndexResultsService](readme.LotteryIndexResultsService.md)
+- [FormulaHitService](readme.FormulaHitService.md)
+- [HeatmapInsightService](readme.HeatmapInsightService.md)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in
-becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
-
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in
-the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by
-the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell
-via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+*Xem chi tiết từng file readme.[ServiceName].md để biết rõ chức năng, ví dụ sử dụng và lưu ý nghiệp vụ từng service.*
