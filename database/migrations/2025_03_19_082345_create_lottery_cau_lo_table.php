@@ -7,7 +7,7 @@ return new class extends Migration {
     public function up(): void {
         Schema::create('lottery_cau_lo', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('formula_meta_id')->constrained('lottery_cau_lo_meta')->onDelete('cascade');
+            // $table->foreignId('formula_meta_id')->constrained('lottery_cau_lo_meta')->onDelete('cascade');
             $table->enum('combination_type', ['single', 'pair', 'multi', 'dynamic']);
             $table->boolean('is_verified')->default(false);
             $table->date('last_date_verified')->nullable();

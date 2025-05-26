@@ -44,6 +44,7 @@ class CampaignService
     public function addBet($campaignId, array $betData)
     {
         $betData['campaign_id'] = $campaignId;
+        Log::info("data bet", ["data" => $betData]);
         return CampaignBet::create($betData);
     }
 
@@ -170,4 +171,4 @@ class CampaignService
         $data['user_id'] = $user->id;
         return $this->create($data);
     }
-} 
+}

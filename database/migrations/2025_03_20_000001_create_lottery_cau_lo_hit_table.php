@@ -13,7 +13,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('cau_lo_id');
             $table->date('ngay');
             $table->string('so_trung', 10);
-            $table->foreign('cau_lo_id')->references('id')->on('lottery_formula');
+            // $table->foreign('cau_lo_id')->references('id')->on('lottery_formula');
             $table->index('ngay');
             $table->index('cau_lo_id');
 

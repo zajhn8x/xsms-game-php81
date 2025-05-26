@@ -185,7 +185,7 @@ class FormulaHitService
     {
         $lotteryFormulaService = new LotteryFormulaService();
         $endDate = $endDate ? Carbon::parse($endDate) : Carbon::today();
-        $startDate = $endDate->copy()->subDays(7); // 20 ngày: từ start đến end
+        $startDate = $endDate->copy()->subDays(12); // 20 ngày: từ start đến end
         $currentDate = $startDate->copy();
         $trackedIds = [];
         $heatmapData = [];
@@ -197,7 +197,7 @@ class FormulaHitService
             $seenIds = [];
             $idsNextDay = [];
             for ($streak = 7; $streak >= 2; $streak--) {
-                $hits = $this->getStreakFormulas($dateStr, $streak, 20); // bỏ limit nếu không cần
+                $hits = $this->getStreakFormulas($dateStr, $streak, 100); // bỏ limit nếu không cần
 
                 foreach ($hits as $hit) {
                     $id = $hit->cau_lo_id;
@@ -207,8 +207,9 @@ class FormulaHitService
                         'id' => $id,
                         'streak' => $streak,
                         'value' => $id,
-                        // 'hit' => null,
-                        // 'status' => 0
+                        'hit' => null,
+                        'status' => 0,
+                        'suggest' => "x,x"
                     ];
 
                     $seenIds[$id] = true;
@@ -217,20 +218,32 @@ class FormulaHitService
                     }
                 }
             }
-            $dateValues =  $lotteryFormulaService->getValuePositionFormulasByDate(array_keys($trackedIds), $dateStr);
+            $dateValues =  $lotteryFormulaService->getValuePositionFormulasByDate(array_merge(array_keys($trackedIds), array_keys($seenIds)), $dateStr);
+            // dump($dateValues);
+            // Cập nhật remember cho các ID trong $dayData từ $dateValues
+
             $headsTails = $this->getLotteryListByFormulas($dateValues);
 //dump($headsTails);
 
             //ID tracking là ID chưa lấy streak ở trên nhưng cần track
-            $idsNextDay = array_diff_key($trackedIds,  $seenIds);
+            $idsNextDay = array_diff_key($trackedIds, $seenIds);
             if(!empty($idsNextDay)){
-                $dayData2 =  $this->getHitData(array_keys($idsNextDay), [$dateStr]);
-                $dayData += $dayData2[$dateStr];
+                $dayData2 = $this->getHitData(array_keys($idsNextDay), [$dateStr]);
+                foreach($dayData2[$dateStr] as $id => $data) {
+                    $dayData[$id] = $data;
+                }
             }
-
+            //Cập nhật suggest cho các ID trong $dayData từ $dateValues
+            foreach ($dateValues as $dateValue) {
+                $id = $dateValue['id'];
+                if (isset($dayData[$id])) {
+                    $dayData[$id]['suggest'] = implode(',', $dateValue['value']);
+                }
+            }
 
             $dayData = array_values($dayData);
             usort($dayData, fn($a, $b) => $b['streak'] <=> $a['streak']);
+            // dump($dayData);
             // $heatmapData[$dateStr] = ["data" =>$dayData, "heads-tails" =>  $headsTails] ;
             $heatmapData[$dateStr] = ["data" =>$dayData] ;
             $allDates[] = $dateStr;
@@ -302,6 +315,7 @@ class FormulaHitService
                 'hit' => $hit->so_trung,
                 'status' => $hit->status,
                 'streak' => 1,
+                'remember' => "x,x"
             ];
         }
 
@@ -314,8 +328,8 @@ class FormulaHitService
                         'hit' => null,
                         'status' => 0,
                         'streak' => 0,
-                        'value' =>$id
-
+                        'value' =>$id,
+                        'suggest' => "x,x"
                     ];
                 }
             }

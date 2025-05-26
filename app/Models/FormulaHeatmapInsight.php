@@ -58,9 +58,32 @@ class FormulaHeatmapInsight extends Model
 
     /**
      * Get suggested numbers from formula
+     * Returns array of bet numbers, each bet can be either single number or pair of numbers
      */
     public function getSuggestedNumbers(): array
     {
+        // Ưu tiên lấy từ cache trong extra
+        if (isset($this->extra['predicted_values_by_position']) && !empty($this->extra['predicted_values_by_position'])) {
+            $numbers = array_values($this->extra['predicted_values_by_position']);
+
+            // Nếu chỉ có 1 số, trả về luôn
+            if (count($numbers) === 1) {
+                return [$numbers[0]];
+            }
+
+            // Nếu có 2 số, tạo các cặp bet AB và BA
+            if (count($numbers) === 2) {
+                return [
+                    $numbers[0] . $numbers[1], // AB
+                    $numbers[1] . $numbers[0]  // BA
+                ];
+            }
+
+            // Nếu có nhiều hơn 2 số, trả về mảng các số đơn
+            return $numbers;
+        }
+
+        // Nếu không có cache, tính toán từ kết quả xổ số
         if (!$this->formula) {
             return [];
         }
@@ -70,7 +93,7 @@ class FormulaHeatmapInsight extends Model
 
         // Lấy các vị trí từ công thức
         $positions = $formula->positions ?? [];
-        
+
         // Lấy kết quả xổ số của ngày trước
         $previousDate = Carbon::parse($this->date)->subDay();
         $previousResult = LotteryResult::where('draw_date', $previousDate)->first();
@@ -81,6 +104,18 @@ class FormulaHeatmapInsight extends Model
                     $suggestedNumbers[] = $previousResult->prizes[$position];
                 }
             }
+        }
+
+        // Xử lý tương tự như trên cho kết quả từ database
+        if (count($suggestedNumbers) === 1) {
+            return [$suggestedNumbers[0]];
+        }
+
+        if (count($suggestedNumbers) === 2) {
+            return [
+                $suggestedNumbers[0] . $suggestedNumbers[1], // AB
+                $suggestedNumbers[1] . $suggestedNumbers[0]  // BA
+            ];
         }
 
         return $suggestedNumbers;
@@ -263,4 +298,4 @@ class FormulaHeatmapInsight extends Model
             ->orderBy('score', 'desc')
             ->get();
     }
-} 
+}

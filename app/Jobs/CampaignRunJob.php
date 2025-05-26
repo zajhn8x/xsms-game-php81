@@ -5,7 +5,7 @@ namespace App\Jobs;
 use App\Models\Campaign;
 use App\Models\CampaignBet;
 use App\Services\CampaignService;
-use App\Services\HeatmapInsightService;
+use App\Services\Queries\HeatmapInsightQueryService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -30,11 +30,11 @@ class CampaignRunJob implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(CampaignService $campaignService, HeatmapInsightService $insightService)
+    public function handle(CampaignService $campaignService, HeatmapInsightQueryService $insightService)
     {
         $campaign = Campaign::findOrFail($this->campaignId);
 
-        if ($campaign->status !== 'running') {
+        if ($campaign->status !== 'running' && $campaign->status !== 'active') {
             Log::info("Campaign {$this->campaignId} không ở trạng thái running");
             return;
         }
@@ -52,8 +52,10 @@ class CampaignRunJob implements ShouldQueue
 
         $insights = $insightService->getTopInsights(
             $runDate->format('Y-m-d'),
-            $campaign->strategy,
-            $campaign->max_bets_per_day
+            "",
+            3
+            // $campaign->strategy,
+            // $campaign->max_bets_per_day
         );
 
         if (empty($insights)) {
@@ -64,8 +66,9 @@ class CampaignRunJob implements ShouldQueue
         foreach ($insights as $insight) {
             $campaignService->addBet($this->campaignId, [
                 'bet_date' => $runDate->format('Y-m-d'),
-                'bet_numbers' => $insight->formula->numbers,
-                'bet_amount' => $campaign->bet_amount_per_number
+                'bet_number' => $insight->getSuggestedNumbers(),
+                // 'bet_amount' => $campaign->1000
+                'bet_amount' => 100
             ]);
         }
 
@@ -82,4 +85,4 @@ class CampaignRunJob implements ShouldQueue
             'error' => $exception->getMessage()
         ]);
     }
-} 
+}

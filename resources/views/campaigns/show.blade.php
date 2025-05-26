@@ -10,7 +10,7 @@
                 <a href="{{ route('campaigns.index') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Quay lại
                 </a>
-                @if($campaign->status == 'running' or $campaign->status == 'waiting')
+                @if($campaign->status == 'running' or $campaign->status == 'active')
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBetModal">
                     <i class="fas fa-plus"></i> Thêm cược
                 </button>
@@ -25,7 +25,7 @@
                         <strong>Trạng thái:</strong>
                         @switch($campaign->status)
                             @case('active')
-                                <span class="badge bg-success">Đang chạy</span>
+                                <span class="badge bg-success">Sẵn sàng</span>
                                 @break
                             @case('waiting')
                                 <span class="badge bg-warning">Chờ</span>
@@ -42,7 +42,7 @@
                     </div>
                     <div class="col-md-6 text-end">
                         <div class="btn-group">
-                            @if($campaign->status === 'waiting')
+                            @if($campaign->status === 'active' || $campaign->status === 'waiting')
                             <button class="btn btn-success btn-sm" onclick="runCampaign({{ $campaign->id }})">
                                 <i class="fas fa-play"></i> Chạy
                             </button>
@@ -194,12 +194,12 @@
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                         </div>
                                                         <div class="modal-body">
-                                                            <p><strong>Số lô đã cược:</strong> 
+                                                            <p><strong>Số lô đã cược:</strong>
                                                                 @foreach(json_decode($bet->bet_numbers) as $number)
                                                                     <span class="badge bg-info">{{ $number }}</span>
                                                                 @endforeach
                                                             </p>
-                                                            <p><strong>Kết quả:</strong> 
+                                                            <p><strong>Kết quả:</strong>
                                                                 @if($bet->result > 0)
                                                                     Trúng {{ $bet->result }} lần
                                                                 @else
@@ -252,7 +252,7 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Số lô (cách nhau bằng dấu phẩy)</label>
-                            <input type="text" name="bet_numbers" class="form-control" 
+                            <input type="text" name="bet_numbers" class="form-control"
                                    placeholder="VD: 18,25,36" required>
                         </div>
                         <div class="mb-3">

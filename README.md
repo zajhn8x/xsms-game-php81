@@ -10,58 +10,102 @@ Hệ thống phân tích và theo dõi các cầu lô dựa trên dữ liệu he
 - **Cách ghép cầu**: Chọn 2 vị trí, lấy số, ghép lại, kiểm tra xuất hiện ở 27 lô ngày hôm sau.
 - **Thông tin cần lưu cho mỗi cầu**: position_1, position_2, ngay_bat_dau, so_ngay_chay, so_lan_trung, ty_le_trung, streak.
 
-## Cài đặt & cấu trúc thư mục
+## Cài đặt & Cấu hình
 - Framework: Laravel v10.x
 - Database: MySQL
 - PHP: >=8.1
+- Cache: Redis (khuyến nghị)
 
-### Cấu trúc tài liệu
-- README.md (tổng quan, định nghĩa, hướng dẫn)
-- readme.LotteryResultService.md
-- readme.LotteryIndexResultsService.md
-- readme.FormulaHitService.md
-- ...
+### Yêu cầu hệ thống
+- PHP >= 8.1
+- MySQL >= 8.0
+- Composer
+- Redis (tùy chọn, cho cache)
 
-## Mô tả chức năng từng service
-- **LotteryResultService**
-  - Quản lý, truy vấn, lưu trữ kết quả xổ số từng ngày.
-  - Chỉ làm việc với bảng LotteryResult, không xử lý logic cầu lô.
-- **LotteryIndexResultsService**
-  - Truy vấn, phân tích dữ liệu từng vị trí số (theo index: DB-1, G1-1, ...).
-  - Hỗ trợ lấy giá trị các cặp số, kiểm tra dữ liệu đầy đủ, truy vấn lịch sử vị trí.
-- **FormulaHitService**
-  - Phân tích cầu lô, tính streak, sinh heatmap, thống kê timeline, tìm các cầu lô trúng liên tiếp.
-  - Sinh danh sách lô từ kết quả công thức, phục vụ cho các phân tích sâu hơn.
-- **HeatmapInsightService**
-  - Phân tích dữ liệu heatmap, phát hiện và lưu insight về các cầu lô (long_run, long_run_stop, rebound_after_long_run).
-  - Phục vụ đánh giá, tối ưu chiến lược chơi, và cung cấp dữ liệu cho analytic.
-- **CauLoStrategyService** (nếu có)
-  - Mô phỏng, đánh giá các chiến lược chọn cầu lô tối ưu dựa trên dữ liệu lịch sử và các chỉ số phân tích.
-- **CauLoSimulationService** (nếu có)
-  - Mô phỏng kết quả khi áp dụng các cầu lô theo từng chiến lược, giúp kiểm thử hiệu quả thực tế.
+### Cài đặt
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate
+php artisan db:seed
+```
 
-## Cấu trúc các route chính
+## Cấu trúc Service
 
-### 1. `timeline/{id}`
-- **Đầu vào:** 1 id (cầu lô)
-- **Chức năng:** Hiển thị timeline các cặp số gợi ý cho cầu lô này, thể hiện rõ từng ngày có hit hay không, tổng số lần hit, tỷ lệ hit trên 500 ngày gần nhất.
-- **Luồng xử lý:** Sử dụng `FormulaHitService->getTimelineData` để lấy dữ liệu timeline, kết hợp kết quả xổ số, index, và lịch sử hit.
+### 1. Domain Services
+- **LotteryResultService**: Quản lý kết quả xổ số
+- **LotteryIndexResultsService**: Phân tích dữ liệu theo vị trí
+- **FormulaHitService**: Phân tích cầu lô và tính toán streak
+- **HeatmapInsightService**: Phân tích và lưu trữ insight
 
-### 2. `heatmap`
-- **Đầu vào:** Không (hoặc có thể truyền ngày kết thúc)
-- **Chức năng:** Xét trong 30 ngày gần nhất, lấy các cầu lô có streak lớn nhất, đồng thời theo dõi các cầu lô đó trong 30 ngày trước đó để phân tích chuỗi streak và hiệu suất.
-- **Luồng xử lý:** Sử dụng `FormulaHitService->getHeatMap` để sinh dữ liệu heatmap, lọc các cầu lô nổi bật theo streak.
+### 2. Query Services
+- **HeatmapInsightQueryService**: Truy vấn dữ liệu insight
+- **FormulaHitQueryService**: Truy vấn dữ liệu hit
+- **LotteryResultQueryService**: Truy vấn kết quả xổ số
 
-### 3. `heatmap-analytic`
-- **Đầu vào:** Không (hoặc có thể truyền ngày/filter)
-- **Chức năng:** Dựa trên dữ liệu heatmap đã sinh, chọn lọc và lưu insight các cầu lô theo các nhóm: long_run, rebound_after_long_run, long_run_stop, ...
-- **Luồng xử lý:** Sử dụng `HeatmapInsightService` để phân tích, chọn lọc, và lưu insight vào DB. Giao diện analytic cho phép lọc, phân tích sâu theo từng loại insight.
+### 3. Command Services
+- **HeatmapInsightCommandService**: Tạo và cập nhật insight
+- **FormulaHitCommandService**: Tạo và cập nhật hit
+- **LotteryResultCommandService**: Tạo và cập nhật kết quả
 
-## Tài liệu chi tiết từng service
+## Các Route Chính
+
+### 1. Timeline
+```
+GET /timeline/{id}
+```
+- Hiển thị timeline của cầu lô
+- Phân tích streak và tỷ lệ hit
+- Thống kê 500 ngày gần nhất
+
+### 2. Heatmap
+```
+GET /heatmap
+```
+- Phân tích 30 ngày gần nhất
+- Theo dõi streak và hiệu suất
+- Lọc cầu lô nổi bật
+
+### 3. Heatmap Analytic
+```
+GET /heatmap/analytic
+```
+- Phân tích insight theo loại:
+  - Long Run
+  - Rebound After Long Run
+  - Long Run Stop
+- Lọc và tìm kiếm nâng cao
+
+## Quy tắc Phát Triển
+
+### 1. Cấu trúc Service
+- Tách biệt Command và Query (CQRS)
+- Sử dụng Repository pattern
+- Cache khi cần thiết
+
+### 2. Tối ưu Performance
+- Sử dụng index cho các cột thường xuyên tìm kiếm
+- Cache kết quả truy vấn phức tạp
+- Eager loading cho relationships
+
+### 3. Code Style
+- PSR-12
+- Type hinting
+- Docblock đầy đủ
+
+## Tài liệu Chi tiết
 - [LotteryResultService](readme.LotteryResultService.md)
 - [LotteryIndexResultsService](readme.LotteryIndexResultsService.md)
 - [FormulaHitService](readme.FormulaHitService.md)
 - [HeatmapInsightService](readme.HeatmapInsightService.md)
 
----
-*Xem chi tiết từng file readme.[ServiceName].md để biết rõ chức năng, ví dụ sử dụng và lưu ý nghiệp vụ từng service.*
+## Contributing
+1. Fork repository
+2. Tạo branch mới
+3. Commit changes
+4. Push to branch
+5. Tạo Pull Request
+
+## License
+MIT License

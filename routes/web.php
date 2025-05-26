@@ -30,7 +30,7 @@ Route::prefix('caulo')->group(function () {
     Route::get('/heatmap', [HeatmapController::class, 'index'])->name('heatmap.index');
     Route::get('/find', [CauLoController::class, 'find'])->name('caulo.find');
     Route::get('/search', [CauLoController::class, 'search'])->name('caulo.search');
-    Route::get('/timeline/{id}', [CauLoController::class, 'timeline'])->name('caulo.timeline');
+Route::get('/timeline/{id}', [CauLoController::class, 'timeline'])->name('caulo.timeline');
     Route::get('/heatmap-analytic/{date?}', [HeatmapAnalyticController::class, 'index'])->name('heatmap.analytic');
 });
 

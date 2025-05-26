@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\FormulaHeatmapInsight;
 use App\Services\FormulaHitService;
-use App\Services\HeatmapInsightService;
+use App\Services\Commands\HeatmapInsightCommandService;
 use App\Services\LotteryIndexResultsService;
 use Illuminate\Console\Command;
 use Carbon\Carbon;
@@ -31,24 +31,26 @@ class AnalyzeHeatmapCommand extends Command
     {
         try {
             $this->info('Bắt đầu phân tích heatmap...');
-            
-            // Lấy dữ liệu heatmap
+
             $date = $this->option('date') ? Carbon::parse($this->option('date')) : Carbon::today();
-            $days = (int)$this->option('days');
-            
-            $heatmap = $this->formulaHitService->getHeatMap($date);
-            
-            if (empty($heatmap)) {
-                $this->error('Không tìm thấy dữ liệu heatmap!');
+            $days = 30; // Luôn lấy 30 ngày trước đó
+
+            // Lấy dữ liệu heatmap từ DB
+            $startDate = $date->copy()->subDays($days - 1);
+            $records = \App\Models\HeatmapDailyRecord::whereBetween('date', [$startDate, $date])
+                ->orderBy('date', 'desc')
+                ->get();
+            if ($records->isEmpty()) {
+                $this->error('Không tìm thấy dữ liệu heatmap trong khoảng ngày!');
                 return 1;
             }
-
-            // Xử lý theo ngày cụ thể hoặc toàn bộ
-            if ($this->option('date')) {
-                $this->processSingleDate($date->format('Y-m-d'), $heatmap);
-            } else {
-                $this->processAllDates($heatmap);
+            $heatmap = [];
+            foreach ($records as $record) {
+                $heatmap[$record->date->format('Y-m-d')] = [
+                    'data' => $record->data
+                ];
             }
+            $this->processAllDates($heatmap);
 
             $this->info('Phân tích hoàn tất!');
             return 0;
@@ -70,14 +72,9 @@ class AnalyzeHeatmapCommand extends Command
         }
 
         $this->info("Đang phân tích ngày {$date}...");
-        
-        // Xóa dữ liệu cũ của ngày này
         FormulaHeatmapInsight::where('date', $date)->delete();
-        
-        // Phân tích và lưu dữ liệu mới
-        $service = new HeatmapInsightService([$date => $heatmap[$date]], $this->lotteryIndexResultsService);
-        $service->process();
-
+        $service = new HeatmapInsightCommandService($this->lotteryIndexResultsService);
+        $service->process([$date => $heatmap[$date]], $date);
         $this->info("Đã hoàn thành phân tích ngày {$date}");
     }
 
@@ -87,15 +84,10 @@ class AnalyzeHeatmapCommand extends Command
     private function processAllDates(array $heatmap): void
     {
         $this->info('Đang phân tích toàn bộ dữ liệu...');
-        
-        // Xóa dữ liệu cũ
         $dates = array_keys($heatmap);
         FormulaHeatmapInsight::whereIn('date', $dates)->delete();
-        
-        // Phân tích và lưu dữ liệu mới
-        $service = new HeatmapInsightService($heatmap, $this->lotteryIndexResultsService);
-        $service->process();
-
+        $service = new HeatmapInsightCommandService($this->lotteryIndexResultsService);
+        $service->process($heatmap, $dates[0]);
         $this->info('Đã hoàn thành phân tích toàn bộ dữ liệu');
     }
 
@@ -167,9 +159,9 @@ class AnalyzeHeatmapCommand extends Command
         $prevPrevNode = collect($heatmap[$prevPrevDate]['data'])
             ->firstWhere('id', $node['id']);
 
-        if (!$prevNode || !$prevPrevNode || 
-            $prevPrevNode['streak'] < 6 || 
-            $prevNode['hit'] !== false || 
+        if (!$prevNode || !$prevPrevNode ||
+            $prevPrevNode['streak'] < 6 ||
+            $prevNode['hit'] !== false ||
             $node['hit'] !== true) {
             return null;
         }
@@ -187,4 +179,4 @@ class AnalyzeHeatmapCommand extends Command
             ]
         ];
     }
-} 
+}

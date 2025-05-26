@@ -1,4 +1,3 @@
-
 @extends('layouts.app')
 
 @section('content')
@@ -47,6 +46,11 @@
                             <div class="bg-danger border" style="width: 20px; height: 20px;"></div>
                             <span class="ms-2">Streak >6</span>
                         </div>
+                        <div class="d-flex align-items-center ms-auto">
+                            <button id="goToTimelineBtn" class="btn btn-primary">
+                                Xem Timeline
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -78,7 +82,7 @@
                                     <div class="heatmap-cell {{ $colorClass }}"
                                          data-bs-toggle="tooltip"
                                          data-bs-placement="top"
-                                         title="ID: {{ $cell['id'] }}, Streak: {{ $cell['streak'] }}"
+                                         title="ID: {{ $cell['id'] }}, Streak: {{ $cell['streak'] }}{{ isset($cell['suggest']) ? ', Suggest: ' . $cell['suggest'] : '' }}"
                                          data-formula-id="{{ $cell['id'] }}"
                                          data-date="{{ $date }}"
                                          data-streak="{{ $cell['streak'] }}">
@@ -216,22 +220,33 @@ document.addEventListener('DOMContentLoaded', function() {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
 
+    let selectedFormulaId = null;
+
     // Xử lý click cell
     const cells = document.querySelectorAll('.heatmap-cell');
     cells.forEach(cell => {
         cell.addEventListener('click', function() {
-            const formulaId = this.dataset.formulaId;
+            selectedFormulaId = this.dataset.formulaId;
 
             // Reset all cells
             cells.forEach(c => c.classList.remove('selected-cell'));
 
             // Highlight cells with same formula ID
             cells.forEach(c => {
-                if(c.dataset.formulaId === formulaId) {
+                if(c.dataset.formulaId === selectedFormulaId) {
                     c.classList.add('selected-cell');
                 }
             });
         });
+    });
+
+    // Thêm event listener cho nút Xem Timeline
+    document.getElementById('goToTimelineBtn').addEventListener('click', function() {
+        if(selectedFormulaId) {
+            window.open('/caulo/timeline/' + selectedFormulaId, '_blank');
+        } else {
+            alert('Vui lòng chọn một cầu lô trước khi xem timeline');
+        }
     });
 });
 </script>

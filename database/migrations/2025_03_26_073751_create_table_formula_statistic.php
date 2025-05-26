@@ -39,7 +39,7 @@ return new class extends Migration {
             $table->timestamps();
 
             $table->unique(['formula_id', 'year', 'quarter'], 'uq_formula_quarter');
-            $table->foreign('formula_id')->references('id')->on('lottery_formula')->onDelete('cascade');
+            // $table->foreign('formula_id')->references('id')->on('lottery_formula')->onDelete('cascade');
         });
     }
 

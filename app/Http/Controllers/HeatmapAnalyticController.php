@@ -5,105 +5,48 @@ namespace App\Http\Controllers;
 use App\Models\FormulaHeatmapInsight;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Services\Queries\HeatmapInsightQueryService;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class HeatmapAnalyticController extends Controller
 {
+    protected $insightQueryService;
+
+    public function __construct(HeatmapInsightQueryService $insightQueryService)
+    {
+        $this->insightQueryService = $insightQueryService;
+    }
+
     public function index(Request $request, $date = null)
     {
-        $query = FormulaHeatmapInsight::with('formula');
+        $type = $request->get('type','');
+        $date = $date ?? now()->toDateString();
+        $limit = 50;
+        $insights = $this->insightQueryService->getTopInsights($date, $type, $limit);
 
-        // Filter theo type
-        if ($request->has('type')) {
-            $query->where('type', $request->type);
-        }
-
-        // Filter theo ngày
-        if ($date) {
-            $query->whereDate('date', $date);
-        } else {
-            $query->whereDate('date', Carbon::today());
-        }
-
-        // Filter theo score
-        if ($request->has('min_score')) {
-            $query->where('score', '>=', $request->min_score);
-        }
-
-        // Filter theo streak length
-        if ($request->has('min_streak')) {
-            $query->whereRaw("JSON_EXTRACT(extra, '$.streak_length') >= ?", [$request->min_streak]);
-        }
-
-        // Filter theo hit status
-        if ($request->has('hit_status')) {
-            $query->whereRaw("JSON_EXTRACT(extra, '$.hit') = ?", [$request->hit_status === 'true']);
-        }
-
-        $insights = $query->orderBy('score', 'desc')
-            ->paginate(50)
-            ->withQueryString();
+        // Log toàn bộ dữ liệu để kiểm tra
+        Log::info('Heatmap Analytic Data', [
+            'date' => $date,
+            'type' => $type,
+            'total_insights' => $insights instanceof LengthAwarePaginator ? $insights->total() :
+                              ($insights instanceof Collection ? $insights->count() : count($insights))
+        ]);
 
         // Chuẩn bị dữ liệu cho view
-        $insights->getCollection()->transform(function ($insight) {
-            $extra = $insight->extra;
-            $hit = $extra['hit'] ?? null;
-            unset($extra['hit']); // Loại bỏ hit khỏi extra
-            
-            // Lấy predicted_values_by_position
-            $predictedValues = $extra['predicted_values_by_position'] ?? [];
-            $processedPredicted = [];
-            foreach ($predictedValues as $position => $val) {
-                $processedPredicted[$position] = $val;
-            }
-            // Chuẩn bị dữ liệu extra theo type
-            $processedExtra = [];
-            switch ($insight->type) {
-                case 'long_run':
-                    $processedExtra = [
-                        'streak_length' => $extra['streak_length'] ?? null,
-                        'value' => $extra['value'] ?? null,
-                        'predicted_values_by_position' => $processedPredicted,
-                    ];
-                    break;
-                case 'long_run_stop':
-                    $processedExtra = [
-                        'streak_length' => $extra['streak_length'] ?? null,
-                        'day_stop' => $extra['day_stop'] ?? null,
-                        'value' => $extra['value'] ?? null,
-                        'predicted_values_by_position' => $processedPredicted,
-                    ];
-                    break;
-                case 'rebound_after_long_run':
-                    $processedExtra = [
-                        'streak_length' => $extra['streak_length'] ?? null,
-                        'step_1' => $extra['step_1'] ?? null,
-                        'step_2' => $extra['step_2'] ?? null,
-                        'value' => $extra['value'] ?? null,
-                        'rebound_success' => $extra['rebound_success'] ?? null,
-                        'predicted_values_by_position' => $processedPredicted,
-                    ];
-                    break;
-            }
-            $insight->processed_extra = $processedExtra;
-            $insight->hit = $hit;
-            return $insight;
-        });
-
-        $types = FormulaHeatmapInsight::select('type')
-            ->distinct()
-            ->pluck('type');
-
-        // Lấy danh sách các ngày có dữ liệu
-        $availableDates = FormulaHeatmapInsight::select('date')
-            ->distinct()
-            ->orderBy('date', 'desc')
-            ->pluck('date')
-            ->map(function ($date) {
-                return [
-                    'value' => $date->format('Y-m-d'),
-                    'label' => $date->format('d/m/Y')
-                ];
+        if ($insights instanceof Collection || $insights instanceof LengthAwarePaginator) {
+            $insights->each(function ($insight) {
+                $this->processInsight($insight);
             });
+        } else {
+            foreach ($insights as $insight) {
+                $this->processInsight($insight);
+            }
+        }
+
+        $types = $this->insightQueryService->getTypes();
+        $availableDates = $this->insightQueryService->getAvailableDates();
 
         return view('heatmap.analytic', [
             'insights' => $insights,
@@ -113,4 +56,67 @@ class HeatmapAnalyticController extends Controller
             'availableDates' => $availableDates
         ]);
     }
-} 
+
+    private function processInsight($insight)
+    {
+        $extra = $insight->extra;
+
+        // Log chi tiết từng insight
+        Log::info('Insight Detail', [
+            'id' => $insight->id,
+            'formula_id' => $insight->formula_id,
+            'date' => $insight->date,
+            'type' => $insight->type,
+            'score' => $insight->score,
+            'raw_extra' => $extra
+        ]);
+
+        $hit = $extra['hit'] ?? null;
+        unset($extra['hit']);
+
+        // Xử lý predicted values
+        $predictedValues = $extra['predicted_values_by_position'] ?? [];
+        $processedPredicted = [];
+        foreach ($predictedValues as $position => $val) {
+            $processedPredicted[$position] = $val;
+        }
+
+        // Giữ nguyên toàn bộ extra, chỉ thêm processed_extra để hiển thị
+        $processedExtra = [];
+        switch ($insight->type) {
+            case 'long_run':
+                $processedExtra = [
+                    'streak_length' => $extra['streak_length'] ?? null,
+                    'value' => $extra['value'] ?? null,
+                    'predicted_values_by_position' => $processedPredicted,
+                ];
+                break;
+            case 'long_run_stop':
+                $processedExtra = [
+                    'streak_length' => $extra['streak_length'] ?? null,
+                    'day_stop' => $extra['day_stop'] ?? null,
+                    'value' => $extra['value'] ?? null,
+                    'predicted_values_by_position' => $processedPredicted,
+                ];
+                break;
+            case 'rebound_after_long_run':
+                $processedExtra = [
+                    'streak_length' => $extra['streak_length'] ?? null,
+                    'stop_days' => $extra['stop_days'] ?? null,
+                    'step' => $extra['step'] ?? null,
+                    'step_1' => $extra['step_1'] ?? null,
+                    'step_2' => $extra['step_2'] ?? null,
+                    'value' => $extra['value'] ?? null,
+                    'rebound_success' => $extra['rebound_success'] ?? null,
+                    'predicted_values_by_position' => $processedPredicted,
+                ];
+                break;
+        }
+
+        // Thêm cả raw_extra để debug
+        $insight->setAttribute('raw_extra', $extra);
+        $insight->setAttribute('processed_extra', $processedExtra);
+        $insight->setAttribute('hit', $hit);
+        $insight->setAttribute('link', route('caulo.timeline', ['id' => $insight->formula_id]));
+    }
+}

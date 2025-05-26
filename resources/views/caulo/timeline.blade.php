@@ -40,14 +40,14 @@
 {{--                                    <small class="text-muted">Kết quả: {{ $result->result_string ?? 'N/A' }}</small>--}}
                                 @endif
                             </div>
-                            <div class="d-flex align-items-center gap-2">
+                            <div class="d-flex align-items-left gap-2">
                                 <!-- Cặp cầu lô hôm sau -->
                                 @if(isset($resultsIndexs[$date]))
                                     <span class="badge bg-info">
-                                        Giá trị cầu lô: {{ GuzzleHttp\json_encode($formulaValues) }}
+                                        Suggest: {{ GuzzleHttp\json_encode($formulaValues) }}
                                     </span>
                                     <span class="badge bg-info">
-                                        Cặp số cầu lô: {{ GuzzleHttp\json_encode($formulaPairs) }}
+                                        Suggest number hôm sau: {{ GuzzleHttp\json_encode($formulaPairs) }}
                                     </span>
                                 @endif
 
@@ -61,22 +61,25 @@
                                         4 => '🔥 Nhiều hơn hai nháy',
                                     ];
                                 @endphp
-                                <span class="badge {{ $hit ? 'bg-success' : 'bg-secondary' }}">
-    @if($hit)
-                                        🎯 Số trúng: {{ $hit->so_trung }} –
-                                        {{ json_encode($metaPosition) }}
-                                        <br>
-                                        {!! $statusIcons[$hit->status] ?? '❔ Không rõ trạng thái' !!}
-                                    @else
-                                        ❌ Không trúng
-                                    @endif
-</span>
-
                                 <!-- Modal Button -->
                                 @if($result)
+                                <span class="badge {{ $hit ? 'bg-success' : 'bg-secondary' }}">
+                                    @if($hit)
+                                                                        🎯 Số trúng: {{ $hit->so_trung }} –
+
+                                                                        <br>
+                                                                        {!! $statusIcons[$hit->status] ?? '❔ Không rõ trạng thái' !!}
+                                                                    @else
+                                                                        ❌ Không trúng
+                                                                    @endif
+                                </span>
                                     <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modal-{{ $date }}">
                                         Chi tiết
                                     </button>
+                                @else
+                                    <span class="badge bg-secondary">
+                                        Chưa có kết quả
+                                    </span>
                                 @endif
                             </div>
                         </div>

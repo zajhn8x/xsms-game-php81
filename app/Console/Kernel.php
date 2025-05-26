@@ -20,8 +20,13 @@ class Kernel extends ConsoleKernel
         //$schedule->command('lottery:import-api',[3])->dailyAt('19:00');
         //lottery:check-formulas --partial --max-formula-batch=800 --start-date=2025-04-10 --days=4
 
+
+        //hàng ngày
+        // php81 artisan heatmap:generate --from=2025-05-20 --to=2025-05-25
+
+        
         //Check 5 phút 1 cầu
-        $schedule->command('lottery:check-formulas', ['--days' => 7500, '--start-date' => '2005-10-01', '--max-formula-batch' => 1])->everyTwoMinutes();
+        // $schedule->command('lottery:check-formulas', ['--days' => 7500, '--start-date' => '2005-10-01', '--max-formula-batch' => 1])->everyTwoMinutes();
 
         //$schedule->job(new \App\Jobs\CampaignRunJobAll())->dailyAt('07:00');
     }

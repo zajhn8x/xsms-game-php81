@@ -62,7 +62,7 @@ class CampaignController extends Controller
         // Thêm các trường mặc định
         $validated['status'] = 'waiting';
         $validated['total_bet'] = 0;
-        $validated['total_profit'] = 0; 
+        $validated['total_profit'] = 0;
         $validated['total_bet_count'] = 0;
         $validated['win_rate'] = 0;
 
@@ -129,7 +129,7 @@ class CampaignController extends Controller
 
         $validated = $request->validate([
             'bet_date' => 'required|date',
-            'lo_number' => 'required|integer|min:0|max:99', 
+            'lo_number' => 'required|integer|min:0|max:99',
             'points' => 'required|integer|min:1'
         ]);
 
@@ -139,7 +139,7 @@ class CampaignController extends Controller
                 'bet_numbers' => [$validated['lo_number']],
                 'bet_amount' => $validated['points'] * 10000 // 10k/điểm
             ];
-            
+
             $bet = $this->campaignService->addBet($campaign->id, $betData);
             return redirect()->route('campaigns.show', $campaign)
                 ->with('success', 'Đặt cược thành công');
@@ -150,7 +150,7 @@ class CampaignController extends Controller
 
     public function run(Campaign $campaign)
     {
-        if ($campaign->status !== 'running' && $campaign->status !== 'waiting') {
+        if ($campaign->status !== 'running' && $campaign->status !== 'active') {
             return response()->json([
                 'message' => 'Chiến dịch không ở trạng thái running'
             ], 400);
