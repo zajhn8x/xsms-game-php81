@@ -95,10 +95,10 @@ GET /heatmap/analytic
 - Docblock đầy đủ
 
 ## Tài liệu Chi tiết
-- [LotteryResultService](readme.LotteryResultService.md)
-- [LotteryIndexResultsService](readme.LotteryIndexResultsService.md)
-- [FormulaHitService](readme.FormulaHitService.md)
-- [HeatmapInsightService](readme.HeatmapInsightService.md)
+- [LotteryResultService](docs/services/LotteryResultService.md)
+- [LotteryIndexResultsService](docs/services/LotteryIndexResultsService.md)
+- [FormulaHitService](docs/services/FormulaHitService.md)
+- [HeatmapInsightService](docs/services/HeatmapInsightService.md)
 
 ## Contributing
 1. Fork repository
