@@ -16,7 +16,7 @@ class LotteryController extends Controller
 
     public function index()
     {
-        $results = $this->lotteryService->getResults();
+        $results = $this->lotteryService->getResults(5);
         return view('lottery.index', compact('results'));
     }
 }

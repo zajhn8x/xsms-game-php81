@@ -4,6 +4,8 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -18,9 +20,10 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
-        'email',
-        'password',
+        'name', 'email', 'password', 'phone', 'avatar',
+        'subscription_type', 'subscription_expires_at',
+        'balance', 'total_deposit', 'total_withdrawal',
+        'is_active', 'last_login_at'
     ];
 
     /**
@@ -41,5 +44,107 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'subscription_expires_at' => 'datetime',
+        'last_login_at' => 'datetime',
+        'balance' => 'decimal:2',
+        'total_deposit' => 'decimal:2',
+        'total_withdrawal' => 'decimal:2',
+        'is_active' => 'boolean'
     ];
+
+    // Relationships
+    public function wallet(): HasOne
+    {
+        return $this->hasOne(Wallet::class);
+    }
+
+    public function campaigns(): HasMany
+    {
+        return $this->hasMany(Campaign::class);
+    }
+
+    public function historicalCampaigns(): HasMany
+    {
+        return $this->hasMany(HistoricalCampaign::class);
+    }
+
+    public function riskRules(): HasMany
+    {
+        return $this->hasMany(RiskManagementRule::class);
+    }
+
+    public function followers(): HasMany
+    {
+        return $this->hasMany(SocialFollow::class, 'following_id');
+    }
+
+    public function following(): HasMany
+    {
+        return $this->hasMany(SocialFollow::class, 'follower_id');
+    }
+
+    public function sharedCampaigns(): HasMany
+    {
+        return $this->hasMany(CampaignShare::class, 'shared_by_user_id');
+    }
+
+    // Helper methods for subscription
+    public function isPremium(): bool
+    {
+        return $this->subscription_type === 'premium'
+            && $this->subscription_expires_at
+            && $this->subscription_expires_at->isFuture();
+    }
+
+    public function isBasic(): bool
+    {
+        return $this->subscription_type === 'basic';
+    }
+
+    public function isTrial(): bool
+    {
+        return $this->subscription_type === 'trial'
+            && $this->subscription_expires_at
+            && $this->subscription_expires_at->isFuture();
+    }
+
+    public function getActiveCampaignsCountAttribute(): int
+    {
+        return $this->campaigns()->whereIn('status', ['active', 'running'])->count();
+    }
+
+    public function getTotalProfitAttribute(): float
+    {
+        return $this->campaigns()->sum(\Illuminate\Support\Facades\DB::raw('current_balance - initial_balance'));
+    }
+
+    // Social methods
+    public function follow($userId): bool
+    {
+        if ($this->id === $userId) {
+            return false; // Can't follow yourself
+        }
+
+        return $this->following()->firstOrCreate(['following_id' => $userId]) !== null;
+    }
+
+    public function unfollow($userId): bool
+    {
+        return $this->following()->where('following_id', $userId)->delete() > 0;
+    }
+
+    public function isFollowing($userId): bool
+    {
+        return $this->following()->where('following_id', $userId)->exists();
+    }
+
+    public function getFollowersCountAttribute(): int
+    {
+        return $this->followers()->count();
+    }
+
+    public function getFollowingCountAttribute(): int
+    {
+        return $this->following()->count();
+    }
 }

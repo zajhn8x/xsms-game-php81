@@ -3,20 +3,21 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\LotteryFormula;
 use Illuminate\Http\Request;
 
 class LotteryFormulaController extends Controller
 {
     public function index()
     {
-        $cauLos = LotteryFormula::with('cauMeta')->paginate(10);
+        $cauLos = LotteryFormula::with('formula')->paginate(10);
         return response()->json($cauLos);
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'lottery_cau_meta_id' => 'required|exists:lottery_cau_meta,id',
+            'lottery_formula_id' => 'required|exists:lottery_formula,id',
             'number' => 'required|string|max:2',
             'status' => 'required|boolean',
             'day_missed' => 'required|integer'
@@ -28,7 +29,7 @@ class LotteryFormulaController extends Controller
 
     public function show(string $id)
     {
-        $cauLo = LotteryFormula::with('cauMeta')->findOrFail($id);
+        $cauLo = LotteryFormula::with('formula')->findOrFail($id);
         return response()->json($cauLo);
     }
 
@@ -37,7 +38,7 @@ class LotteryFormulaController extends Controller
         $cauLo = LotteryFormula::findOrFail($id);
 
         $validated = $request->validate([
-            'lottery_cau_meta_id' => 'exists:lottery_cau_meta,id',
+            'lottery_formula_id' => 'exists:lottery_formula,id',
             'number' => 'string|max:2',
             'status' => 'boolean',
             'day_missed' => 'integer'

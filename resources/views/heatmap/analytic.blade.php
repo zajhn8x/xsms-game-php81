@@ -31,9 +31,9 @@
                                 <select class="form-select"
                                     onchange="window.location.href = '{{ route('heatmap.analytic', '') }}/' + this.value">
                                     @foreach ($availableDates as $date)
-                                        <option value="{{ is_array($date) ? $date['value'] : $date }}"
-                                            {{ (is_array($date) ? $date['value'] : $date->format('Y-m-d')) === $currentDate->format('Y-m-d') ? 'selected' : '' }}>
-                                            {{ is_array($date) ? $date['label'] : $date->format('d/m/Y') }}
+                                        <option value="{{ $date }}"
+                                            {{ $date === $currentDate->format('Y-m-d') ? 'selected' : '' }}>
+                                            {{ \Carbon\Carbon::parse($date)->format('d/m/Y') }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -57,7 +57,7 @@
                     <div class="card-body">
                         <form method="GET" class="row g-3">
                             {{-- Type Filter --}}
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label">Loại</label>
                                 <select name="type" class="form-select">
                                     <option value="">Tất cả</option>
@@ -69,38 +69,15 @@
                                 </select>
                             </div>
 
-                            {{-- Score Filter --}}
-                            <div class="col-md-3">
-                                <label class="form-label">Điểm tối thiểu</label>
-                                <input type="number" name="min_score" class="form-control" step="0.1"
-                                    value="{{ request('min_score') }}">
-                            </div>
-
-                            {{-- Streak Length Filter --}}
-                            <div class="col-md-3">
-                                <label class="form-label">Streak tối thiểu</label>
-                                <input type="number" name="min_streak" class="form-control"
-                                    value="{{ request('min_streak') }}">
-                            </div>
-
-                            {{-- Hit Status Filter --}}
-                            <div class="col-md-2">
-                                <label class="form-label">Trạng thái</label>
-                                <select name="hit_status" class="form-select">
-                                    <option value="">Tất cả</option>
-                                    <option value="true" {{ request('hit_status') === 'true' ? 'selected' : '' }}>Trúng
-                                    </option>
-                                    <option value="false" {{ request('hit_status') === 'false' ? 'selected' : '' }}>Không
-                                        trúng</option>
-                                </select>
-                            </div>
-
-                            <div class="col-12">
-                                <button type="submit" class="btn btn-primary">Lọc</button>
-                                <a href="{{ route('heatmap.analytic', $currentDate->format('Y-m-d')) }}"
-                                    class="btn btn-secondary">Reset</a>
-                                <button type="button" class="btn btn-info ms-2" id="showHitStatusBtn">Hiển thị trạng thái
-                                    trúng</button>
+                            <div class="col-md-6">
+                                <label class="form-label">&nbsp;</label>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary">Lọc</button>
+                                    <a href="{{ route('heatmap.analytic', $currentDate->format('Y-m-d')) }}"
+                                        class="btn btn-secondary">Reset</a>
+                                    <button type="button" class="btn btn-info" id="showHitStatusBtn">Hiển thị trạng thái
+                                        trúng</button>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -117,33 +94,15 @@
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            STT</th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            ID</th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Loại</th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Streak</th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Trạng thái</th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Điểm</th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Công thức</th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Timeline</th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Chi tiết</th>
+                                        <th>STT</th>
+                                        <th>ID</th>
+                                        <th>Loại</th>
+                                        <th>Streak</th>
+                                        <th>Trạng thái</th>
+                                        <th>Điểm</th>
+                                        <th>Công thức</th>
+                                        <th>Timeline</th>
+                                        <th>Chi tiết</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -152,45 +111,39 @@
                                             class="
                                         {{ $insight->type === 'long_run' ? 'table-warning' : ($insight->type === 'long_run_stop' ? 'table-danger' : 'table-success') }}
                                         hit-status-row
-                                        {{ $insight->hit === null ? 'hit-null-row' : 'hit-not-null-row' }}
+                                        {{ $insight->hit === null ? 'hit-null-row' : ($insight->hit ? 'hit-true-row' : 'hit-false-row') }}
                                     ">
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ $insights->firstItem() + $index }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ $insight->formula_id }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td>{{ $index + 1 }}</td>
+                                            <td>{{ $insight->formula_id }}</td>
+                                            <td>
                                                 @php
-
                                                     $typeClasses = [
                                                         'long_run' => 'bg-warning',
                                                         'long_run_stop' => 'bg-danger',
                                                         'rebound_after_long_run' => 'bg-success'
                                                     ];
                                                 @endphp
-                                                <span class="badge {{ $typeClasses[$insight->type] }}">
-                                                    {{ $types[$insight->type] }}
+                                                <span class="badge {{ $typeClasses[$insight->type] ?? 'bg-secondary' }}">
+                                                    {{ $types[$insight->type] ?? $insight->type }}
                                                 </span>
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td>
                                                 @php
-                                                    $streak = isset($insight->processed_extra)
-                                                        ? $insight->processed_extra['streak_length'] ?? null
-                                                        : null;
+                                                    $streak = $insight->processed_extra['streak_length'] ?? null;
                                                 @endphp
                                                 @if ($streak !== null)
                                                     @if ($streak >= 6)
-                                                        <span class="badge bg-success">Streak: {{ $streak }}</span>
-                                                    @elseif($streak == 4 || $streak == 5)
-                                                        <span class="badge bg-warning text-dark">Streak:
-                                                            {{ $streak }}</span>
+                                                        <span class="badge bg-success">{{ $streak }}</span>
+                                                    @elseif($streak >= 4)
+                                                        <span class="badge bg-warning text-dark">{{ $streak }}</span>
                                                     @else
-                                                        <span class="badge bg-secondary">Streak: {{ $streak }}</span>
+                                                        <span class="badge bg-secondary">{{ $streak }}</span>
                                                     @endif
+                                                @else
+                                                    <span class="text-muted">-</span>
                                                 @endif
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td>
                                                 @php
                                                     $extra = $insight->extra ?? [];
 
@@ -255,30 +208,29 @@
                                                     @endforeach
                                                 </div>
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td>
                                                 <span
                                                     class="badge {{ $insight->score >= 5 ? 'bg-success' : ($insight->score >= 3 ? 'bg-warning' : 'bg-danger') }}">
                                                     {{ number_format($insight->score, 1) }}
                                                 </span>
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ $insight->formula->name }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                <a href="{{ route('caulo.timeline', $insight->formula_id) }}"
-                                                    target="_blank" class="text-indigo-600 hover:text-indigo-900">
+                                            <td>{{ $insight->formula->name }}</td>
+                                            <td>
+                                                <a href="{{ $insight->link }}" target="_blank" class="btn btn-sm btn-outline-primary">
                                                     Xem timeline
                                                 </a>
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td>
                                                 <button class="btn btn-sm btn-primary show-details-btn"
                                                     data-bs-toggle="modal" data-bs-target="#detailsModal"
                                                     data-insight="{{ json_encode([
                                                         'type' => $insight->type,
                                                         'hit' => $insight->hit,
                                                         'extra' => $insight->processed_extra,
+                                                        'formula_id' => $insight->formula_id,
+                                                        'score' => $insight->score
                                                     ]) }}">
-                                                    Xem chi tiết
+                                                    Chi tiết
                                                 </button>
                                             </td>
                                         </tr>
@@ -287,10 +239,11 @@
                             </table>
                         </div>
 
-                        {{-- Pagination --}}
-                        <div class="d-flex justify-content-center mt-4">
-                            {{ $insights->links() }}
-                        </div>
+                        @if($insights->isEmpty())
+                            <div class="text-center py-4">
+                                <p class="text-muted">Không có dữ liệu cho ngày này</p>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -302,58 +255,12 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="detailsModalLabel">Chi tiết</h5>
+                    <h5 class="modal-title" id="detailsModalLabel">Chi tiết Insight</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="row">
-                        <div class="col-12">
-                            @php
-                                $infoGroups = [
-                                    'main' => [
-                                        'title' => 'Thông tin chính',
-                                        'class' => 'text-primary',
-                                        'fields' => ['running', 'suggests', 'stop_days']
-                                    ],
-                                    'steps' => [
-                                        'title' => 'Thông tin step',
-                                        'class' => 'text-secondary',
-                                        'fields' => ['step_1', 'step_2', 'step_3']
-                                    ],
-                                    'other' => [
-                                        'title' => 'Thông tin khác',
-                                        'class' => 'text-muted',
-                                        'fields' => []
-                                    ]
-                                ];
-                            @endphp
-
-                            @foreach($infoGroups as $group)
-                                <div class="mb-3">
-                                    <h6 class="{{ $group['class'] }}">{{ $group['title'] }}</h6>
-                                    <div class="table-responsive">
-                                        <table class="table table-sm">
-                                            <tbody>
-                                                @foreach($extra as $key => $val)
-                                                    @if(in_array($key, $group['fields']) || ($group['title'] === 'Thông tin khác' && !in_array($key, array_merge($infoGroups['main']['fields'], $infoGroups['steps']['fields']))))
-                                                        <tr>
-                                                            <td class="fw-bold">{{ ucfirst($key) }}</td>
-                                                            <td>
-                                                                @if(is_array($val))
-                                                                    {{ implode(', ', $val) }}
-                                                                @else
-                                                                    {{ $val }}
-                                                                @endif
-                                                            </td>
-                                                        </tr>
-                                                    @endif
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
+                    <div id="modalContent">
+                        <!-- Nội dung sẽ được load bằng JavaScript -->
                     </div>
                 </div>
             </div>
@@ -365,18 +272,20 @@
             font-size: 0.9em;
             padding: 0.5em 0.8em;
         }
-        .modal-body h6 {
-            margin-bottom: 0.5rem;
+        .hit-true-row {
+            background-color: rgba(40, 167, 69, 0.1) !important;
         }
-        .table-sm td {
-            padding: 0.5rem;
+        .hit-false-row {
+            background-color: rgba(220, 53, 69, 0.1) !important;
+        }
+        .hit-null-row {
+            background-color: rgba(108, 117, 125, 0.1) !important;
         }
     </style>
 
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                // Xử lý hiển thị modal chi tiết
                 const detailsModal = document.getElementById('detailsModal');
                 const showHitStatusBtn = document.getElementById('showHitStatusBtn');
                 let showHitStatus = false;
@@ -386,18 +295,77 @@
                     showHitStatus = !showHitStatus;
                     document.querySelectorAll('.hit-status-row').forEach(row => {
                         if (showHitStatus) {
-                            if (!row.classList.contains('hit-null-row') && !row.classList.contains('hit-not-null-row')) {
+                            // Chỉ hiển thị các row có hit status
+                            if (row.classList.contains('hit-null-row')) {
                                 row.style.display = 'none';
                             } else {
                                 row.style.display = '';
-                                row.style.backgroundColor = row.classList.contains('hit-null-row') ? '#ffdddd' : '#ddffdd';
                             }
                         } else {
+                            // Hiển thị tất cả
                             row.style.display = '';
-                            row.style.backgroundColor = '';
                         }
                     });
                     this.textContent = showHitStatus ? 'Hiển thị tất cả' : 'Hiển thị trạng thái trúng';
+                });
+
+                // Xử lý modal chi tiết
+                document.querySelectorAll('.show-details-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const insightData = JSON.parse(this.getAttribute('data-insight'));
+                        const modalContent = document.getElementById('modalContent');
+
+                        let html = `
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Thông tin cơ bản</h6>
+                                    <table class="table table-sm">
+                                        <tr><td><strong>Formula ID:</strong></td><td>${insightData.formula_id}</td></tr>
+                                        <tr><td><strong>Loại:</strong></td><td>${insightData.type}</td></tr>
+                                        <tr><td><strong>Điểm:</strong></td><td>${insightData.score}</td></tr>
+                                        <tr><td><strong>Hit:</strong></td><td>
+                                            ${insightData.hit === null ? 'Chưa có' : (insightData.hit ? 'Trúng' : 'Không trúng')}
+                                        </td></tr>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Chi tiết</h6>
+                                    <table class="table table-sm">
+                        `;
+
+                        if (insightData.extra) {
+                            Object.entries(insightData.extra).forEach(([key, value]) => {
+                                if (key !== 'predicted_values_by_position') {
+                                    html += `<tr><td><strong>${key}:</strong></td><td>${value}</td></tr>`;
+                                }
+                            });
+                        }
+
+                        html += `
+                                    </table>
+                                </div>
+                            </div>
+                        `;
+
+                        if (insightData.extra && insightData.extra.predicted_values_by_position) {
+                            html += `
+                                <div class="row mt-3">
+                                    <div class="col-12">
+                                        <h6>Predicted Values by Position</h6>
+                                        <div class="d-flex flex-wrap gap-2">
+                            `;
+                            Object.entries(insightData.extra.predicted_values_by_position).forEach(([pos, val]) => {
+                                html += `<span class="badge bg-info">${pos}: ${val}</span>`;
+                            });
+                            html += `
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }
+
+                        modalContent.innerHTML = html;
+                    });
                 });
             });
         </script>

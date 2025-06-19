@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Services\LotteryResultService;
+use App\Models\User;
+use App\Observers\UserObserver;
 use Illuminate\Support\ServiceProvider;
 use App\Contracts\LotteryResultServiceInterface;
 
@@ -21,6 +23,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Register User Observer
+        User::observe(UserObserver::class);
+
         /**
          * if($this->app->environment('production')) {
          * \URL::forceScheme('https');

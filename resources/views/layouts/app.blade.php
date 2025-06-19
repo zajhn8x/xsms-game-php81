@@ -39,10 +39,50 @@
                     </li>
                     @auth
                         <li class="nav-item">
-                            <a class="nav-link" href="/bet">Đặt cược</a>
+                            <a class="nav-link" href="{{ route('dashboard') }}">Dashboard</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/statistics">Thống kê</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownWallet" role="button" data-bs-toggle="dropdown">
+                                Ví & Giao Dịch
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ route('wallet.index') }}">Quản Lý Ví</a></li>
+                                <li><a class="dropdown-item" href="{{ route('wallet.history') }}">Lịch Sử Giao Dịch</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownCampaign" role="button" data-bs-toggle="dropdown">
+                                Chiến Dịch
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ route('campaigns.index') }}">Quản Lý Chiến Dịch</a></li>
+                                <li><a class="dropdown-item" href="{{ route('campaigns.create') }}">Tạo Chiến Dịch</a></li>
+                                <li><a class="dropdown-item" href="{{ route('historical-testing.index') }}">Test Lịch Sử</a></li>
+                                <li><a class="dropdown-item" href="{{ route('risk-management.index') }}">Risk Management</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownSocial" role="button" data-bs-toggle="dropdown">
+                                Cộng đồng
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ route('social.index') }}">Social Feed</a></li>
+                                <li><a class="dropdown-item" href="{{ route('social.leaderboard') }}">Bảng xếp hạng</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ route('social.profile', auth()->user()) }}">Profile của tôi</a></li>
+                                <li><a class="dropdown-item" href="{{ route('social.followers', auth()->user()) }}">Followers</a></li>
+                                <li><a class="dropdown-item" href="{{ route('social.following', auth()->user()) }}">Đang theo dõi</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAnalysis" role="button" data-bs-toggle="dropdown">
+                                Phân Tích
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="/caulo/heatmap">Heatmap</a></li>
+                                <li><a class="dropdown-item" href="/caulo/heatmap-analytic">Heatmap Analytics</a></li>
+                                <li><a class="dropdown-item" href="/statistics">Thống Kê</a></li>
+                            </ul>
                         </li>
                     @endauth
                 </ul>

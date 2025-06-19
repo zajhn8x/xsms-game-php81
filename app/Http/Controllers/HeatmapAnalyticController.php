@@ -7,8 +7,6 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Services\Queries\HeatmapInsightQueryService;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Collection;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class HeatmapAnalyticController extends Controller
 {
@@ -22,37 +20,39 @@ class HeatmapAnalyticController extends Controller
     public function index(Request $request, $date = null)
     {
         $type = $request->get('type','');
-        $date = $date ?? now()->toDateString();
+
+        // Nếu không có date truyền vào thì lấy date mới nhất từ FormulaHeatmapInsight
+        if (!$date) {
+            $latestInsight = FormulaHeatmapInsight::latest('date')->first();
+            $date = $latestInsight ? $latestInsight->date : now()->toDateString();
+        }
+
         $limit = 50;
         $insights = $this->insightQueryService->getTopInsights($date, $type, $limit);
 
-        // Log toàn bộ dữ liệu để kiểm tra
-        Log::info('Heatmap Analytic Data', [
-            'date' => $date,
-            'type' => $type,
-            'total_insights' => $insights instanceof LengthAwarePaginator ? $insights->total() :
-                              ($insights instanceof Collection ? $insights->count() : count($insights))
-        ]);
-
-        // Chuẩn bị dữ liệu cho view
-        if ($insights instanceof Collection || $insights instanceof LengthAwarePaginator) {
-            $insights->each(function ($insight) {
-                $this->processInsight($insight);
-            });
-        } else {
-            foreach ($insights as $insight) {
-                $this->processInsight($insight);
-            }
+        // Chuẩn bị dữ liệu cho view - xử lý đơn giản
+        foreach ($insights as $insight) {
+            $this->processInsight($insight);
         }
 
         $types = $this->insightQueryService->getTypes();
-        $availableDates = $this->insightQueryService->getAvailableDates();
+
+        // Chỉ lấy 10 ngày xung quanh ngày hiện tại
+        $currentDate = Carbon::parse($date);
+        $availableDates = collect();
+        for ($i = -5; $i <= 5; $i++) {
+            $checkDate = $currentDate->copy()->addDays($i);
+            // Kiểm tra xem ngày này có dữ liệu không
+            if (FormulaHeatmapInsight::whereDate('date', $checkDate->toDateString())->exists()) {
+                $availableDates->push($checkDate->toDateString());
+            }
+        }
 
         return view('heatmap.analytic', [
             'insights' => $insights,
             'types' => $types,
             'filters' => $request->all(),
-            'currentDate' => $date ? Carbon::parse($date) : Carbon::today(),
+            'currentDate' => $currentDate,
             'availableDates' => $availableDates
         ]);
     }
@@ -60,17 +60,6 @@ class HeatmapAnalyticController extends Controller
     private function processInsight($insight)
     {
         $extra = $insight->extra;
-
-        // Log chi tiết từng insight
-        Log::info('Insight Detail', [
-            'id' => $insight->id,
-            'formula_id' => $insight->formula_id,
-            'date' => $insight->date,
-            'type' => $insight->type,
-            'score' => $insight->score,
-            'raw_extra' => $extra
-        ]);
-
         $hit = $extra['hit'] ?? null;
         unset($extra['hit']);
 
@@ -81,7 +70,7 @@ class HeatmapAnalyticController extends Controller
             $processedPredicted[$position] = $val;
         }
 
-        // Giữ nguyên toàn bộ extra, chỉ thêm processed_extra để hiển thị
+        // Xử lý dữ liệu theo type
         $processedExtra = [];
         switch ($insight->type) {
             case 'long_run':
@@ -113,8 +102,6 @@ class HeatmapAnalyticController extends Controller
                 break;
         }
 
-        // Thêm cả raw_extra để debug
-        $insight->setAttribute('raw_extra', $extra);
         $insight->setAttribute('processed_extra', $processedExtra);
         $insight->setAttribute('hit', $hit);
         $insight->setAttribute('link', route('caulo.timeline', ['id' => $insight->formula_id]));
