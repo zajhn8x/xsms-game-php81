@@ -3,9 +3,38 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\LotteryResultController;
+use App\Http\Controllers\Api\AuthController;
 
 Route::get('/lottery-results', [LotteryResultController::class, 'index']);
 Route::get('/lottery-results/date-range', [LotteryResultController::class, 'getByDateRange']);
+
+/*
+|--------------------------------------------------------------------------
+| Authentication API Routes
+|--------------------------------------------------------------------------
+*/
+
+// Public authentication routes
+Route::prefix('auth')->name('api.auth.')->group(function () {
+    // Guest routes (no authentication required)
+    Route::post('/register', [AuthController::class, 'register'])->name('register');
+    Route::post('/login', [AuthController::class, 'login'])->name('login');
+    Route::post('/verify-2fa', [AuthController::class, 'verifyTwoFactor'])->name('verify-2fa');
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->name('forgot-password');
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('reset-password');
+
+    // Authenticated routes (require auth:sanctum)
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+        Route::post('/logout-all', [AuthController::class, 'logoutAll'])->name('logout-all');
+        Route::get('/me', [AuthController::class, 'me'])->name('me');
+        Route::post('/refresh', [AuthController::class, 'refresh'])->name('refresh');
+        Route::post('/change-password', [AuthController::class, 'changePassword'])->name('change-password');
+        Route::post('/update-profile', [AuthController::class, 'updateProfile'])->name('update-profile');
+        Route::get('/sessions', [AuthController::class, 'sessions'])->name('sessions');
+        Route::delete('/sessions/{tokenId}', [AuthController::class, 'revokeSession'])->name('revoke-session');
+    });
+});
 
 /*
 |--------------------------------------------------------------------------

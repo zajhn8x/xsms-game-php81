@@ -23,7 +23,7 @@ class User extends Authenticatable
         'name', 'email', 'password', 'phone', 'avatar',
         'subscription_type', 'subscription_expires_at',
         'balance', 'total_deposit', 'total_withdrawal',
-        'is_active', 'last_login_at', 'phone_number',
+        'is_active', 'last_login_at', 'last_login_ip', 'phone_number',
         'two_factor_enabled'
     ];
 

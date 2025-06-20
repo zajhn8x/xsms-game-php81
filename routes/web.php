@@ -13,6 +13,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SocialController;
 use App\Http\Controllers\RiskManagementController;
 use App\Http\Controllers\TwoFactorController;
+use App\Http\Controllers\CampaignTemplateController;
+use App\Http\Controllers\SubCampaignController;
 
 Route::get('/', [LotteryController::class, 'index'])->name('home');
 Route::get('/statistics', [StatisticsController::class, 'index'])->name('statistics.index');
@@ -166,6 +168,52 @@ Route::prefix('campaigns')->group(function () {
     Route::post('/{campaign}/finish', [\App\Http\Controllers\CampaignController::class, 'finish'])->name('campaigns.finish');
     Route::delete('/{campaign}', [\App\Http\Controllers\CampaignController::class, 'destroy'])->name('campaigns.destroy');
     Route::post('/{campaign}/bets', [\App\Http\Controllers\CampaignController::class, 'storeBet'])->name('campaigns.bets.store');
+});
+
+// Campaign Template routes - Micro-task 2.1.2.6: Template sharing system (2h)
+Route::middleware(['auth'])->group(function () {
+    Route::resource('campaign-templates', CampaignTemplateController::class);
+
+    // Template management actions
+    Route::post('/campaign-templates/{template}/duplicate', [CampaignTemplateController::class, 'duplicate'])
+        ->name('campaign-templates.duplicate');
+    Route::post('/campaign-templates/{template}/create-campaign', [CampaignTemplateController::class, 'createCampaign'])
+        ->name('campaign-templates.create-campaign');
+
+    // Template sharing & rating
+    Route::post('/campaign-templates/{template}/rate', [CampaignTemplateController::class, 'rate'])
+        ->name('campaign-templates.rate');
+    Route::get('/campaign-templates/{template}/export', [CampaignTemplateController::class, 'export'])
+        ->name('campaign-templates.export');
+    Route::post('/campaign-templates/import', [CampaignTemplateController::class, 'import'])
+        ->name('campaign-templates.import');
+
+    // AJAX endpoints for templates
+    Route::get('/api/campaign-templates/popular', [CampaignTemplateController::class, 'popular'])
+        ->name('campaign-templates.popular');
+    Route::get('/api/campaign-templates/search', [CampaignTemplateController::class, 'search'])
+        ->name('campaign-templates.search');
+});
+
+// Sub-campaign routes
+Route::middleware(['auth'])->group(function () {
+    Route::prefix('campaigns/{campaign}/sub-campaigns')->name('campaigns.sub-campaigns.')->group(function () {
+        Route::get('/', [SubCampaignController::class, 'index'])->name('index');
+        Route::post('/', [SubCampaignController::class, 'store'])->name('store');
+        Route::post('/split', [SubCampaignController::class, 'split'])->name('split');
+        Route::get('/monitoring', [SubCampaignController::class, 'monitoring'])->name('monitoring');
+        Route::post('/rebalance', [SubCampaignController::class, 'rebalance'])->name('rebalance');
+        Route::get('/performance-data', [SubCampaignController::class, 'performanceData'])->name('performance-data');
+
+        Route::prefix('{subCampaign}')->group(function () {
+            Route::get('/', [SubCampaignController::class, 'show'])->name('show');
+            Route::post('/start', [SubCampaignController::class, 'start'])->name('start');
+            Route::post('/pause', [SubCampaignController::class, 'pause'])->name('pause');
+            Route::post('/resume', [SubCampaignController::class, 'resume'])->name('resume');
+            Route::post('/stop', [SubCampaignController::class, 'stop'])->name('stop');
+            Route::delete('/', [SubCampaignController::class, 'destroy'])->name('destroy');
+        });
+    });
 });
 
 
