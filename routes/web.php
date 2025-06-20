@@ -41,9 +41,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/transfer', [WalletController::class, 'transfer'])->name('transfer');
         Route::get('/history', [WalletController::class, 'history'])->name('history');
 
-        // Payment gateway callbacks
-        Route::get('/vnpay/callback', [WalletController::class, 'vnpayCallback'])->name('vnpay.callback');
-        Route::get('/momo/callback', [WalletController::class, 'momoCallback'])->name('momo.callback');
+        // Payment gateway return URLs
+        Route::get('/vnpay/return', [WalletController::class, 'vnpayReturn'])->name('vnpay.return');
+        Route::get('/momo/return', [WalletController::class, 'momoReturn'])->name('momo.return');
 
         // Admin routes
         Route::post('/admin/withdrawal/{transactionId}/process', [WalletController::class, 'adminProcessWithdrawal'])
@@ -120,6 +120,16 @@ Route::middleware('auth')->group(function () {
         });
     });
 
+    // Payment Gateway Webhooks (outside auth middleware)
+});
+
+// Public webhook routes (no authentication required)
+Route::prefix('webhook')->name('webhook.')->group(function () {
+    Route::post('/vnpay/notify', [App\Http\Controllers\WebhookController::class, 'vnpayNotify'])->name('vnpay.notify');
+    Route::post('/momo/notify', [App\Http\Controllers\WebhookController::class, 'momoNotify'])->name('momo.notify');
+});
+
+Route::middleware('auth')->group(function () {
     // Two-Factor Authentication routes
     Route::prefix('two-factor')->name('two-factor.')->middleware('rate.limit:2fa')->group(function () {
         Route::get('/', [TwoFactorController::class, 'index'])->name('index');

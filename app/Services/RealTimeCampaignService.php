@@ -329,6 +329,69 @@ class RealTimeCampaignService
         Log::info("Campaign {$campaign->id} paused: {$reason}");
     }
 
+    protected function adjustBetAmount(Campaign $campaign, array $action, array $context)
+    {
+        $adjustmentType = $action['adjustment_type'] ?? 'percentage';
+        $value = $action['value'] ?? 0;
+        $condition = $action['condition'] ?? 'loss_streak';
+
+        if ($adjustmentType === 'percentage') {
+            $multiplier = 1 + ($value / 100);
+        } else {
+            $multiplier = $value;
+        }
+
+        // Apply adjustment based on condition
+        switch ($condition) {
+            case 'loss_streak':
+                $consecutiveLosses = $context['consecutive_losses'];
+                if ($consecutiveLosses >= 3) {
+                    $campaign->update(['bet_amount' => $campaign->bet_amount * $multiplier]);
+                    Log::info("Campaign {$campaign->id} bet amount adjusted by {$value}% due to loss streak");
+                }
+                break;
+            case 'win_streak':
+                // Implement win streak logic
+                break;
+        }
+    }
+
+    protected function placeBetByPattern(Campaign $campaign, array $params, array $context)
+    {
+        $patternType = $params['pattern_type'] ?? 'frequency';
+        $lookbackDays = $params['lookback_days'] ?? 30;
+        $maxNumbers = $params['max_numbers'] ?? 2;
+        $baseAmount = $params['base_amount'] ?? 10000;
+
+        // Simple frequency pattern - numbers that appear often
+        if ($patternType === 'frequency') {
+            // This would integrate with your lottery analysis
+            $frequentNumbers = $this->getFrequentNumbers($lookbackDays);
+            $numbersToBook = array_slice($frequentNumbers, 0, $maxNumbers);
+
+            foreach ($numbersToBook as $number) {
+                $this->createBet($campaign, $number, $baseAmount, 'pattern_auto');
+            }
+        }
+    }
+
+    protected function placeBetManual(Campaign $campaign, array $params, array $context)
+    {
+        $numbers = $params['numbers'] ?? [];
+        $baseAmount = $params['base_amount'] ?? 10000;
+
+        foreach ($numbers as $number) {
+            $this->createBet($campaign, $number, $baseAmount, 'manual_auto');
+        }
+    }
+
+    protected function getFrequentNumbers(int $days): array
+    {
+        // Mock data for frequent numbers
+        // This would integrate with your existing lottery analysis
+        return ['12', '27', '45', '67', '89'];
+    }
+
     protected function sendNotification(Campaign $campaign, array $action, array $context)
     {
         $message = $action['message'] ?? 'Campaign notification';

@@ -3,17 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Services\WalletService;
+use App\Services\PaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class WalletController extends Controller
 {
     protected $walletService;
+    protected $paymentService;
 
-    public function __construct(WalletService $walletService)
+    public function __construct(WalletService $walletService, PaymentService $paymentService)
     {
         $this->middleware('auth');
         $this->walletService = $walletService;
+        $this->paymentService = $paymentService;
     }
 
     public function index()
@@ -28,29 +31,41 @@ class WalletController extends Controller
     public function deposit(Request $request)
     {
         $request->validate([
-            'amount' => 'required|numeric|min:10000|max:10000000', // 10k to 10M VND
+            'amount' => 'required|numeric|min:10000|max:100000000', // 10k to 100M VND
             'gateway' => 'required|in:vnpay,momo,bank_transfer'
         ]);
 
         try {
+            // Validate payment with PaymentService
+            $validation = $this->paymentService->validatePayment($request->amount, $request->gateway);
+            if (!$validation['valid']) {
+                return back()->with('error', $validation['message'])->withInput();
+            }
+
+            // Calculate and show fee
+            $fee = $this->paymentService->calculateFee($request->amount, $request->gateway);
+
             $transaction = $this->walletService->deposit(
                 Auth::id(),
                 $request->amount,
                 $request->gateway,
-                ['ip' => $request->ip()]
+                ['ip' => $request->ip(), 'user_agent' => $request->userAgent()]
             );
 
-            // In real implementation, redirect to payment gateway
+            // Redirect to appropriate payment gateway
             if ($request->gateway === 'vnpay') {
-                return redirect()->route('wallet.vnpay', $transaction->transaction_id);
+                $paymentUrl = $this->paymentService->createVNPayPayment($transaction);
+                return redirect($paymentUrl);
             } elseif ($request->gateway === 'momo') {
-                return redirect()->route('wallet.momo', $transaction->transaction_id);
+                $momoResult = $this->paymentService->createMoMoPayment($transaction);
+                return redirect($momoResult['payUrl']);
             } else {
-                return view('wallet.bank-transfer', compact('transaction'));
+                $bankInfo = $this->paymentService->getBankTransferInfo('VCB'); // Default to VCB
+                return view('wallet.bank-transfer', compact('transaction', 'bankInfo', 'fee'));
             }
 
         } catch (\Exception $e) {
-            return back()->with('error', 'Lỗi tạo giao dịch: ' . $e->getMessage());
+            return back()->with('error', 'Lỗi tạo giao dịch: ' . $e->getMessage())->withInput();
         }
     }
 
@@ -130,33 +145,69 @@ class WalletController extends Controller
     }
 
     // Payment gateway callbacks
-    public function vnpayCallback(Request $request)
+    public function vnpayReturn(Request $request)
     {
-        // VNPay callback processing
-        $transactionId = $request->vnp_TxnRef;
-        $responseCode = $request->vnp_ResponseCode;
+        try {
+            // Verify VNPay signature
+            if (!$this->paymentService->verifyVNPayCallback($request->all())) {
+                return redirect()->route('wallet.index')->with('error', 'Xác thực giao dịch thất bại');
+            }
 
-        if ($responseCode === '00') {
-            $this->walletService->processDeposit($transactionId, $request->vnp_TransactionNo, 'completed');
-            return redirect()->route('wallet.index')->with('success', 'Nạp tiền thành công');
-        } else {
-            $this->walletService->processDeposit($transactionId, null, 'failed');
-            return redirect()->route('wallet.index')->with('error', 'Nạp tiền thất bại');
+            $transactionId = $request->vnp_TxnRef;
+            $responseCode = $request->vnp_ResponseCode;
+            $gatewayTransactionId = $request->vnp_TransactionNo;
+
+            if ($responseCode === '00') {
+                $success = $this->paymentService->processSuccessfulPayment(
+                    $transactionId,
+                    $gatewayTransactionId,
+                    'vnpay'
+                );
+
+                if ($success) {
+                    return redirect()->route('wallet.index')->with('success', 'Nạp tiền thành công qua VNPay');
+                } else {
+                    return redirect()->route('wallet.index')->with('error', 'Có lỗi xử lý giao dịch');
+                }
+            } else {
+                return redirect()->route('wallet.index')->with('error', 'Thanh toán VNPay thất bại');
+            }
+
+        } catch (\Exception $e) {
+            return redirect()->route('wallet.index')->with('error', 'Lỗi xử lý callback: ' . $e->getMessage());
         }
     }
 
-    public function momoCallback(Request $request)
+    public function momoReturn(Request $request)
     {
-        // MoMo callback processing
-        $transactionId = $request->orderId;
-        $resultCode = $request->resultCode;
+        try {
+            // Verify MoMo signature
+            if (!$this->paymentService->verifyMoMoCallback($request->all())) {
+                return redirect()->route('wallet.index')->with('error', 'Xác thực giao dịch MoMo thất bại');
+            }
 
-        if ($resultCode === 0) {
-            $this->walletService->processDeposit($transactionId, $request->transId, 'completed');
-            return redirect()->route('wallet.index')->with('success', 'Nạp tiền thành công');
-        } else {
-            $this->walletService->processDeposit($transactionId, null, 'failed');
-            return redirect()->route('wallet.index')->with('error', 'Nạp tiền thất bại');
+            $transactionId = $request->orderId;
+            $resultCode = $request->resultCode;
+            $gatewayTransactionId = $request->transId;
+
+            if ($resultCode === 0) {
+                $success = $this->paymentService->processSuccessfulPayment(
+                    $transactionId,
+                    $gatewayTransactionId,
+                    'momo'
+                );
+
+                if ($success) {
+                    return redirect()->route('wallet.index')->with('success', 'Nạp tiền thành công qua MoMo');
+                } else {
+                    return redirect()->route('wallet.index')->with('error', 'Có lỗi xử lý giao dịch');
+                }
+            } else {
+                return redirect()->route('wallet.index')->with('error', 'Thanh toán MoMo thất bại');
+            }
+
+        } catch (\Exception $e) {
+            return redirect()->route('wallet.index')->with('error', 'Lỗi xử lý callback: ' . $e->getMessage());
         }
     }
 
