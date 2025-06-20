@@ -23,7 +23,8 @@ class User extends Authenticatable
         'name', 'email', 'password', 'phone', 'avatar',
         'subscription_type', 'subscription_expires_at',
         'balance', 'total_deposit', 'total_withdrawal',
-        'is_active', 'last_login_at'
+        'is_active', 'last_login_at', 'phone_number',
+        'two_factor_enabled'
     ];
 
     /**
@@ -34,6 +35,8 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
     ];
 
     /**
@@ -49,7 +52,11 @@ class User extends Authenticatable
         'balance' => 'decimal:2',
         'total_deposit' => 'decimal:2',
         'total_withdrawal' => 'decimal:2',
-        'is_active' => 'boolean'
+        'is_active' => 'boolean',
+        'two_factor_enabled' => 'boolean',
+        'two_factor_confirmed_at' => 'datetime',
+        'phone_verified_at' => 'datetime',
+        'two_factor_recovery_codes' => 'array'
     ];
 
     // Relationships
@@ -86,6 +93,16 @@ class User extends Authenticatable
     public function sharedCampaigns(): HasMany
     {
         return $this->hasMany(CampaignShare::class, 'shared_by_user_id');
+    }
+
+    public function twoFactorTokens(): HasMany
+    {
+        return $this->hasMany(TwoFactorToken::class);
+    }
+
+    public function activityLogs(): HasMany
+    {
+        return $this->hasMany(ActivityLog::class);
     }
 
     // Helper methods for subscription
@@ -146,5 +163,72 @@ class User extends Authenticatable
     public function getFollowingCountAttribute(): int
     {
         return $this->following()->count();
+    }
+
+    // Two-Factor Authentication methods
+
+    /**
+     * Check if user has 2FA enabled
+     */
+    public function hasTwoFactorEnabled(): bool
+    {
+        return $this->two_factor_enabled && !empty($this->two_factor_secret);
+    }
+
+    /**
+     * Check if 2FA is required for this user
+     */
+    public function requiresTwoFactor(): bool
+    {
+        // Require 2FA for users with high balance or VIP status
+        return $this->hasTwoFactorEnabled() ||
+               ($this->isPremium() && $this->balance > 10000000) ||
+               in_array($this->subscription_type, ['admin', 'vip']);
+    }
+
+    /**
+     * Generate recovery codes for 2FA
+     */
+    public function generateTwoFactorRecoveryCodes(): array
+    {
+        $codes = [];
+        for ($i = 0; $i < 8; $i++) {
+            $codes[] = strtoupper(substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 10));
+        }
+
+        $this->two_factor_recovery_codes = $codes;
+        $this->save();
+
+        return $codes;
+    }
+
+    /**
+     * Check if recovery code is valid and use it
+     */
+    public function useRecoveryCode(string $code): bool
+    {
+        if (!$this->two_factor_recovery_codes) {
+            return false;
+        }
+
+        $codes = $this->two_factor_recovery_codes;
+        $key = array_search(strtoupper($code), $codes);
+
+        if ($key !== false) {
+            unset($codes[$key]);
+            $this->two_factor_recovery_codes = array_values($codes);
+            $this->save();
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if phone is verified
+     */
+    public function hasVerifiedPhone(): bool
+    {
+        return !empty($this->phone_number) && $this->phone_verified_at !== null;
     }
 }

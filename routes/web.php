@@ -12,6 +12,7 @@ use App\Http\Controllers\HistoricalTestingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SocialController;
 use App\Http\Controllers\RiskManagementController;
+use App\Http\Controllers\TwoFactorController;
 
 Route::get('/', [LotteryController::class, 'index'])->name('home');
 Route::get('/statistics', [StatisticsController::class, 'index'])->name('statistics.index');
@@ -33,7 +34,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Wallet routes
-    Route::prefix('wallet')->name('wallet.')->group(function () {
+    Route::prefix('wallet')->name('wallet.')->middleware('rate.limit:financial')->group(function () {
         Route::get('/', [WalletController::class, 'index'])->name('index');
         Route::post('/deposit', [WalletController::class, 'deposit'])->name('deposit');
         Route::post('/withdraw', [WalletController::class, 'withdraw'])->name('withdraw');
@@ -72,9 +73,9 @@ Route::middleware('auth')->group(function () {
     });
 
     // Campaign routes
-    Route::resource('campaigns', CampaignController::class);
+    Route::resource('campaigns', CampaignController::class)->middleware('rate.limit:campaign');
     Route::get('campaigns/{campaign}/bet', [CampaignController::class, 'showBetForm'])->name('campaigns.bet.form');
-    Route::post('campaigns/{campaign}/bet', [CampaignController::class, 'placeBet'])->name('campaigns.bet');
+    Route::post('campaigns/{campaign}/bet', [CampaignController::class, 'placeBet'])->name('campaigns.bet')->middleware('rate.limit:campaign');
 
     // Phase 2: Social Features
     Route::prefix('social')->name('social.')->group(function () {
@@ -117,6 +118,19 @@ Route::middleware('auth')->group(function () {
             Route::get('/templates', [RiskManagementController::class, 'ruleTemplates']);
             Route::get('/statistics', [RiskManagementController::class, 'statistics']);
         });
+    });
+
+    // Two-Factor Authentication routes
+    Route::prefix('two-factor')->name('two-factor.')->middleware('rate.limit:2fa')->group(function () {
+        Route::get('/', [TwoFactorController::class, 'index'])->name('index');
+        Route::post('/enable-totp', [TwoFactorController::class, 'enableTotp'])->name('enable-totp');
+        Route::post('/confirm-totp', [TwoFactorController::class, 'confirmTotp'])->name('confirm-totp');
+        Route::delete('/disable', [TwoFactorController::class, 'disable'])->name('disable');
+        Route::post('/send-sms', [TwoFactorController::class, 'sendSmsToken'])->name('send-sms');
+        Route::post('/send-email', [TwoFactorController::class, 'sendEmailToken'])->name('send-email');
+        Route::post('/recovery-codes', [TwoFactorController::class, 'generateRecoveryCodes'])->name('recovery-codes');
+        Route::get('/challenge', [TwoFactorController::class, 'showChallenge'])->name('challenge');
+        Route::post('/challenge', [TwoFactorController::class, 'verifyChallenge'])->name('verify-challenge');
     });
 });
 

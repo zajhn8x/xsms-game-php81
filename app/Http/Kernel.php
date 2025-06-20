@@ -4,8 +4,11 @@ namespace App\Http;
 
 use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\EncryptCookies;
+use App\Http\Middleware\LogActivity;
 use App\Http\Middleware\PreventRequestsDuringMaintenance;
+use App\Http\Middleware\RateLimitingMiddleware;
 use App\Http\Middleware\RedirectIfAuthenticated;
+use App\Http\Middleware\SecurityHeadersMiddleware;
 use App\Http\Middleware\TrimStrings;
 use App\Http\Middleware\TrustProxies;
 use App\Http\Middleware\ValidateSignature;
@@ -44,6 +47,7 @@ class Kernel extends HttpKernel
         ValidatePostSize::class,
         TrimStrings::class,
         ConvertEmptyStringsToNull::class,
+        SecurityHeadersMiddleware::class,
     ];
 
     /**
@@ -59,12 +63,14 @@ class Kernel extends HttpKernel
             ShareErrorsFromSession::class,
             VerifyCsrfToken::class,
             SubstituteBindings::class,
+            LogActivity::class,
         ],
 
         'api' => [
             // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             ThrottleRequests::class . ':api',
             SubstituteBindings::class,
+            LogActivity::class,
         ],
     ];
 
@@ -87,5 +93,10 @@ class Kernel extends HttpKernel
         'signed' => ValidateSignature::class,
         'throttle' => ThrottleRequests::class,
         'verified' => EnsureEmailIsVerified::class,
+
+        // Custom middleware aliases
+        'log.activity' => LogActivity::class,
+        'rate.limit' => RateLimitingMiddleware::class,
+        'security.headers' => SecurityHeadersMiddleware::class,
     ];
 }
