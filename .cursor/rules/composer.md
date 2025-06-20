@@ -1,0 +1,1 @@
+Sử dụng "php81 ~/composer.phar" thay cho composer
