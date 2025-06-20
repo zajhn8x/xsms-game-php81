@@ -18,8 +18,8 @@ alwaysApply: true
   ```
 
 - **File References:**
-  - Use `[filename](mdc:path/to/file)` ([filename](mdc:filename)) to reference files
-  - Example: [project.mdc](mdc:.cursor/rules/project.md) for rule references
+  - Use `[filename](md:path/to/file)` ([filename](md:filename)) to reference files
+  - Example: [project.md](mdc:.cursor/rules/project.md) for rule references
   - Example: [laravel-feature-task-workflow.md](./.laravel-feature-task-workflow.md) for code references
 
 - **Code Examples:**
