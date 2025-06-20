@@ -70,7 +70,8 @@ class SecurityHeadersMiddleware
             "form-action 'self'",
             "frame-ancestors 'none'",
             "block-all-mixed-content",
-            "upgrade-insecure-requests"
+            "upgrade-insecure-requests",
+            "http://localhost:5174"
         ];
 
         return implode('; ', $policies);
