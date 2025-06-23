@@ -2,6 +2,184 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom component classes theo quy chuẩn UI */
+@layer components {
+  /* Card Components */
+  .card-primary {
+    @apply rounded-lg border-2 border-primary-500 bg-primary-50 p-6 shadow-card;
+  }
+
+  .card-success {
+    @apply rounded-lg border-2 border-success-500 bg-success-50 p-4 text-success-700 font-semibold;
+  }
+
+  .card-warning {
+    @apply rounded-lg border-2 border-warning-500 bg-warning-50 p-4 text-warning-700 font-semibold;
+  }
+
+  .card-error {
+    @apply rounded-lg border-2 border-error-500 bg-error-50 p-4 text-error-700 font-semibold;
+  }
+
+  .card-info {
+    @apply rounded-lg border-2 border-info-500 bg-info-50 p-4 text-info-700 font-semibold;
+  }
+
+  /* Button Components */
+  .btn-primary {
+    @apply inline-flex items-center px-4 py-2 bg-primary-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-700 focus:bg-primary-700 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150;
+  }
+
+  .btn-success {
+    @apply inline-flex items-center px-4 py-2 bg-success-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-success-700 focus:bg-success-700 active:bg-success-900 focus:outline-none focus:ring-2 focus:ring-success-500 focus:ring-offset-2 transition ease-in-out duration-150;
+  }
+
+  .btn-warning {
+    @apply inline-flex items-center px-4 py-2 bg-warning-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-warning-700 focus:bg-warning-700 active:bg-warning-900 focus:outline-none focus:ring-2 focus:ring-warning-500 focus:ring-offset-2 transition ease-in-out duration-150;
+  }
+
+  .btn-error {
+    @apply inline-flex items-center px-4 py-2 bg-error-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-error-700 focus:bg-error-700 active:bg-error-900 focus:outline-none focus:ring-2 focus:ring-error-500 focus:ring-offset-2 transition ease-in-out duration-150;
+  }
+
+  /* Form Components */
+  .form-input {
+    @apply mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500;
+  }
+
+  .form-label {
+    @apply block text-sm font-medium text-gray-700;
+  }
+
+  .form-error {
+    @apply mt-2 text-sm text-error-600;
+  }
+
+  /* Table Components theo quy chuẩn */
+  .table-standard {
+    @apply table-auto w-full border-collapse my-4;
+  }
+
+  .table-header {
+    @apply bg-primary-100 text-primary-700 font-bold;
+  }
+
+  .table-cell {
+    @apply px-4 py-2 border border-gray-200;
+  }
+
+  /* Loading Components */
+  .loading-spinner {
+    @apply animate-spin h-5 w-5 text-info-600;
+  }
+
+  .loading-container {
+    @apply flex items-center space-x-2;
+  }
+
+  /* Progress Components */
+  .progress-container {
+    @apply w-full bg-primary-200 rounded-full h-2.5;
+  }
+
+  .progress-bar {
+    @apply bg-primary-600 h-2.5 rounded-full transition-all duration-300;
+  }
+
+  /* Status Badges */
+  .status-success {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-success-100 text-success-800;
+  }
+
+  .status-warning {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-warning-100 text-warning-800;
+  }
+
+  .status-error {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-error-100 text-error-800;
+  }
+
+  .status-info {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-info-100 text-info-800;
+  }
+
+  /* Notification Components */
+  .notification-success {
+    @apply rounded-lg border-2 border-success-500 bg-success-50 p-4 mb-4 text-success-700 font-semibold;
+  }
+
+  .notification-warning {
+    @apply rounded-lg border-2 border-warning-500 bg-warning-50 p-4 mb-4 text-warning-700 font-semibold;
+  }
+
+  .notification-error {
+    @apply rounded-lg border-2 border-error-500 bg-error-50 p-4 mb-4 text-error-700 font-semibold;
+  }
+
+  .notification-info {
+    @apply rounded-lg border-2 border-info-500 bg-info-50 p-4 mb-4 text-info-700 font-semibold;
+  }
+
+  /* Next Steps Box theo quy chuẩn */
+  .next-steps-box {
+    @apply rounded-lg border-2 border-primary-500 bg-primary-50 p-4 my-4;
+  }
+
+  .next-steps-title {
+    @apply font-bold text-primary-700;
+  }
+
+  .next-steps-content {
+    @apply mt-2;
+  }
+
+  .next-steps-item {
+    @apply text-primary-600;
+  }
+
+  .next-steps-command {
+    @apply text-warning-600;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-primary-300 rounded-lg;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-primary-400;
+}
+
+/* Animation utilities */
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Focus utilities */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+}
+
 .stats-card {
     @apply bg-gray-50 rounded-lg p-4 text-center;
 }

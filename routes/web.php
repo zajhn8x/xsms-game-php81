@@ -15,6 +15,8 @@ use App\Http\Controllers\RiskManagementController;
 use App\Http\Controllers\TwoFactorController;
 use App\Http\Controllers\CampaignTemplateController;
 use App\Http\Controllers\SubCampaignController;
+use App\Http\Controllers\PerformanceAlertController;
+use App\Http\Controllers\ResourceMonitoringController;
 
 Route::get('/', [LotteryController::class, 'index'])->name('home');
 Route::get('/statistics', [StatisticsController::class, 'index'])->name('statistics.index');
@@ -76,6 +78,9 @@ Route::middleware('auth')->group(function () {
 
     // Campaign routes
     Route::resource('campaigns', CampaignController::class)->middleware('rate.limit:campaign');
+    Route::get('campaigns/analytics', function () {
+        return view('campaigns.analytics');
+    })->name('campaigns.analytics');
     Route::get('campaigns/{campaign}/bet', [CampaignController::class, 'showBetForm'])->name('campaigns.bet.form');
     Route::post('campaigns/{campaign}/bet', [CampaignController::class, 'placeBet'])->name('campaigns.bet')->middleware('rate.limit:campaign');
 
@@ -213,6 +218,33 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/stop', [SubCampaignController::class, 'stop'])->name('stop');
             Route::delete('/', [SubCampaignController::class, 'destroy'])->name('destroy');
         });
+    });
+
+    // Performance Alerts routes
+    Route::prefix('performance-alerts')->name('performance-alerts.')->group(function () {
+        Route::get('/overview', [PerformanceAlertController::class, 'getUserAlertsOverview'])->name('overview');
+        Route::get('/configuration', [PerformanceAlertController::class, 'getAlertConfiguration'])->name('configuration');
+        Route::get('/metrics', [PerformanceAlertController::class, 'getAlertMetrics'])->name('metrics');
+
+        Route::prefix('campaigns/{campaign}')->name('campaigns.')->group(function () {
+            Route::get('/alerts', [PerformanceAlertController::class, 'getCampaignAlerts'])->name('alerts');
+            Route::get('/alert-history', [PerformanceAlertController::class, 'getCampaignAlertHistory'])->name('alert-history');
+            Route::post('/acknowledge-alerts', [PerformanceAlertController::class, 'acknowledgeCampaignAlerts'])->name('acknowledge-alerts');
+            Route::post('/test-alerts', [PerformanceAlertController::class, 'testCampaignAlerts'])->name('test-alerts');
+        });
+    });
+
+    // Resource Monitoring routes - Micro-task 2.3.1.4: Resource usage monitoring (3h)
+    Route::prefix('resource-monitoring')->name('resource-monitoring.')->group(function () {
+        Route::get('/system/overview', [ResourceMonitoringController::class, 'getSystemOverview'])->name('system.overview');
+        Route::get('/system/detailed', [ResourceMonitoringController::class, 'getDetailedBreakdown'])->name('system.detailed');
+        Route::get('/alerts', [ResourceMonitoringController::class, 'getResourceAlerts'])->name('alerts');
+        Route::get('/campaigns', [ResourceMonitoringController::class, 'getCampaignResourceUsage'])->name('campaigns');
+        Route::get('/campaigns/{campaign}', [ResourceMonitoringController::class, 'getCampaignResourceUsage'])->name('campaigns.show');
+        Route::get('/users', [ResourceMonitoringController::class, 'getUserResourceUsage'])->name('users');
+        Route::get('/recommendations', [ResourceMonitoringController::class, 'getOptimizationRecommendations'])->name('recommendations');
+        Route::get('/health-metrics', [ResourceMonitoringController::class, 'getHealthMetrics'])->name('health-metrics');
+        Route::post('/refresh-cache', [ResourceMonitoringController::class, 'refreshCache'])->name('refresh-cache');
     });
 });
 
