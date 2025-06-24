@@ -91,7 +91,7 @@ To connect to the server using SSE transport, use this configuration:
   "mcpServers": {
     "task-manager": {
       "transport": "sse",
-      "url": "http://localhost:8050/sse"
+      "url": "http://localhost:8086/sse"
     }
   }
 }
