@@ -84,7 +84,7 @@ class HistoricalTestingService
 
     private function hasLotteryResult($date)
     {
-        return LotteryResult::whereDate('date', $date)->exists();
+        return LotteryResult::whereDate('draw_date', $date)->exists();
     }
 
     public function getBetHistory($campaignId)

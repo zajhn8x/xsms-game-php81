@@ -2,204 +2,408 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom component classes theo quy chuẩn UI */
-@layer components {
-  /* Card Components */
-  .card-primary {
-    @apply rounded-lg border-2 border-primary-500 bg-primary-50 p-6 shadow-card;
-  }
+/* Compass Theme - Design System */
+@layer base {
+  :root {
+    /* Primary Colors - Blue/Cyan Gradient */
+    --color-primary: 6 182 212; /* cyan-500 */
+    --color-primary-dark: 8 145 178; /* cyan-600 */
+    --color-primary-light: 34 211 238; /* cyan-400 */
 
-  .card-success {
-    @apply rounded-lg border-2 border-success-500 bg-success-50 p-4 text-success-700 font-semibold;
-  }
+    /* Semantic Colors */
+    --color-success: 34 197 94; /* green-500 */
+    --color-warning: 234 179 8; /* yellow-500 */
+    --color-error: 239 68 68; /* red-500 */
+    --color-info: 59 130 246; /* blue-500 */
 
-  .card-warning {
-    @apply rounded-lg border-2 border-warning-500 bg-warning-50 p-4 text-warning-700 font-semibold;
-  }
+    /* Neutral Colors */
+    --color-gray-50: 249 250 251;
+    --color-gray-900: 17 24 39;
 
-  .card-error {
-    @apply rounded-lg border-2 border-error-500 bg-error-50 p-4 text-error-700 font-semibold;
-  }
-
-  .card-info {
-    @apply rounded-lg border-2 border-info-500 bg-info-50 p-4 text-info-700 font-semibold;
-  }
-
-  /* Button Components */
-  .btn-primary {
-    @apply inline-flex items-center px-4 py-2 bg-primary-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-700 focus:bg-primary-700 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150;
-  }
-
-  .btn-success {
-    @apply inline-flex items-center px-4 py-2 bg-success-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-success-700 focus:bg-success-700 active:bg-success-900 focus:outline-none focus:ring-2 focus:ring-success-500 focus:ring-offset-2 transition ease-in-out duration-150;
-  }
-
-  .btn-warning {
-    @apply inline-flex items-center px-4 py-2 bg-warning-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-warning-700 focus:bg-warning-700 active:bg-warning-900 focus:outline-none focus:ring-2 focus:ring-warning-500 focus:ring-offset-2 transition ease-in-out duration-150;
-  }
-
-  .btn-error {
-    @apply inline-flex items-center px-4 py-2 bg-error-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-error-700 focus:bg-error-700 active:bg-error-900 focus:outline-none focus:ring-2 focus:ring-error-500 focus:ring-offset-2 transition ease-in-out duration-150;
-  }
-
-  /* Form Components */
-  .form-input {
-    @apply mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500;
-  }
-
-  .form-label {
-    @apply block text-sm font-medium text-gray-700;
-  }
-
-  .form-error {
-    @apply mt-2 text-sm text-error-600;
-  }
-
-  /* Table Components theo quy chuẩn */
-  .table-standard {
-    @apply table-auto w-full border-collapse my-4;
-  }
-
-  .table-header {
-    @apply bg-primary-100 text-primary-700 font-bold;
-  }
-
-  .table-cell {
-    @apply px-4 py-2 border border-gray-200;
-  }
-
-  /* Loading Components */
-  .loading-spinner {
-    @apply animate-spin h-5 w-5 text-info-600;
-  }
-
-  .loading-container {
-    @apply flex items-center space-x-2;
-  }
-
-  /* Progress Components */
-  .progress-container {
-    @apply w-full bg-primary-200 rounded-full h-2.5;
-  }
-
-  .progress-bar {
-    @apply bg-primary-600 h-2.5 rounded-full transition-all duration-300;
-  }
-
-  /* Status Badges */
-  .status-success {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-success-100 text-success-800;
-  }
-
-  .status-warning {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-warning-100 text-warning-800;
-  }
-
-  .status-error {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-error-100 text-error-800;
-  }
-
-  .status-info {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-info-100 text-info-800;
-  }
-
-  /* Notification Components */
-  .notification-success {
-    @apply rounded-lg border-2 border-success-500 bg-success-50 p-4 mb-4 text-success-700 font-semibold;
-  }
-
-  .notification-warning {
-    @apply rounded-lg border-2 border-warning-500 bg-warning-50 p-4 mb-4 text-warning-700 font-semibold;
-  }
-
-  .notification-error {
-    @apply rounded-lg border-2 border-error-500 bg-error-50 p-4 mb-4 text-error-700 font-semibold;
-  }
-
-  .notification-info {
-    @apply rounded-lg border-2 border-info-500 bg-info-50 p-4 mb-4 text-info-700 font-semibold;
-  }
-
-  /* Next Steps Box theo quy chuẩn */
-  .next-steps-box {
-    @apply rounded-lg border-2 border-primary-500 bg-primary-50 p-4 my-4;
-  }
-
-  .next-steps-title {
-    @apply font-bold text-primary-700;
-  }
-
-  .next-steps-content {
-    @apply mt-2;
-  }
-
-  .next-steps-item {
-    @apply text-primary-600;
-  }
-
-  .next-steps-command {
-    @apply text-warning-600;
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
   }
 }
 
-/* Dark mode support */
+/* Compass Theme Components */
+@layer components {
+  /* Cards - Compass Style */
+  .compass-card {
+    @apply bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden transition-all duration-200 hover:shadow-xl hover:border-primary-200;
+  }
+
+  .compass-card-header {
+    @apply px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white;
+  }
+
+  .compass-card-body {
+    @apply p-6;
+  }
+
+  .compass-card-footer {
+    @apply px-6 py-4 border-t border-gray-100 bg-gray-50;
+  }
+
+  /* Buttons - Compass Style */
+  .compass-btn {
+    @apply inline-flex items-center justify-center px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+
+  .compass-btn-primary {
+    @apply compass-btn bg-gradient-to-r from-primary-600 to-primary-500 text-white hover:from-primary-700 hover:to-primary-600 focus:ring-primary-500 shadow-md hover:shadow-lg;
+  }
+
+  .compass-btn-secondary {
+    @apply compass-btn bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 focus:ring-gray-500;
+  }
+
+  .compass-btn-success {
+    @apply compass-btn bg-gradient-to-r from-success-600 to-success-500 text-white hover:from-success-700 hover:to-success-600 focus:ring-success-500 shadow-md hover:shadow-lg;
+  }
+
+  .compass-btn-danger {
+    @apply compass-btn bg-gradient-to-r from-error-600 to-error-500 text-white hover:from-error-700 hover:to-error-600 focus:ring-error-500 shadow-md hover:shadow-lg;
+  }
+
+  /* Forms - Compass Style */
+  .compass-input {
+    @apply block w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors;
+  }
+
+  .compass-label {
+    @apply block text-sm font-medium text-gray-700 mb-1.5;
+  }
+
+  .compass-select {
+    @apply compass-input pr-10 appearance-none bg-white;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+  }
+
+  .compass-textarea {
+    @apply compass-input resize-none;
+  }
+
+  /* Tables - Compass Style */
+  .compass-table {
+    @apply w-full bg-white rounded-xl shadow-sm overflow-hidden;
+  }
+
+  .compass-table thead {
+    @apply bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200;
+  }
+
+  .compass-table th {
+    @apply px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider;
+  }
+
+  .compass-table td {
+    @apply px-6 py-4 text-sm text-gray-900 border-b border-gray-100;
+  }
+
+  .compass-table tbody tr {
+    @apply hover:bg-gray-50 transition-colors;
+  }
+
+  .compass-table tbody tr:last-child td {
+    @apply border-b-0;
+  }
+
+  /* Badges - Compass Style */
+  .compass-badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
+  }
+
+  .compass-badge-primary {
+    @apply compass-badge bg-primary-100 text-primary-800;
+  }
+
+  .compass-badge-success {
+    @apply compass-badge bg-success-100 text-success-800;
+  }
+
+  .compass-badge-warning {
+    @apply compass-badge bg-warning-100 text-warning-800;
+  }
+
+  .compass-badge-error {
+    @apply compass-badge bg-error-100 text-error-800;
+  }
+
+  /* Alerts - Compass Style */
+  .compass-alert {
+    @apply p-4 rounded-xl border-2 font-medium;
+  }
+
+  .compass-alert-success {
+    @apply compass-alert bg-success-50 border-success-200 text-success-800;
+  }
+
+  .compass-alert-warning {
+    @apply compass-alert bg-warning-50 border-warning-200 text-warning-800;
+  }
+
+  .compass-alert-error {
+    @apply compass-alert bg-error-50 border-error-200 text-error-800;
+  }
+
+  .compass-alert-info {
+    @apply compass-alert bg-info-50 border-info-200 text-info-800;
+  }
+
+  /* Progress Bars - Compass Style */
+  .compass-progress {
+    @apply w-full bg-gray-200 rounded-full h-2.5 overflow-hidden;
+  }
+
+  .compass-progress-bar {
+    @apply h-full bg-gradient-to-r from-primary-500 to-primary-600 rounded-full transition-all duration-500 ease-out;
+  }
+
+  /* Tooltips - Compass Style */
+  .compass-tooltip {
+    @apply absolute z-50 px-3 py-2 text-xs font-medium text-white bg-gray-900 rounded-lg shadow-lg;
+  }
+
+  /* Loading States - Compass Style */
+  .compass-spinner {
+    @apply inline-block w-8 h-8 border-4 border-gray-300 border-t-primary-600 rounded-full animate-spin;
+  }
+
+  .compass-skeleton {
+    @apply animate-pulse bg-gray-200 rounded;
+  }
+
+  /* Dashboard Widgets - Compass Style */
+  .compass-stat-card {
+    @apply compass-card p-6;
+  }
+
+  .compass-stat-value {
+    @apply text-3xl font-bold text-gray-900;
+  }
+
+  .compass-stat-label {
+    @apply text-sm text-gray-600 mt-1;
+  }
+
+  .compass-stat-change {
+    @apply inline-flex items-center mt-2 text-sm font-medium;
+  }
+
+  .compass-stat-change-positive {
+    @apply compass-stat-change text-success-600;
+  }
+
+  .compass-stat-change-negative {
+    @apply compass-stat-change text-error-600;
+  }
+
+  /* Navigation - Compass Style */
+  .compass-nav-item {
+    @apply flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200;
+  }
+
+  .compass-nav-item:hover {
+    @apply bg-primary-50 text-primary-700;
+  }
+
+  .compass-nav-item-active {
+    @apply bg-primary-100 text-primary-800 font-semibold;
+  }
+
+  /* Modals - Compass Style */
+  .compass-modal-backdrop {
+    @apply fixed inset-0 bg-gray-900 bg-opacity-50 transition-opacity;
+  }
+
+  .compass-modal {
+    @apply fixed inset-0 z-50 overflow-y-auto;
+  }
+
+  .compass-modal-content {
+    @apply relative bg-white rounded-xl shadow-2xl max-w-lg mx-auto my-8;
+  }
+
+  .compass-modal-header {
+    @apply px-6 py-4 border-b border-gray-200;
+  }
+
+  .compass-modal-body {
+    @apply px-6 py-4;
+  }
+
+  .compass-modal-footer {
+    @apply px-6 py-4 border-t border-gray-200 flex justify-end space-x-3;
+  }
+
+  /* Charts Container - Compass Style */
+  .compass-chart-container {
+    @apply compass-card p-6;
+  }
+
+  .compass-chart-header {
+    @apply flex items-center justify-between mb-4;
+  }
+
+  .compass-chart-title {
+    @apply text-lg font-semibold text-gray-900;
+  }
+
+  /* Lottery Specific Components */
+  .lottery-ball {
+    @apply inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 text-white font-bold text-sm shadow-md;
+  }
+
+  .lottery-result-card {
+    @apply compass-card hover:scale-105 transform transition-transform duration-200;
+  }
+
+  /* Campaign Status Indicators */
+  .campaign-status {
+    @apply inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wide;
+  }
+
+  .campaign-status-active {
+    @apply campaign-status bg-success-100 text-success-800;
+  }
+
+  .campaign-status-paused {
+    @apply campaign-status bg-warning-100 text-warning-800;
+  }
+
+  .campaign-status-completed {
+    @apply campaign-status bg-gray-100 text-gray-800;
+  }
+
+  /* Heatmap Cell Styles */
+  .heatmap-cell {
+    @apply relative w-full h-full flex items-center justify-center text-xs font-medium rounded transition-all duration-200 cursor-pointer;
+  }
+
+  .heatmap-cell:hover {
+    @apply transform scale-110 z-10 shadow-lg;
+  }
+
+  /* Animations */
+  .compass-fade-in {
+    animation: compassFadeIn 0.3s ease-in-out;
+  }
+
+  .compass-slide-up {
+    animation: compassSlideUp 0.3s ease-out;
+  }
+
+  .compass-bounce {
+    animation: compassBounce 1s infinite;
+  }
+
+  /* Custom Dropdown - Compass Style */
+  .compass-dropdown-wrapper {
+    @apply relative inline-block text-left;
+  }
+
+  .compass-dropdown-button {
+    @apply inline-flex items-center justify-between w-full px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors;
+  }
+
+  .compass-dropdown-menu {
+    @apply absolute z-10 mt-1 w-full bg-white rounded-lg shadow-lg border border-gray-100;
+  }
+
+  .compass-dropdown-item {
+    @apply flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 text-left;
+  }
+
+  .compass-dropdown-item-selected {
+    @apply font-semibold text-primary-600;
+  }
+}
+
+/* Custom Animations */
+@keyframes compassFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes compassSlideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes compassBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Utility Classes */
+@layer utilities {
+  .compass-text-gradient {
+    @apply bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent;
+  }
+
+  .compass-bg-gradient {
+    @apply bg-gradient-to-br from-primary-500 to-primary-600;
+  }
+
+  .compass-shadow-glow {
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+  }
+}
+
+/* Dark Mode Support */
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
   }
+
+  .dark .compass-card {
+    @apply bg-gray-800 border-gray-700;
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
+  .dark .compass-card-header {
+    @apply bg-gradient-to-r from-gray-800 to-gray-700;
+  }
 }
 
-::-webkit-scrollbar-track {
-  @apply bg-gray-100;
+/* Responsive Utilities */
+@media (max-width: 640px) {
+  .compass-table {
+    @apply text-sm;
 }
 
-::-webkit-scrollbar-thumb {
-  @apply bg-primary-300 rounded-lg;
+  .compass-table th,
+  .compass-table td {
+    @apply px-3 py-2;
+}
 }
 
-::-webkit-scrollbar-thumb:hover {
-  @apply bg-primary-400;
+/* Print Styles */
+@media print {
+  .no-print {
+    display: none !important;
 }
 
-/* Animation utilities */
-.animate-fade-in {
-  animation: fadeIn 0.5s ease-in-out;
+  .compass-card {
+    @apply shadow-none border-gray-300;
 }
-
-.animate-slide-in {
-  animation: slideIn 0.3s ease-out;
-}
-
-/* Focus utilities */
-.focus-ring {
-  @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
-}
-
-.stats-card {
-    @apply bg-gray-50 rounded-lg p-4 text-center;
-}
-
-.stats-card h3 {
-    @apply text-gray-600 text-sm mb-2;
-}
-
-.stats-card p {
-    @apply text-2xl font-bold text-blue-600;
-}
-
-.table td {
-    padding: 0.5rem;
-}
-
-.table .row {
-    margin: 0;
-}
-
-.table .col {
-    padding: 0.25rem;
 }

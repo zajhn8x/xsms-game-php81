@@ -58,20 +58,19 @@ class SecurityHeadersMiddleware
     {
         $policies = [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
-            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com",
-            "font-src 'self' https://fonts.gstatic.com",
-            "img-src 'self' data: https: blob:",
-            "connect-src 'self' https://api.qr-server.com",
-            "object-src 'none'",
-            "media-src 'self'",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com http://localhost:5174",
+            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.bunny.net/ http://localhost:5174 ",
+            "font-src 'self' https://fonts.gstatic.com http://localhost:5174 https://fonts.bunny.net/",
+            "img-src 'self' data: https: blob: otpauth:",
+            "connect-src 'self' https://api.qr-server.com http://localhost:5174",
+            "object-src 'none' otpauth:",
+            "media-src 'self' otpauth:",
             "frame-src 'none'",
             "base-uri 'self'",
             "form-action 'self'",
             "frame-ancestors 'none'",
             "block-all-mixed-content",
-            "upgrade-insecure-requests",
-            "http://localhost:5174"
+            "upgrade-insecure-requests"
         ];
 
         return implode('; ', $policies);

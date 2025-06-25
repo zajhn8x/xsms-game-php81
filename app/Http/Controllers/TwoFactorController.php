@@ -8,6 +8,11 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 use Exception;
+use Illuminate\Support\Facades\Cache;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Writer;
 
 class TwoFactorController extends Controller
 {
@@ -260,5 +265,30 @@ class TwoFactorController extends Controller
                 'message' => $e->getMessage()
             ], 400);
         }
+    }
+
+    /**
+     * Trả về ảnh QR code từ otpauth url (dạng PNG)
+     */
+    public function qrImage(Request $request)
+    {
+        $user = $request->user();
+        $secret = Cache::get("2fa_temp_secret_{$user->id}");
+        if (!$secret) {
+            return response('Không tìm thấy secret', 404);
+        }
+        $google2fa = app(\PragmaRX\Google2FA\Google2FA::class);
+        $qrCodeUrl = $google2fa->getQRCodeUrl(
+            config('app.name'),
+            $user->email,
+            $secret
+        );
+        $renderer = new ImageRenderer(
+            new RendererStyle(200),
+            new SvgImageBackEnd()
+        );
+        $writer = new Writer($renderer);
+        $qrCodeSvg = $writer->writeString($qrCodeUrl);
+        return response($qrCodeSvg)->header('Content-Type', 'image/svg+xml');
     }
 }

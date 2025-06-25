@@ -21,6 +21,13 @@ use App\Http\Controllers\ResourceMonitoringController;
 Route::get('/', [LotteryController::class, 'index'])->name('home');
 Route::get('/statistics', [StatisticsController::class, 'index'])->name('statistics.index');
 
+// Compass Theme Examples (Development Only)
+if (app()->environment('local')) {
+    Route::get('/compass-theme', function () {
+        return view('compass-theme-examples');
+    })->name('compass.theme');
+}
+
 // Authentication routes
 \Illuminate\Support\Facades\Auth::routes();
 
@@ -148,6 +155,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/recovery-codes', [TwoFactorController::class, 'generateRecoveryCodes'])->name('recovery-codes');
         Route::get('/challenge', [TwoFactorController::class, 'showChallenge'])->name('challenge');
         Route::post('/challenge', [TwoFactorController::class, 'verifyChallenge'])->name('verify-challenge');
+        Route::get('/qr-image', [TwoFactorController::class, 'qrImage'])->name('qr-image');
     });
 });
 

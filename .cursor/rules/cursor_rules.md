@@ -19,9 +19,10 @@ alwaysApply: true
 
 - **File References:**
   - Use `[filename](md:path/to/file)` ([filename](md:filename)) to reference files
-  - Example: [project.md](mdc:.cursor/rules/project.md) for rule references
-  - Example: [laravel-feature-task-workflow.md](./.laravel-feature-task-workflow.md) for code references
-
+  - Example: [project.md](./project.md) for rule references
+  - Example: [laravel-feature-task-workflow.md](./laravel-feature-task-workflow.md) for code references
+  - Example: [composer.md](./composer.md) for rule composer
+  - Example: [mcp-task.md](./mcp-task.md) for code mcp task
 - **Code Examples:**
   - Use language-specific code blocks
   ```typescript

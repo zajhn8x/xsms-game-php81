@@ -73,21 +73,34 @@ class TimeTravelBettingEngine
 
     private function manualStrategy($campaign, $currentDate)
     {
-        // For manual strategy in historical testing, we can simulate some basic betting
-        // In real implementation, this would use predefined betting patterns
+        $config = $campaign->strategy_config ?? [];
+        $betsToPlace = [];
 
-        // Simple simulation: bet on random numbers occasionally
-        if (rand(1, 100) <= 30) { // 30% chance to bet
-            return [
-                [
-                    'number' => str_pad(rand(0, 99), 2, '0', STR_PAD_LEFT),
-                    'amount' => 10000, // 10k VND
-                    'notes' => 'Manual simulation bet'
-                ]
+        // Sử dụng target_numbers từ config hoặc random numbers
+        $targetNumbers = $config['target_numbers'] ?? [];
+        $betAmount = $config['bet_amount'] ?? 10000;
+        $maxDailyBets = $config['max_daily_bets'] ?? 3;
+
+        if (empty($targetNumbers)) {
+            // Nếu không có target numbers, tạo random
+            $targetNumbers = [];
+            for ($i = 0; $i < $maxDailyBets; $i++) {
+                $targetNumbers[] = str_pad(rand(0, 99), 2, '0', STR_PAD_LEFT);
+            }
+        }
+
+        // Giới hạn số lần đặt hàng ngày
+        $numbersTobet = array_slice($targetNumbers, 0, $maxDailyBets);
+
+        foreach ($numbersTobet as $number) {
+            $betsToPlace[] = [
+                'number' => $number,
+                'amount' => $betAmount,
+                'notes' => 'Manual strategy bet - ' . $number
             ];
         }
 
-        return [];
+        return $betsToPlace;
     }
 
     private function heatmapStrategy($campaign, $currentDate)
@@ -137,35 +150,20 @@ class TimeTravelBettingEngine
 
     private function checkBetResult($bet, $lotteryResults)
     {
-        // Check if the bet number appears in lottery results
-        foreach ($lotteryResults as $result) {
-            if (str_contains($result, $bet['number'])) {
-                return true;
-            }
-        }
-        return false;
+        // Check if the bet number appears in lottery results lo_array
+        return in_array($bet['number'], $lotteryResults);
     }
 
     private function getLotteryResults($date)
     {
-        $results = LotteryResult::whereDate('date', $date)->first();
+        $result = LotteryResult::whereDate('draw_date', $date)->first();
 
-        if (!$results) {
+        if (!$result) {
             return [];
         }
 
-        // Extract all numbers from lottery result
-        // This depends on your lottery result format
-        $allNumbers = [];
-
-        // Assuming lottery result has fields like dac_biet, giai_nhat, etc.
-        if (isset($results->dac_biet)) {
-            $allNumbers[] = substr($results->dac_biet, -2); // Last 2 digits
-        }
-
-        // Add more result extraction logic based on your lottery format
-
-        return $allNumbers;
+        // Trả về lo_array - danh sách các số lô 2 chữ số
+        return $result->lo_array ?? [];
     }
 
     private function getHotNumbers($date, $minHeatScore)
