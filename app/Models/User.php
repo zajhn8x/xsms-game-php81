@@ -172,7 +172,7 @@ class User extends Authenticatable
      */
     public function hasTwoFactorEnabled(): bool
     {
-        return $this->two_factor_enabled && !empty($this->two_factor_secret);
+        return (bool) $this->two_factor_enabled;
     }
 
     /**
