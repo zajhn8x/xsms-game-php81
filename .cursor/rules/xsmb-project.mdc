@@ -1,0 +1,41 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+---
+description: Tổng hợp quy tắc đọc và áp dụng rule cho thư mục .cursor/rules, tối ưu cho IDE Cursor.
+globs: .cursor/rules/*.md
+alwaysApply: true
+---
+
+# Tổng hợp Rule Đọc cho .cursor/rules (dùng cho Cursor IDE)
+
+## 1. Cấu trúc & Cách Đọc Rule
+- Mỗi file rule cần có phần mô tả (`description`), phạm vi áp dụng (`globs`), và cờ `alwaysApply` nếu luôn áp dụng.
+- Ưu tiên trình bày rõ ràng, có ví dụ thực tế, tham chiếu lẫn nhau khi cần.
+- Khi đọc rule, chú ý các lưu ý đặc biệt (ví dụ: lệnh composer, quy trình task, UI guideline).
+
+## 2. Quy tắc chính từ các file rule
+- **cursor_rules.md**: Hướng dẫn tạo, duy trì, cập nhật rule. Luôn trình bày rõ ràng, có ví dụ, cập nhật khi có thay đổi.
+- **mcp-task-ussing.md**: Hướng dẫn sử dụng Task Manager (tạo project, thêm task, quản lý trạng thái, workflow phát triển, tích hợp MCP client). Có ví dụ code Python.
+- **mcp-task.md**: Mô tả app journaling thông minh với Laravel, tích hợp AI, bảo mật, UI tối giản. Liệt kê tính năng, milestone, tiêu chí thành công.
+- **UI-rule.md**: Quy tắc thiết kế UI với Tailwind CSS, phân tách component, màu sắc, bảng dữ liệu, loading, báo cáo tiến độ, gợi ý thao tác, phân tích chi tiết, tách UI và business logic. Có ví dụ code HTML.
+- **composer.md**: Sử dụng lệnh `php81 ~/composer.phar` thay cho composer mặc định.
+- **laravel-feature-task-workflow.md**: Quy trình phát triển Laravel theo từng task/tính năng/nhánh, không dùng master task trung tâm. Hướng dẫn chi tiết từng bước, có ví dụ markdown, code, lưu ý dùng AI hỗ trợ.
+- **project.md**: Quy tắc phát triển dự án: công nghệ sử dụng, quy tắc code (không để khoảng trắng đầu dòng, tối ưu query, dùng cache, kiểm tra index), liệt kê model quan trọng, lưu ý hiệu suất.
+
+## 3. Lưu ý khi áp dụng trong Cursor IDE
+- Khi tạo/chỉnh sửa rule, luôn kiểm tra lại các file rule tổng hợp để tránh trùng lặp và đảm bảo nhất quán.
+- Ưu tiên ví dụ thực tế, hướng dẫn thao tác cụ thể, và cập nhật khi có thay đổi workflow hoặc công nghệ.
+- Tham chiếu lẫn nhau giữa các rule để giữ DRY (Don't Repeat Yourself).
+- Khi có quy tắc đặc biệt (ví dụ composer, UI, workflow), cần ghi rõ và đặt ở đầu file rule tương ứng.
+
+## 4. Tham khảo
+- [cursor_rules.md](./cursor_rules.md)
+- [mcp-task-ussing.md](./mcp-task-ussing.md)
+- [mcp-task.md](./mcp-task.md)
+- [UI-rule.md](./UI-rule.md)
+- [composer.md](./composer.md)
+- [laravel-feature-task-workflow.md](./laravel-feature-task-workflow.md)
+- [project.md](./project.md)
