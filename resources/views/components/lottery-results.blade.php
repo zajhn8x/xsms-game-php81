@@ -34,6 +34,7 @@
     </tr>
     </tbody>
 </table>
+{{--
 <h5 class="mt-4 fw-bold text-center">📊 BẢNG ĐẦU – ĐUÔI LÔ TÔ</h5>
 
 <div class="row">
@@ -103,3 +104,4 @@
         </div>
     </div>
 </div>
+ --}}

@@ -24,7 +24,7 @@ class User extends Authenticatable
         'subscription_type', 'subscription_expires_at',
         'balance', 'total_deposit', 'total_withdrawal',
         'is_active', 'last_login_at', 'last_login_ip', 'phone_number',
-        'two_factor_enabled'
+        'two_factor_enabled', 'google_id', 'facebook_id', 'provider'
     ];
 
     /**

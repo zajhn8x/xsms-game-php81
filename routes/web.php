@@ -31,6 +31,28 @@ if (app()->environment('local')) {
 // Authentication routes
 \Illuminate\Support\Facades\Auth::routes();
 
+// Social Authentication routes
+Route::prefix('auth')->name('auth.')->group(function () {
+    Route::get('/{provider}/redirect', [App\Http\Controllers\Auth\SocialAuthController::class, 'redirectToProvider'])
+        ->name('social.redirect')
+        ->where('provider', 'google|facebook');
+
+    Route::get('/{provider}/callback', [App\Http\Controllers\Auth\SocialAuthController::class, 'handleProviderCallback'])
+        ->name('social.callback')
+        ->where('provider', 'google|facebook');
+
+    // Protected routes for linking/unlinking accounts
+    Route::middleware('auth')->group(function () {
+        Route::post('/{provider}/link', [App\Http\Controllers\Auth\SocialAuthController::class, 'linkAccount'])
+            ->name('social.link')
+            ->where('provider', 'google|facebook');
+
+        Route::delete('/{provider}/unlink', [App\Http\Controllers\Auth\SocialAuthController::class, 'unlinkAccount'])
+            ->name('social.unlink')
+            ->where('provider', 'google|facebook');
+    });
+});
+
 Route::middleware('auth')->group(function () {
     // Dashboard routes
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
