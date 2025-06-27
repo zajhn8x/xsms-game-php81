@@ -135,11 +135,21 @@ class DashboardService
     {
         $campaigns = $user->campaigns;
         $dailyData = $this->getDailyProfitData($campaigns);
+        $userActivity = $this->getUserActivityData();
 
         return [
             'profit_loss_chart' => $dailyData,
             'win_rate_chart' => $this->getWinRateData($campaigns),
-            'campaign_performance' => $this->getCampaignPerformanceData($campaigns)
+            'campaign_performance' => [
+                'labels' => $campaigns->pluck('name')->toArray(),
+                'data' => $campaigns->map(function($campaign) {
+                    return $campaign->current_balance - $campaign->initial_balance;
+                })->toArray()
+            ],
+            'user_activity' => [
+                'labels' => array_column($userActivity, 'date'),
+                'data' => array_column($userActivity, 'activity')
+            ]
         ];
     }
 

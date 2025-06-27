@@ -105,7 +105,7 @@ class CampaignService
     /**
      * Lọc/tìm kiếm campaign theo trạng thái, thời gian, hiệu quả
      * @param array $filters (status, start_date, end_date, ...)
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
     public function search($filters = [])
     {
@@ -123,7 +123,28 @@ class CampaignService
             $query->where('end_date', '<=', $filters['end_date']);
         }
 
-        return $query->orderBy('created_at', 'desc')->get();
+        // Add search by name
+        if (!empty($filters['search'])) {
+            $query->where(function($q) use ($filters) {
+                $q->where('name', 'like', '%' . $filters['search'] . '%')
+                  ->orWhere('description', 'like', '%' . $filters['search'] . '%');
+            });
+        }
+
+        // Add sorting
+        $sortBy = $filters['sort_by'] ?? 'created_at';
+        $sortOrder = $filters['sort_order'] ?? 'desc';
+
+        $validSortColumns = ['created_at', 'name', 'total_profit', 'win_rate', 'start_date'];
+        if (!in_array($sortBy, $validSortColumns)) {
+            $sortBy = 'created_at';
+        }
+
+        $query->orderBy($sortBy, $sortOrder);
+
+        // Return paginated results
+        $perPage = $filters['per_page'] ?? 15;
+        return $query->paginate($perPage);
     }
 
     /**

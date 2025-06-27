@@ -102,4 +102,50 @@ class LotteryBetService
             ->whereRaw('DATE_ADD(start_date, INTERVAL days DAY) < ?', [$today])
             ->update(['status' => 'completed']);
     }
+
+    public function getBetStatistics($userId)
+    {
+        $campaigns = Campaign::where('user_id', $userId)->get();
+
+        $totalCampaigns = $campaigns->count();
+        $activeCampaigns = $campaigns->where('status', 'active')->count();
+        $completedCampaigns = $campaigns->where('status', 'completed')->count();
+
+        $totalBets = CampaignBet::whereIn('campaign_id', $campaigns->pluck('id'))->count();
+        $winningBets = CampaignBet::whereIn('campaign_id', $campaigns->pluck('id'))
+            ->where('is_win', true)->count();
+
+        $totalDeposited = $campaigns->sum('initial_balance');
+        $currentBalance = $campaigns->sum('current_balance');
+        $totalWinnings = CampaignBet::whereIn('campaign_id', $campaigns->pluck('id'))
+            ->where('is_win', true)->sum('win_amount');
+
+        $winRate = $totalBets > 0 ? round(($winningBets / $totalBets) * 100, 2) : 0;
+        $profitLoss = $currentBalance - $totalDeposited + $totalWinnings;
+
+        return [
+            'total_campaigns' => $totalCampaigns,
+            'active_campaigns' => $activeCampaigns,
+            'completed_campaigns' => $completedCampaigns,
+            'total_bets' => $totalBets,
+            'winning_bets' => $winningBets,
+            'win_rate' => $winRate,
+            'total_deposited' => $totalDeposited,
+            'current_balance' => $currentBalance,
+            'total_winnings' => $totalWinnings,
+            'profit_loss' => $profitLoss,
+        ];
+    }
+
+    public function getUserBetHistory($userId, $days = 30)
+    {
+        $campaigns = Campaign::where('user_id', $userId)->pluck('id');
+
+        return CampaignBet::whereIn('campaign_id', $campaigns)
+            ->with(['campaign'])
+            ->where('bet_date', '>=', Carbon::now()->subDays($days))
+            ->orderBy('bet_date', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+    }
 }
