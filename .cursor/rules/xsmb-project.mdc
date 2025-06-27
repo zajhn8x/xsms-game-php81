@@ -30,12 +30,15 @@ alwaysApply: true
 - Ưu tiên ví dụ thực tế, hướng dẫn thao tác cụ thể, và cập nhật khi có thay đổi workflow hoặc công nghệ.
 - Tham chiếu lẫn nhau giữa các rule để giữ DRY (Don't Repeat Yourself).
 - Khi có quy tắc đặc biệt (ví dụ composer, UI, workflow), cần ghi rõ và đặt ở đầu file rule tương ứng.
+## 4.MCP
+- task-manager
+- browsermcp
 
-## 4. Tham khảo
-- [cursor_rules.md](./cursor_rules.md)
-- [mcp-task-ussing.md](./mcp-task-ussing.md)
-- [mcp-task.md](./mcp-task.md)
-- [UI-rule.md](./UI-rule.md)
-- [composer.md](./composer.md)
-- [laravel-feature-task-workflow.md](./laravel-feature-task-workflow.md)
-- [project.md](./project.md)
+## 5. Tham khảo
+- [cursor_rules.md](mdc:cursor_rules.md)
+- [mcp-task-ussing.md](mdc:mcp-task-ussing.md)
+- [mcp-task.md](mdc:mcp-task.md)
+- [UI-rule.md](mdc:UI-rule.md)
+- [composer.md](mdc:composer.md)
+- [laravel-feature-task-workflow.md](mdc:laravel-feature-task-workflow.md)
+- [project.md](mdc:project.md)
